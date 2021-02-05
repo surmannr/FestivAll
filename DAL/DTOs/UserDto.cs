@@ -20,5 +20,14 @@ namespace DAL.DTOs
             Role = role;
             NickName = nickname;
         }
+
+        public UserDto(string username, string password, string email, IList<string> role, string nickname)
+        {
+            UserName = username;
+            Password = password;
+            Email = email;
+            Role = role[0];
+            NickName = nickname;
+        }
     }
 }
