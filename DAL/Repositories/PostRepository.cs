@@ -75,8 +75,7 @@ namespace DAL.Repositories
     {
         public static bool IsPostParamsNull(PostDto postDto)
         {
-            return postDto.EventId == 0 && postDto.UserId == null && postDto.PostContent == null
-                && postDto.CreationDate == null;
+            return postDto.EventId == 0 && postDto.UserId == null && postDto.PostContent == null;
         }
 
         public static async Task<IReadOnlyCollection<PostDto>> GetPostsList(this IQueryable<Post> posts)

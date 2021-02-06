@@ -163,9 +163,13 @@ namespace DAL.Repositories
         {
             var user = await userManager.FindByIdAsync(userId);
             if (user == null) throw new Exception(ExceptionMessageConstants.NullObject);
-            if(newNickName==null) throw new Exception(ExceptionMessageConstants.NullObject);
-            user.NickName = newNickName;
-            await db.SaveChangesAsync();
+            if (newNickName != null)
+            {
+                user.NickName = newNickName;
+                await db.SaveChangesAsync();
+            }
+            else
+                throw new Exception(ExceptionMessageConstants.NullObject);
         }
 
         public async Task ModifyPassword(string userId, string newPassword)

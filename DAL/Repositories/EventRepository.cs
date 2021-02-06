@@ -94,7 +94,6 @@ namespace DAL.Repositories
         public async Task ModifyEventStartDate(int eventId, DateTime newStartDate)
         {
             var mevent = await db.Events.Where(e => e.Id == eventId).FirstOrDefaultAsync();
-            if(newStartDate == null) throw new Exception(ExceptionMessageConstants.NullObject);
             mevent.StartDate = newStartDate;
             await db.SaveChangesAsync();
         }
@@ -104,8 +103,7 @@ namespace DAL.Repositories
     {
         public static bool IsEventParamsNull(EventDto eventdto)
         {
-            return eventdto.Name == null && eventdto.Location == null
-                && eventdto.StartDate == null && eventdto.CreatorUserId == null;
+            return eventdto.Name == null && eventdto.Location == null && eventdto.CreatorUserId == null;
         }
 
         public static async Task<EventDto> GetByIdOrNull(this IQueryable<Event> events, int eventId)
