@@ -102,7 +102,8 @@ namespace DAL.Repositories
                 Email = newUser.Email,
                 Role = newUser.Role,
                 UserName = newUser.UserName,
-                NickName = newUser.NickName
+                NickName = newUser.NickName,
+                EmailConfirmed = true
             };
             var role = roleManager.FindByNameAsync(newUser.Role);
             if (role == null) await roleManager.CreateAsync(new IdentityRole { Name = newUser.Role });
