@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace DAL.Enums
+namespace Shared.Enums
 {
     public enum Status
     {

@@ -1,5 +1,4 @@
-﻿using DAL.DTOs;
-using DAL.Exceptions;
+﻿using DAL.Exceptions;
 using DAL.InterfacesForRepos;
 using DAL.Models;
 using Microsoft.EntityFrameworkCore;
@@ -19,18 +18,11 @@ namespace DAL.Repositories
             db = _db;
         }
 
-        public async Task CreateReview(ReviewDto newReview)
+        public async Task CreateReview(Review newReview)
         {
             if(newReview == null) throw new Exception(ExceptionMessageConstants.NullObject);
             if(ReviewRepositoryExtension.IsReviewParamsNull(newReview)) throw new Exception(ExceptionMessageConstants.RequiredParams);
-            Review nreview = new Review()
-            {
-                Description = newReview.Description,
-                Stars = newReview.Stars,
-                EventId = newReview.EventId,
-                UserId = newReview.UserId
-            };
-            db.Reviews.Add(nreview);
+            db.Reviews.Add(newReview);
             await db.SaveChangesAsync();
         }
 
@@ -45,17 +37,17 @@ namespace DAL.Repositories
             else throw new Exception(ExceptionMessageConstants.NullObject);
         }
 
-        public async Task<IReadOnlyCollection<ReviewDto>> GetAllReviews()
+        public async Task<IReadOnlyCollection<Review>> GetAllReviews()
         {
             return await db.Reviews.GetReviewsList();
         }
 
-        public async Task<ReviewDto> GetReviewById(int reviewId)
+        public async Task<Review> GetReviewById(int reviewId)
         {
             return await db.Reviews.GetReviewById(reviewId);
         }
 
-        public async Task<IReadOnlyCollection<ReviewDto>> GetReviewsByEventId(int eventId)
+        public async Task<IReadOnlyCollection<Review>> GetReviewsByEventId(int eventId)
         {
             return await db.Reviews.GetReviewsByEventId(eventId);
         }
@@ -84,19 +76,19 @@ namespace DAL.Repositories
     }
     internal static class ReviewRepositoryExtension
     {
-        public static bool IsReviewParamsNull(ReviewDto reviewDto)
+        public static bool IsReviewParamsNull(Review review)
         {
-            return reviewDto.EventId == 0 && reviewDto.UserId == null
-                && reviewDto.Stars == 0 && reviewDto.Description == null;
+            return review.EventId == 0 && review.UserId == null
+                && review.Stars == 0 && review.Description == null;
         }
 
-        public static async Task<IReadOnlyCollection<ReviewDto>> GetReviewsList(this IQueryable<Review> reviews)
-            => await reviews.Select(r => new ReviewDto(r.Stars, r.Description, r.EventId, r.UserId)).ToListAsync();
+        public static async Task<IReadOnlyCollection<Review>> GetReviewsList(this IQueryable<Review> reviews)
+            => await reviews.ToListAsync();
 
-        public static async Task<ReviewDto> GetReviewById(this IQueryable<Review> reviews, int reviewId)
-            => await reviews.Where(r => r.Id == reviewId).Select(r => new ReviewDto(r.Stars, r.Description, r.EventId, r.UserId)).FirstOrDefaultAsync();
+        public static async Task<Review> GetReviewById(this IQueryable<Review> reviews, int reviewId)
+            => await reviews.Where(r => r.Id == reviewId).FirstOrDefaultAsync();
 
-        public static async Task<IReadOnlyCollection<ReviewDto>> GetReviewsByEventId(this IQueryable<Review> reviews, int eventId)
-            => await reviews.Where(r => r.EventId == eventId).Select(r => new ReviewDto(r.Stars, r.Description, r.EventId, r.UserId)).ToListAsync();
+        public static async Task<IReadOnlyCollection<Review>> GetReviewsByEventId(this IQueryable<Review> reviews, int eventId)
+            => await reviews.Where(r => r.EventId == eventId).ToListAsync();
     }
 }

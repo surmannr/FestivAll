@@ -1,7 +1,7 @@
-﻿using DAL.DTOs;
-using DAL.Models;
+﻿using DAL.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -10,11 +10,11 @@ namespace DAL.InterfacesForRepos
     public interface IUserRepository
     {
         // Lekérdezések
-        Task<UserDto> GetUserById(string userId);
-        Task<UserDto> GetUserByUsername(string userName);
-        Task<IReadOnlyCollection<UserDto>> GetAllUsers();
+        Task<User> GetUserById(string userId);
+        Task<User> GetUserByUsername(string userName);
+        Task<IReadOnlyCollection<User>> GetAllUsers();
         // Létrehozás
-        Task CreateUser(UserDto newUser);
+        Task CreateUser(User newUser, string password);
         // Módosítások
         Task ModifyUserName(string userId, string newUserName);
         Task ModifyNickName(string userId, string newNickName);

@@ -1,13 +1,16 @@
-﻿using DAL.DTOs;
+﻿using BL.InterfacesForManagers;
 using DAL.InterfacesForRepos;
+using DAL.Models;
+using Shared.DTOs;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace BL.Managers
 {
-    public class UserManager
+    public class UserManager : IUserManager
     {
         private readonly IUserRepository userRepository;
 
@@ -19,18 +22,36 @@ namespace BL.Managers
         // Lekérdezések 
 
         public async Task<UserDto> GetUserByIdAsync(string userId)
-            => await userRepository.GetUserById(userId);
+        {
+            var user = await userRepository.GetUserById(userId);
+            return new UserDto(user.UserName, user.PasswordHash, user.Email, user.Role, user.NickName);
+        }
 
         public async Task<IReadOnlyCollection<UserDto>> GetUsersAsync()
-            => await userRepository.GetAllUsers();
+        {
+            var users = await userRepository.GetAllUsers();
+            return users.Select(u => new UserDto(u.UserName, u.PasswordHash, u.Email, u.Role, u.NickName)).ToList();
+        }
 
         public async Task<UserDto> GetUserByNameAsync(string name)
-            => await userRepository.GetUserByUsername(name);
+        {
+            var user = await userRepository.GetUserByUsername(name);
+            return new UserDto(user.UserName, user.PasswordHash, user.Email, user.Role, user.NickName);
+        }
 
         // Létrehozás
 
-        public async Task CreateUserAsync(UserDto newUserDto)
-            => await userRepository.CreateUser(newUserDto);
+        public async Task CreateUserAsync(UserDto newUserDto, string password)
+        {
+            User user = new User()
+            {
+                UserName = newUserDto.UserName,
+                Email = newUserDto.Email,
+                Role = newUserDto.Role,
+                NickName = newUserDto.NickName
+            };
+            await userRepository.CreateUser(user, password);
+        }
 
         // Törlés
 

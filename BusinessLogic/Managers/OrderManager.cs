@@ -1,14 +1,17 @@
-﻿using DAL.DTOs;
-using DAL.Enums;
+﻿using BL.InterfacesForManagers;
 using DAL.InterfacesForRepos;
+using DAL.Models;
+using Shared.DTOs;
+using Shared.Enums;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace BL.Managers
 {
-    public class OrderManager
+    public class OrderManager : IOrderManager
     {
         private readonly IOrderRepository orderRepository;
         private readonly IOrderItemRepository orderItemRepository;
@@ -22,18 +25,47 @@ namespace BL.Managers
         // Lekérdezések
 
         public async Task<OrderDto> GetOrderByIdAsync(int orderId)
-            => await orderRepository.GetOrderById(orderId);
+        {
+            var order = await orderRepository.GetOrderById(orderId);
+            return new OrderDto(order.PaymentMethod, order.ShippingMethod, order.Status, order.UserId, order.OrderItems
+                .Select(o => new OrderItemDto(o.Amount, o.Price, o.Status, o.TicketId, o.OrderId)).ToList());
+        }
 
         public async Task<IReadOnlyCollection<OrderDto>> GetOrdersAsync()
-            => await orderRepository.GetAllOrders();
+        {
+            var orders = await orderRepository.GetAllOrders();
+            return orders.Select(o => new OrderDto(o.PaymentMethod, o.ShippingMethod, o.Status, o.UserId, o.OrderItems
+                .Select(o => new OrderItemDto(o.Amount, o.Price, o.Status, o.TicketId, o.OrderId)).ToList())).ToList();
+        }
 
         public async Task<IReadOnlyCollection<OrderDto>> GetOrdersByUserId(string userId)
-            => await orderRepository.GetOrdersByUserId(userId);
+        {
+            var orders = await orderRepository.GetOrdersByUserId(userId);
+            return orders.Select(o => new OrderDto(o.PaymentMethod, o.ShippingMethod, o.Status, o.UserId, o.OrderItems
+                .Select(o => new OrderItemDto(o.Amount, o.Price, o.Status, o.TicketId, o.OrderId)).ToList())).ToList();
+        }
 
         // Létrehozás
 
         public async Task CreateOrderAsync(OrderDto newOrderDto)
-            => await orderRepository.CreateOrder(newOrderDto);
+        {
+            Order order = new Order
+            {
+                PaymentMethod = newOrderDto.PaymentMethod,
+                ShippingMethod = newOrderDto.ShippingMethod,
+                Status = newOrderDto.Status,
+                UserId = newOrderDto.UserId,
+                OrderItems = newOrderDto.OrderItems.Select(o => new OrderItem()
+                {
+                    Amount = o.Amount,
+                    Price = o.Price,
+                    Status = o.Status,
+                    TicketId = o.TicketId,
+                    OrderId = o.OrderId
+                }).ToList()
+            };
+            await orderRepository.CreateOrder(order);
+        }
 
         // Törlés
 

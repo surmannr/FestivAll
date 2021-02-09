@@ -1,6 +1,7 @@
-﻿using DAL.DTOs;
+﻿using DAL.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -9,11 +10,11 @@ namespace DAL.InterfacesForRepos
     public interface IPostRepository
     {
         // Lekérdezések
-        Task<PostDto> GetPostById(int postId);
-        Task<IReadOnlyCollection<PostDto>> GetPostsByEventId(int eventId);
-        Task<IReadOnlyCollection<PostDto>> GetAllPosts();
+        Task<Post> GetPostById(int postId);
+        Task<IReadOnlyCollection<Post>> GetPostsByEventId(int eventId);
+        Task<IReadOnlyCollection<Post>> GetAllPosts();
         // Létrehozás
-        Task CreatePost(PostDto newPost);
+        Task CreatePost(Post newPost);
         // Módosítások
         Task ModifyContent(int postId, string content);
         // Törlés

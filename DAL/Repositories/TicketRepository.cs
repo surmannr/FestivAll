@@ -1,5 +1,4 @@
-﻿using DAL.DTOs;
-using DAL.Exceptions;
+﻿using DAL.Exceptions;
 using DAL.InterfacesForRepos;
 using DAL.Models;
 using Microsoft.EntityFrameworkCore;
@@ -18,18 +17,11 @@ namespace DAL.Repositories
         {
             db = _db;
         }
-        public async Task CreateTicket(TicketDto newTicket)
+        public async Task CreateTicket(Ticket newTicket)
         {
             if(newTicket==null) throw new Exception(ExceptionMessageConstants.NullObject);
             if(TicketRepositoryExtension.IsTicketParamsNull(newTicket)) throw new Exception(ExceptionMessageConstants.RequiredParams);
-            Ticket nticket = new Ticket()
-            {
-                Category = newTicket.Category,
-                Price = newTicket.Price,
-                InStock = newTicket.InStock,
-                EventId = newTicket.EventId
-            };
-            db.Tickets.Add(nticket);
+            db.Tickets.Add(newTicket);
             await db.SaveChangesAsync();
         }
 
@@ -49,17 +41,17 @@ namespace DAL.Repositories
             await db.SaveChangesAsync();
         }
 
-        public async Task<IReadOnlyCollection<TicketDto>> GetAllTickets()
+        public async Task<IReadOnlyCollection<Ticket>> GetAllTickets()
         {
             return await db.Tickets.GetTicketsList();
         }
 
-        public async Task<TicketDto> GetTicketById(int ticketId)
+        public async Task<Ticket> GetTicketById(int ticketId)
         {
             return await db.Tickets.GetTicketById(ticketId);
         }
 
-        public async Task<IReadOnlyCollection<TicketDto>> GetTicketsByEventId(int eventId)
+        public async Task<IReadOnlyCollection<Ticket>> GetTicketsByEventId(int eventId)
         {
             return await db.Tickets.GetTicketsByEventId(eventId);
         }
@@ -90,19 +82,19 @@ namespace DAL.Repositories
     }
     internal static class TicketRepositoryExtension
     {
-        public static bool IsTicketParamsNull(TicketDto ticketDto)
+        public static bool IsTicketParamsNull(Ticket ticketDto)
         {
             return ticketDto.EventId == 0 && ticketDto.Category == null && ticketDto.InStock == 0;
         }
 
-        public static async Task<IReadOnlyCollection<TicketDto>> GetTicketsList(this IQueryable<Ticket> tickets)
-            => await tickets.Select(t => new TicketDto(t.Category, t.Price, t.InStock, t.EventId)).ToListAsync();
+        public static async Task<IReadOnlyCollection<Ticket>> GetTicketsList(this IQueryable<Ticket> tickets)
+            => await tickets.ToListAsync();
 
-        public static async Task<TicketDto> GetTicketById(this IQueryable<Ticket> tickets, int ticketId)
-            => await tickets.Where(t => t.Id == ticketId).Select(t => new TicketDto(t.Category, t.Price, t.InStock, t.EventId)).FirstOrDefaultAsync();
+        public static async Task<Ticket> GetTicketById(this IQueryable<Ticket> tickets, int ticketId)
+            => await tickets.Where(t => t.Id == ticketId).FirstOrDefaultAsync();
 
-        public static async Task<IReadOnlyCollection<TicketDto>> GetTicketsByEventId(this IQueryable<Ticket> tickets, int eventId)
-            => await tickets.Where(t => t.EventId == eventId).Select(t => new TicketDto(t.Category, t.Price, t.InStock, t.EventId)).ToListAsync();
+        public static async Task<IReadOnlyCollection<Ticket>> GetTicketsByEventId(this IQueryable<Ticket> tickets, int eventId)
+            => await tickets.Where(t => t.EventId == eventId).ToListAsync();
 
     }
 }

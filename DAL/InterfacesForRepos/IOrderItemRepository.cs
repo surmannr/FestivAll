@@ -1,7 +1,8 @@
-﻿using DAL.DTOs;
-using DAL.Enums;
+﻿using DAL.Models;
+using Shared.Enums;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -10,11 +11,11 @@ namespace DAL.InterfacesForRepos
     public interface IOrderItemRepository
     {
         // Lekérdezések
-        Task<OrderItemDto> GetOrderItemById(int orderItemId);
-        Task<IReadOnlyCollection<OrderItemDto>> GetOrderItemsByOrderId(int orderId);
-        Task<IReadOnlyCollection<OrderItemDto>> GetAllOrderItems();
+        Task<OrderItem> GetOrderItemById(int orderItemId);
+        Task<IReadOnlyCollection<OrderItem>> GetOrderItemsByOrderId(int orderId);
+        Task<IReadOnlyCollection<OrderItem>> GetAllOrderItems();
         // Létrehozás
-        Task CreateOrderItem(OrderItemDto newOrderItem);
+        Task CreateOrderItem(OrderItem newOrderItem);
         // Módosítások
         Task ModifyStatus(int orderItemId, Status status);
         Task SetOrder(int orderItemId, int orderId);

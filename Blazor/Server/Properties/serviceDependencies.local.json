@@ -1,0 +1,17 @@
+{
+  "dependencies": {
+    "mssql1": {
+      "type": "mssql.local",
+      "connectionId": "DefaultConnection"
+    },
+    "secrets1": {
+      "type": "secrets.user"
+    },
+    "mssql2": {
+      "resourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/Microsoft.Sql/servers/festivall-server/databases/FestivAll",
+      "type": "mssql.azure",
+      "connectionId": "FestivallDb",
+      "secretStore": "LocalSecretsFile"
+    }
+  }
+}

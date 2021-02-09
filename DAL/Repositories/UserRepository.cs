@@ -1,5 +1,4 @@
-﻿using DAL.DTOs;
-using DAL.Exceptions;
+﻿using DAL.Exceptions;
 using DAL.InterfacesForRepos;
 using DAL.Models;
 using Microsoft.AspNetCore.Identity;
@@ -94,26 +93,18 @@ namespace DAL.Repositories
             else throw new Exception(ExceptionMessageConstants.NullObject);
         }
 
-        public async Task CreateUser(UserDto newUser)
+        public async Task CreateUser(User newUser, string password)
         {
             if(newUser==null) throw new Exception(ExceptionMessageConstants.NullObject);
-            User user = new User()
-            {
-                Email = newUser.Email,
-                Role = newUser.Role,
-                UserName = newUser.UserName,
-                NickName = newUser.NickName,
-                EmailConfirmed = true
-            };
             var role = roleManager.FindByNameAsync(newUser.Role);
             if (role == null) await roleManager.CreateAsync(new IdentityRole { Name = newUser.Role });
-            var result = await userManager.CreateAsync(user, newUser.Password);
-            await userManager.AddToRoleAsync(user, newUser.Role);
+            var result = await userManager.CreateAsync(newUser, password);
+            await userManager.AddToRoleAsync(newUser, newUser.Role);
             if (result.Succeeded)
             {
                 await db.SaveChangesAsync();
             }
-            throw new Exception("Nem sikerült létrehozni a felhasználót.");
+            else throw new Exception("Nem sikerült létrehozni a felhasználót.");
         }
 
         public async Task DeleteUser(string userId)
@@ -127,23 +118,23 @@ namespace DAL.Repositories
             else throw new Exception(ExceptionMessageConstants.NullObject);
         }
 
-        public async Task<IReadOnlyCollection<UserDto>> GetAllUsers()
+        public async Task<IReadOnlyCollection<User>> GetAllUsers()
         {
             return await db.Users.GetUsersList();
         }
 
-        public async Task<UserDto> GetUserById(string userId)
+        public async Task<User> GetUserById(string userId)
         {
             var user = await userManager.FindByIdAsync(userId);
             if(user==null) throw new Exception(ExceptionMessageConstants.NullObject);
-            return new UserDto(user.UserName,user.PasswordHash,user.Email,user.Role,user.NickName);
+            return user;
         }
 
-        public async Task<UserDto> GetUserByUsername(string userName)
+        public async Task<User> GetUserByUsername(string userName)
         {
             var user = await userManager.FindByNameAsync(userName);
             if (user == null) throw new Exception(ExceptionMessageConstants.NullObject);
-            return new UserDto(user.UserName, user.PasswordHash, user.Email, user.Role, user.NickName);
+            return user;
 
         }
 
@@ -196,8 +187,8 @@ namespace DAL.Repositories
     }
     internal static class UserRepositoryExtension
     {
-        public static async Task<IReadOnlyCollection<UserDto>> GetUsersList(this IQueryable<User> users)
-            => await users.Select(u => new UserDto(u.UserName, u.PasswordHash, u.Email, u.Role, u.NickName)).ToListAsync();
+        public static async Task<IReadOnlyCollection<User>> GetUsersList(this IQueryable<User> users)
+            => await users.ToListAsync();
 
         public static bool ValidateEmail(string email)
         {

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace DAL.DTOs
+namespace Shared.DTOs
 {
     public class PostDto
     {

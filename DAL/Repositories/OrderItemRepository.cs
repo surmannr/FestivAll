@@ -1,9 +1,8 @@
-﻿using DAL.DTOs;
-using DAL.Enums;
-using DAL.Exceptions;
+﻿using DAL.Exceptions;
 using DAL.InterfacesForRepos;
 using DAL.Models;
 using Microsoft.EntityFrameworkCore;
+using Shared.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,19 +18,11 @@ namespace DAL.Repositories
         {
             db = _db;
         }
-        public async Task CreateOrderItem(OrderItemDto newOrderItem)
+        public async Task CreateOrderItem(OrderItem newOrderItem)
         {
             if (newOrderItem == null) throw new Exception(ExceptionMessageConstants.NullObject);
             if (OrderItemRepositoryExtension.IsOrderItemParamsNull(newOrderItem)) throw new Exception(ExceptionMessageConstants.RequiredParams);
-            OrderItem norderitem = new OrderItem()
-            {
-                Amount = newOrderItem.Amount,
-                Price = newOrderItem.Price,
-                TicketId = newOrderItem.TicketId,
-                OrderId = newOrderItem.OrderId,
-                Status = newOrderItem.Status
-            };
-            db.OrderItems.Add(norderitem);
+            db.OrderItems.Add(newOrderItem);
             await db.SaveChangesAsync();
         }
 
@@ -46,17 +37,17 @@ namespace DAL.Repositories
             else throw new Exception(ExceptionMessageConstants.NullObject);
         }
 
-        public async Task<IReadOnlyCollection<OrderItemDto>> GetAllOrderItems()
+        public async Task<IReadOnlyCollection<OrderItem>> GetAllOrderItems()
         {
             return await db.OrderItems.GetOrderItemsList();
         }
 
-        public async Task<OrderItemDto> GetOrderItemById(int orderItemId)
+        public async Task<OrderItem> GetOrderItemById(int orderItemId)
         {
             return await db.OrderItems.GetOrderItemById(orderItemId);
         }
 
-        public async Task<IReadOnlyCollection<OrderItemDto>> GetOrderItemsByOrderId(int orderId)
+        public async Task<IReadOnlyCollection<OrderItem>> GetOrderItemsByOrderId(int orderId)
         {
             return await db.OrderItems.GetOrderItemsByOrderId(orderId);
         }
@@ -91,18 +82,18 @@ namespace DAL.Repositories
     }
     internal static class OrderItemRepositoryExtension
     {
-        public static bool IsOrderItemParamsNull(OrderItemDto orderItemDto)
+        public static bool IsOrderItemParamsNull(OrderItem orderItem)
         {
-            return orderItemDto.TicketId == 0 && orderItemDto.Amount == 0 && orderItemDto.Price == -1;
+            return orderItem.TicketId == 0 && orderItem.Amount == 0 && orderItem.Price == -1;
         }
 
-        public static async Task<IReadOnlyCollection<OrderItemDto>> GetOrderItemsList(this IQueryable<OrderItem> orderItems)
-            => await orderItems.Select(o => new OrderItemDto(o.Amount,o.Price,o.Status,o.TicketId,o.OrderId)).ToListAsync();
+        public static async Task<IReadOnlyCollection<OrderItem>> GetOrderItemsList(this IQueryable<OrderItem> orderItems)
+            => await orderItems.ToListAsync();
 
-        public static async Task<OrderItemDto> GetOrderItemById(this IQueryable<OrderItem> orderItems, int orderItemId)
-            => await orderItems.Where(o => o.Id == orderItemId).Select(o => new OrderItemDto(o.Amount, o.Price, o.Status, o.TicketId, o.OrderId)).FirstOrDefaultAsync();
+        public static async Task<OrderItem> GetOrderItemById(this IQueryable<OrderItem> orderItems, int orderItemId)
+            => await orderItems.Where(o => o.Id == orderItemId).FirstOrDefaultAsync();
 
-        public static async Task<IReadOnlyCollection<OrderItemDto>> GetOrderItemsByOrderId(this IQueryable<OrderItem> orderItems, int orderId)
-            => await orderItems.Where(o => o.OrderId == orderId).Select(o => new OrderItemDto(o.Amount, o.Price, o.Status, o.TicketId, o.OrderId)).ToListAsync();
+        public static async Task<IReadOnlyCollection<OrderItem>> GetOrderItemsByOrderId(this IQueryable<OrderItem> orderItems, int orderId)
+            => await orderItems.Where(o => o.OrderId == orderId).ToListAsync();
     }
 }

@@ -1,13 +1,16 @@
-﻿using DAL.DTOs;
+﻿using BL.InterfacesForManagers;
 using DAL.InterfacesForRepos;
+using DAL.Models;
+using Shared.DTOs;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace BL.Managers
 {
-    public class TicketManager
+    public class TicketManager : ITicketManager
     {
         private readonly ITicketRepository ticketRepository;
 
@@ -19,18 +22,36 @@ namespace BL.Managers
         // Lekérdezések
 
         public async Task<TicketDto> GetTicketByIdAsync(int ticketId)
-            => await ticketRepository.GetTicketById(ticketId);
+        {
+            var ticket = await ticketRepository.GetTicketById(ticketId);
+            return new TicketDto(ticket.Category, ticket.Price, ticket.InStock, ticket.EventId);
+        }
 
         public async Task<IReadOnlyCollection<TicketDto>> GetTicketsAsync()
-            => await ticketRepository.GetAllTickets();
+        {
+            var tickets = await ticketRepository.GetAllTickets();
+            return tickets.Select(t => new TicketDto(t.Category, t.Price, t.InStock, t.EventId)).ToList();
+        }
 
         public async Task<IReadOnlyCollection<TicketDto>> GetTicketsByEventIdAsync(int eventId)
-            => await ticketRepository.GetTicketsByEventId(eventId);
+        {
+            var tickets = await ticketRepository.GetTicketsByEventId(eventId);
+            return tickets.Select(t => new TicketDto(t.Category, t.Price, t.InStock, t.EventId)).ToList();
+        }
 
         // Létrehozás
 
         public async Task CreateTicketAsync(TicketDto newTicketDto)
-            => await ticketRepository.CreateTicket(newTicketDto);
+        {
+            Ticket ticket = new Ticket()
+            {
+                Category = newTicketDto.Category,
+                Price = newTicketDto.Price,
+                InStock = newTicketDto.InStock,
+                EventId = newTicketDto.EventId
+            };
+            await ticketRepository.CreateTicket(ticket);
+        }
 
         // Törlés
 

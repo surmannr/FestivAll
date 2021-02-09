@@ -1,5 +1,4 @@
-﻿using DAL.DTOs;
-using DAL.Exceptions;
+﻿using DAL.Exceptions;
 using DAL.InterfacesForRepos;
 using DAL.Models;
 using Microsoft.EntityFrameworkCore;
@@ -19,18 +18,11 @@ namespace DAL.Repositories
             db = _db;
         }
 
-        public async Task CreatePost(PostDto newPost)
+        public async Task CreatePost(Post newPost)
         {
             if(newPost==null) throw new Exception(ExceptionMessageConstants.NullObject);
             if(PostRepositoryExtension.IsPostParamsNull(newPost)) throw new Exception(ExceptionMessageConstants.RequiredParams);
-            Post post = new Post()
-            {
-                PostContent = newPost.PostContent,
-                UserId = newPost.UserId,
-                EventId = newPost.EventId,
-                CreationDate = newPost.CreationDate
-            };
-            db.Posts.Add(post);
+            db.Posts.Add(newPost);
             await db.SaveChangesAsync();
         }
 
@@ -42,24 +34,24 @@ namespace DAL.Repositories
                 db.Posts.Remove(post);
                 await db.SaveChangesAsync();
             } 
-            else new Exception(ExceptionMessageConstants.NullObject);
+            else throw new Exception(ExceptionMessageConstants.NullObject);
         }
-
-        public async Task<IReadOnlyCollection<PostDto>> GetAllPosts()
+        
+        public async Task<IReadOnlyCollection<Post>> GetAllPosts()
         {
             return await db.Posts.GetPostsList();
         }
 
-        public async Task<PostDto> GetPostById(int postId)
+        public async Task<Post> GetPostById(int postId)
         {
             return await db.Posts.GetPostById(postId);
         }
 
-        public async Task<IReadOnlyCollection<PostDto>> GetPostsByEventId(int eventId)
+        public async Task<IReadOnlyCollection<Post>> GetPostsByEventId(int eventId)
         {
             return await db.Posts.GetPostsByEventId(eventId);
         }
-
+        
         public async Task ModifyContent(int postId, string content)
         {
             var post = await db.Posts.Where(p => p.Id == postId).FirstOrDefaultAsync();
@@ -68,23 +60,23 @@ namespace DAL.Repositories
                 post.PostContent = content;
                 await db.SaveChangesAsync();
             }
-            else new Exception(ExceptionMessageConstants.NullObject);
+            else throw new Exception(ExceptionMessageConstants.NullObject);
         }
     }
     internal static class PostRepositoryExtension
     {
-        public static bool IsPostParamsNull(PostDto postDto)
+        public static bool IsPostParamsNull(Post post)
         {
-            return postDto.EventId == 0 && postDto.UserId == null && postDto.PostContent == null;
+            return post.EventId == 0 && post.UserId == null && post.PostContent == null;
         }
 
-        public static async Task<IReadOnlyCollection<PostDto>> GetPostsList(this IQueryable<Post> posts)
-            => await posts.Select(p => new PostDto(p.PostContent, p.CreationDate, p.EventId, p.UserId)).ToListAsync();
+        public static async Task<IReadOnlyCollection<Post>> GetPostsList(this IQueryable<Post> posts)
+            => await posts.ToListAsync();
 
-        public static async Task<PostDto> GetPostById(this IQueryable<Post> posts, int postId)
-            => await posts.Where(p => p.Id == postId).Select(p => new PostDto(p.PostContent, p.CreationDate, p.EventId, p.UserId)).FirstOrDefaultAsync();
+        public static async Task<Post> GetPostById(this IQueryable<Post> posts, int postId)
+            => await posts.Where(p => p.Id == postId).FirstOrDefaultAsync();
 
-        public static async Task<IReadOnlyCollection<PostDto>> GetPostsByEventId(this IQueryable<Post> posts, int eventId)
-            => await posts.Where(p => p.EventId == eventId).Select(p => new PostDto(p.PostContent, p.CreationDate, p.EventId, p.UserId)).ToListAsync();
+        public static async Task<IReadOnlyCollection<Post>> GetPostsByEventId(this IQueryable<Post> posts, int eventId)
+            => await posts.Where(p => p.EventId == eventId).ToListAsync();
     }
 }

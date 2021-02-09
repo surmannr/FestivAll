@@ -1,13 +1,16 @@
-﻿using DAL.DTOs;
+﻿using BL.InterfacesForManagers;
 using DAL.InterfacesForRepos;
+using DAL.Models;
+using Shared.DTOs;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace BL.Managers
 {
-    public class PostManager
+    public class PostManager : IPostManager
     {
         private readonly IPostRepository postRepository;
 
@@ -19,18 +22,36 @@ namespace BL.Managers
         // Lekérdezések
 
         public async Task<PostDto> GetPostByIdAsync(int postId)
-            => await postRepository.GetPostById(postId);
+        {
+            var post = await postRepository.GetPostById(postId);
+            return new PostDto(post.PostContent, post.CreationDate, post.EventId, post.UserId);
+        }
 
         public async Task<IReadOnlyCollection<PostDto>> GetPostsAsync()
-            => await postRepository.GetAllPosts();
+        {
+            var posts = await postRepository.GetAllPosts();
+            return posts.Select(p => new PostDto(p.PostContent, p.CreationDate, p.EventId, p.UserId)).ToList();
+        }
 
         public async Task<IReadOnlyCollection<PostDto>> GetPostsByEventIdAsync(int eventId)
-            => await postRepository.GetPostsByEventId(eventId);
+        {
+            var posts = await postRepository.GetPostsByEventId(eventId);
+            return posts.Select(p => new PostDto(p.PostContent, p.CreationDate, p.EventId, p.UserId)).ToList();
+        }
 
         // Létrehozás
 
         public async Task CreatePostAsync(PostDto newPostDto)
-            => await postRepository.CreatePost(newPostDto);
+        {
+            Post post = new Post()
+            {
+                PostContent = newPostDto.PostContent,
+                CreationDate = newPostDto.CreationDate,
+                EventId = newPostDto.EventId,
+                UserId = newPostDto.UserId
+            };
+            await postRepository.CreatePost(post);
+        }
 
         // Törlés
 

@@ -46,7 +46,6 @@ namespace DAL
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             base.OnConfiguring(optionsBuilder);
-            optionsBuilder.UseSqlServer("Server=tcp:festivall-server.database.windows.net,1433;Initial Catalog=FestivAll;Persist Security Info=False;User ID=festadmin;Password=asd123ASD;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;");
         }
     }
 }

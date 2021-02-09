@@ -1,14 +1,17 @@
-﻿using DAL.DTOs;
-using DAL.Enums;
+﻿using BL.InterfacesForManagers;
 using DAL.InterfacesForRepos;
+using DAL.Models;
+using Shared.DTOs;
+using Shared.Enums;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace BL.Managers
 {
-    public class OrderItemManager
+    public class OrderItemManager : IOrderItemManager
     {
         private readonly IOrderItemRepository orderItemRepository;
 
@@ -20,18 +23,37 @@ namespace BL.Managers
         // Lekérdezések
 
         public async Task<OrderItemDto> GetOrderItemByIdAsync(int orderItemId)
-            => await orderItemRepository.GetOrderItemById(orderItemId);
+        {
+            var orderitem = await orderItemRepository.GetOrderItemById(orderItemId);
+            return new OrderItemDto(orderitem.Amount, orderitem.Price, orderitem.Status, orderitem.TicketId, orderitem.OrderId);
+        }
 
         public async Task<IReadOnlyCollection<OrderItemDto>> GetOrderItemsAsync()
-            => await orderItemRepository.GetAllOrderItems();
+        {
+            var orders = await orderItemRepository.GetAllOrderItems();
+            return orders.Select(o => new OrderItemDto(o.Amount, o.Price, o.Status, o.TicketId, o.OrderId)).ToList();
+        }
 
         public async Task<IReadOnlyCollection<OrderItemDto>> GetOrderItemsByOrderIdAsync(int orderId)
-            => await orderItemRepository.GetOrderItemsByOrderId(orderId);
+        {
+            var orders = await orderItemRepository.GetOrderItemsByOrderId(orderId);
+            return orders.Select(o => new OrderItemDto(o.Amount, o.Price, o.Status, o.TicketId, o.OrderId)).ToList();
+        }
 
         // Létrehozás
 
         public async Task CreateOrderItemAsync(OrderItemDto orderItemDto)
-            => await orderItemRepository.CreateOrderItem(orderItemDto);
+        {
+            OrderItem orderItem = new OrderItem()
+            {
+                Amount = orderItemDto.Amount,
+                Price = orderItemDto.Price,
+                Status = orderItemDto.Status,
+                TicketId = orderItemDto.TicketId,
+                OrderId = orderItemDto.OrderId
+            };
+            await orderItemRepository.CreateOrderItem(orderItem);
+        }
 
         // Törlés
 

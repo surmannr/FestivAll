@@ -1,13 +1,16 @@
-﻿using DAL.DTOs;
+﻿using BL.InterfacesForManagers;
 using DAL.InterfacesForRepos;
+using DAL.Models;
+using Shared.DTOs;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace BL.Managers
 {
-    public class EventManager
+    public class EventManager : IEventManager
     {
         private readonly IEventRepository eventRepository;
 
@@ -19,27 +22,55 @@ namespace BL.Managers
         // Lekérdezések
 
         public async Task<EventDto> GetEventByIdAsync(int eventId)
-            => await eventRepository.GetEventById(eventId);
+        {
+            var _event = await eventRepository.GetEventById(eventId);
+            return new EventDto(creatorUserId: _event.CreatorUserId, name: _event.Name,
+                location: _event.Location, description: _event.Description, startDate: _event.StartDate);
+        }
 
         public async Task<IReadOnlyCollection<EventDto>> GetEventsAsync()
-            => await eventRepository.GetAllEvents();
+        {
+            var eventList = await eventRepository.GetAllEvents();
+            return eventList.Select(e => new EventDto(e.Name, e.Location, e.Description,e.StartDate,e.CreatorUserId)).ToList();
+        }
 
         public async Task<IReadOnlyCollection<EventDto>> GetEventsByNameAsync(string name)
-            => await eventRepository.GetEventsByName(name);
+        {
+            var eventList = await eventRepository.GetEventsByName(name);
+            return eventList.Select(e => new EventDto(e.Name, e.Location, e.Description, e.StartDate, e.CreatorUserId)).ToList();
+        }
 
         public async Task<IReadOnlyCollection<EventDto>> GetEventsByLocationAsync(string location)
-            => await eventRepository.GetEventsByLocation(location);
+        {
+            var eventList = await eventRepository.GetEventsByLocation(location);
+            return eventList.Select(e => new EventDto(e.Name, e.Location, e.Description, e.StartDate, e.CreatorUserId)).ToList();
+        }
 
         public async Task<IReadOnlyCollection<EventDto>> GetEventsByStartDateAsync(DateTime startDate)
-            => await eventRepository.GetEventsByStartDate(startDate);
+        {
+            var eventList = await eventRepository.GetEventsByStartDate(startDate);
+            return eventList.Select(e => new EventDto(e.Name, e.Location, e.Description, e.StartDate, e.CreatorUserId)).ToList();
+        }
 
         public async Task<IReadOnlyCollection<EventDto>> GetEventsByCreatorIdAsync(string userId)
-            => await eventRepository.GetEventsByCreatorUserId(userId);
+        {
+            var eventList = await eventRepository.GetEventsByCreatorUserId(userId);
+            return eventList.Select(e => new EventDto(e.Name, e.Location, e.Description, e.StartDate, e.CreatorUserId)).ToList();
+        }
 
         // Létrehozás
 
-        public async Task CreateEventAsync(EventDto newEventDto) 
-            => await eventRepository.CreateEvent(newEventDto);
+        public async Task CreateEventAsync(EventDto newEventDto)
+        {
+            Event _event = new Event() { 
+                Name = newEventDto.Name,
+                Location = newEventDto.Location,
+                Description = newEventDto.Description,
+                StartDate = newEventDto.StartDate,
+                CreatorUserId=newEventDto.CreatorUserId
+            };
+            await eventRepository.CreateEvent(_event);
+        }
 
         // Törlés
 
