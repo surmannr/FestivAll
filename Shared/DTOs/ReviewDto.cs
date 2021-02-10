@@ -1,15 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.Json.Serialization;
 
 namespace Shared.DTOs
 {
     public class ReviewDto
     {
-        public readonly int Stars;
-        public readonly string Description;
-        public readonly int EventId;
-        public readonly string UserId;
+        [JsonPropertyName("stars")]
+        public int Stars { get; set; }
+        [JsonPropertyName("description")]
+        public string Description { get; set; }
+        [JsonPropertyName("eventid")]
+        public int EventId { get; set; }
+        [JsonPropertyName("userid")]
+        public string UserId { get; set; }
+
+        public ReviewDto() { }
 
         public ReviewDto(int stars, string description, int eventId, string userId)
         {

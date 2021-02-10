@@ -1,15 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.Json.Serialization;
 
 namespace Shared.DTOs
 {
     public class TicketDto
     {
-        public readonly string Category;
-        public readonly int Price;
-        public readonly int InStock;
-        public readonly int EventId;
+        [JsonPropertyName("category")]
+        public string Category { get; set; }
+        [JsonPropertyName("price")]
+        public int Price { get; set; }
+        [JsonPropertyName("instock")]
+        public int InStock { get; set; }
+        [JsonPropertyName("eventid")]
+        public int EventId { get; set; }
+
+        public TicketDto() { }
 
         public TicketDto(string category, int price, int inStock, int eventId)
         {

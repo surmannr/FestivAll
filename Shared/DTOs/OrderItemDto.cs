@@ -2,16 +2,24 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.Json.Serialization;
 
 namespace Shared.DTOs
 {
     public class OrderItemDto
     {
-        public readonly int Amount;
-        public readonly int Price;
-        public readonly Status Status;
-        public readonly int TicketId;
-        public readonly int OrderId;
+        [JsonPropertyName("amount")]
+        public int Amount { get; set; }
+        [JsonPropertyName("price")]
+        public int Price { get; set; }
+        [JsonPropertyName("status")]
+        public Status Status { get; set; }
+        [JsonPropertyName("ticketid")]
+        public int TicketId { get; set; }
+        [JsonPropertyName("orderid")]
+        public int OrderId { get; set; }
+
+        public OrderItemDto() { }
 
         public OrderItemDto(int amount, int price, Status status, int ticketId, int orderId)
         {

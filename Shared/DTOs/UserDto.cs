@@ -1,16 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.Json.Serialization;
 
 namespace Shared.DTOs
 {
     public class UserDto
     {
-        public readonly string UserName;
-        public readonly string Password;
-        public readonly string Email;
-        public readonly string Role;
-        public readonly string NickName;
+        [JsonPropertyName("username")]
+        public string UserName;
+        [JsonPropertyName("password")]
+        public string Password;
+        [JsonPropertyName("email")]
+        public string Email;
+        [JsonPropertyName("role")]
+        public string Role;
+        [JsonPropertyName("nickname")]
+        public string NickName;
+
+        public UserDto() { }
 
         public UserDto(string username, string password, string email, string role, string nickname)
         {
