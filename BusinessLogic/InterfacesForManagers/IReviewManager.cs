@@ -12,10 +12,10 @@ namespace BL.InterfacesForManagers
         Task<ReviewDto> GetReviewByIdAsync(int reviewId);
         Task<IReadOnlyCollection<ReviewDto>> GetReviewsAsync();
         Task<IReadOnlyCollection<ReviewDto>> GetReviewsByEventIdAsync(int eventId);
-        Task CreateReviewAsync(ReviewDto newReviewDto);
+        Task<ReviewDto> CreateReviewAsync(ReviewDto newReviewDto);
         Task DeleteReviewAsync(int reviewId);
-        Task ModifyStarsAsync(int reviewId, int stars);
-        Task ModifyContentAsync(int reviewId, string description);
+        Task<ReviewDto> ModifyStarsAsync(int reviewId, int stars);
+        Task<ReviewDto> ModifyContentAsync(int reviewId, string description);
 
     }
 }

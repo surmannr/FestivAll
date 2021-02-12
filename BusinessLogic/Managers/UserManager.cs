@@ -1,4 +1,5 @@
-﻿using BL.InterfacesForManagers;
+﻿using AutoMapper;
+using BL.InterfacesForManagers;
 using DAL.InterfacesForRepos;
 using DAL.Models;
 using Shared.DTOs;
@@ -13,10 +14,12 @@ namespace BL.Managers
     public class UserManager : IUserManager
     {
         private readonly IUserRepository userRepository;
+        private readonly IMapper mapper;
 
-        public UserManager(IUserRepository _userRepository)
+        public UserManager(IUserRepository _userRepository, IMapper _mapper)
         {
             userRepository = _userRepository;
+            mapper = _mapper;
         }
 
         // Lekérdezések 
@@ -24,33 +27,28 @@ namespace BL.Managers
         public async Task<UserDto> GetUserByIdAsync(string userId)
         {
             var user = await userRepository.GetUserById(userId);
-            return new UserDto(user.UserName, user.PasswordHash, user.Email, user.Role, user.NickName);
+            return mapper.Map<UserDto>(user);
         }
 
         public async Task<IReadOnlyCollection<UserDto>> GetUsersAsync()
         {
             var users = await userRepository.GetAllUsers();
-            return users.Select(u => new UserDto(u.UserName, u.PasswordHash, u.Email, u.Role, u.NickName)).ToList();
+            return mapper.Map<List<UserDto>>(users);
         }
 
         public async Task<UserDto> GetUserByNameAsync(string name)
         {
             var user = await userRepository.GetUserByUsername(name);
-            return new UserDto(user.UserName, user.PasswordHash, user.Email, user.Role, user.NickName);
+            return mapper.Map<UserDto>(user);
         }
 
         // Létrehozás
 
-        public async Task CreateUserAsync(UserDto newUserDto, string password)
+        public async Task<UserDto> CreateUserAsync(UserDto newUserDto, string password)
         {
-            User user = new User()
-            {
-                UserName = newUserDto.UserName,
-                Email = newUserDto.Email,
-                Role = newUserDto.Role,
-                NickName = newUserDto.NickName
-            };
-            await userRepository.CreateUser(user, password);
+            User user = mapper.Map<User>(newUserDto);
+            var result = await userRepository.CreateUser(user, password);
+            return mapper.Map<UserDto>(result);
         }
 
         // Törlés
@@ -60,16 +58,28 @@ namespace BL.Managers
 
         // Módosítások
 
-        public async Task ModifyUserNameAsync(string userId, string userName)
-            => await userRepository.ModifyUserName(userId, userName);
+        public async Task<UserDto> ModifyUserNameAsync(string userId, string userName)
+        {
+            var result = await userRepository.ModifyUserName(userId, userName);
+            return mapper.Map<UserDto>(result);
+        }
 
-        public async Task ModifyPasswordAsync(string userId, string password)
-            => await userRepository.ModifyPassword(userId, password);
+        public async Task<UserDto> ModifyPasswordAsync(string userId, string password)
+        {
+            var result = await userRepository.ModifyPassword(userId, password);
+            return mapper.Map<UserDto>(result);
+        }
         
-        public async Task ModifyNickNameAsync(string userId, string nickName)
-            => await userRepository.ModifyNickName(userId, nickName);
+        public async Task<UserDto> ModifyNickNameAsync(string userId, string nickName)
+        {
+            var result = await userRepository.ModifyNickName(userId, nickName);
+            return mapper.Map<UserDto>(result);
+        }
 
-        public async Task ModifyEmailAsync(string userId, string email)
-            => await userRepository.ModifyEmail(userId, email);
+        public async Task<UserDto> ModifyEmailAsync(string userId, string email)
+        {
+            var result = await userRepository.ModifyEmail(userId, email);
+            return mapper.Map<UserDto>(result);
+        }
     }
 }

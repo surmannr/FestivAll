@@ -14,12 +14,12 @@ namespace DAL.InterfacesForRepos
         Task<User> GetUserByUsername(string userName);
         Task<IReadOnlyCollection<User>> GetAllUsers();
         // Létrehozás
-        Task CreateUser(User newUser, string password);
+        Task<User> CreateUser(User newUser, string password);
         // Módosítások
-        Task ModifyUserName(string userId, string newUserName);
-        Task ModifyNickName(string userId, string newNickName);
-        Task ModifyPassword(string userId, string newPassword);
-        Task ModifyEmail(string userId, string newEmail);
+        Task<User> ModifyUserName(string userId, string newUserName);
+        Task<User> ModifyNickName(string userId, string newNickName);
+        Task<User> ModifyPassword(string userId, string newPassword);
+        Task<User> ModifyEmail(string userId, string newEmail);
         Task<UserFollowedEvent> AddFollowedEvent(string userId, int eventId);
         Task<Cart> AddTicketToCart(string userId, int ticketId);
         Task<BoughtTicket> AddTicketToBoughtItems(string userId, int ticketId, int amount);

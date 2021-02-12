@@ -15,10 +15,10 @@ namespace BL.InterfacesForManagers
         Task<IReadOnlyCollection<EventDto>> GetEventsByLocationAsync(string location);
         Task<IReadOnlyCollection<EventDto>> GetEventsByStartDateAsync(DateTime startDate);
         Task<IReadOnlyCollection<EventDto>> GetEventsByCreatorIdAsync(string userId);
-        Task CreateEventAsync(EventDto newEventDto);
+        Task<EventDto> CreateEventAsync(EventDto newEventDto);
         Task DeleteEventAsync(int eventId);
-        Task ModifyLocationAsync(int eventId, string location);
-        Task ModifyNameAsync(int eventId, string name);
-        Task ModifyStartDateAsync(int eventId, DateTime startDate);
+        Task<EventDto> ModifyLocationAsync(int eventId, string location);
+        Task<EventDto> ModifyNameAsync(int eventId, string name);
+        Task<EventDto> ModifyStartDateAsync(int eventId, DateTime startDate);
     }
 }

@@ -17,11 +17,11 @@ namespace DAL.InterfacesForRepos
         Task<IReadOnlyCollection<Event>> GetEventsByCreatorUserId(string userId);
         Task<IReadOnlyCollection<Event>> GetAllEvents();
         // Létrehozás
-        Task CreateEvent(Event newEvent);
+        Task<Event> CreateEvent(Event newEvent);
         // Módosítások
-        Task ModifyEventName(int eventId, string newName);
-        Task ModifyEventLocation(int eventId, string newLocation);
-        Task ModifyEventStartDate(int eventId, DateTime newStartDate);
+        Task<Event> ModifyEventName(int eventId, string newName);
+        Task<Event> ModifyEventLocation(int eventId, string newLocation);
+        Task<Event> ModifyEventStartDate(int eventId, DateTime newStartDate);
         // Törlés
         Task DeleteEvent(int eventId);
     }

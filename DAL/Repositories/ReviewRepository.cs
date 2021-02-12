@@ -18,12 +18,13 @@ namespace DAL.Repositories
             db = _db;
         }
 
-        public async Task CreateReview(Review newReview)
+        public async Task<Review> CreateReview(Review newReview)
         {
-            if(newReview == null) throw new Exception(ExceptionMessageConstants.NullObject);
-            if(ReviewRepositoryExtension.IsReviewParamsNull(newReview)) throw new Exception(ExceptionMessageConstants.RequiredParams);
+            if(newReview == null) throw new NullReferenceException(ExceptionMessageConstants.NullObject);
+            if(ReviewRepositoryExtension.IsReviewParamsNull(newReview)) throw new ArgumentNullException(ExceptionMessageConstants.RequiredParams);
             db.Reviews.Add(newReview);
             await db.SaveChangesAsync();
+            return newReview;
         }
 
         public async Task DeleteReview(int reviewId)
@@ -34,7 +35,7 @@ namespace DAL.Repositories
                 db.Reviews.Remove(review);
                 await db.SaveChangesAsync();
             } 
-            else throw new Exception(ExceptionMessageConstants.NullObject);
+            else throw new NullReferenceException(ExceptionMessageConstants.NullObject);
         }
 
         public async Task<IReadOnlyCollection<Review>> GetAllReviews()
@@ -52,26 +53,28 @@ namespace DAL.Repositories
             return await db.Reviews.GetReviewsByEventId(eventId);
         }
 
-        public async Task ModifyDescription(int reviewId, string newDescription)
+        public async Task<Review> ModifyDescription(int reviewId, string newDescription)
         {
             var review = await db.Reviews.Where(r => r.Id == reviewId).FirstOrDefaultAsync();
             if (review != null)
             {
                 review.Description = newDescription;
                 await db.SaveChangesAsync();
+                return review;
             }
-            else throw new Exception(ExceptionMessageConstants.NullObject);
+            else throw new NullReferenceException(ExceptionMessageConstants.NullObject);
         }
 
-        public async Task ModifyStars(int reviewId, int newStars)
+        public async Task<Review> ModifyStars(int reviewId, int newStars)
         {
             var review = await db.Reviews.Where(r => r.Id == reviewId).FirstOrDefaultAsync();
             if (review != null)
             {
                 review.Stars = newStars;
                 await db.SaveChangesAsync();
+                return review;
             }
-            else throw new Exception(ExceptionMessageConstants.NullObject);
+            else throw new NullReferenceException(ExceptionMessageConstants.NullObject);
         }
     }
     internal static class ReviewRepositoryExtension

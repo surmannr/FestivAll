@@ -22,7 +22,7 @@ namespace Shared.DTOs
         public OrderDto() { }
 
         public OrderDto(PaymentMethod paymentMethod, ShippingMethod shippingMethod,
-            Status status, string userId, IReadOnlyCollection<OrderItemDto> orderItems)
+            Status status, string userId, ICollection<OrderItemDto> orderItems)
         {
             PaymentMethod = paymentMethod;
             ShippingMethod = shippingMethod;

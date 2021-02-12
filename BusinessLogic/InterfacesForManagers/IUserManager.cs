@@ -12,11 +12,11 @@ namespace BL.InterfacesForManagers
         Task<UserDto> GetUserByIdAsync(string userId);
         Task<IReadOnlyCollection<UserDto>> GetUsersAsync();
         Task<UserDto> GetUserByNameAsync(string name);
-        Task CreateUserAsync(UserDto newUserDto, string password);
+        Task<UserDto> CreateUserAsync(UserDto newUserDto, string password);
         Task DeleteUserAsync(string userId);
-        Task ModifyUserNameAsync(string userId, string userName);
-        Task ModifyPasswordAsync(string userId, string password);
-        Task ModifyNickNameAsync(string userId, string nickName);
-        Task ModifyEmailAsync(string userId, string email);
+        Task<UserDto> ModifyUserNameAsync(string userId, string userName);
+        Task<UserDto> ModifyPasswordAsync(string userId, string password);
+        Task<UserDto> ModifyNickNameAsync(string userId, string nickName);
+        Task<UserDto> ModifyEmailAsync(string userId, string email);
     }
 }

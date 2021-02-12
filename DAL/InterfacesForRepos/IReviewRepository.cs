@@ -14,10 +14,10 @@ namespace DAL.InterfacesForRepos
         Task<IReadOnlyCollection<Review>> GetReviewsByEventId(int eventId);
         Task<IReadOnlyCollection<Review>> GetAllReviews();
         // Létrehozás
-        Task CreateReview(Review newReview);
+        Task<Review> CreateReview(Review newReview);
         // Módosítások
-        Task ModifyStars(int reviewId, int newStars);
-        Task ModifyDescription(int reviewId, string newDescription);
+        Task<Review> ModifyStars(int reviewId, int newStars);
+        Task<Review> ModifyDescription(int reviewId, string newDescription);
         // Törlés
         Task DeleteReview(int reviewId);
     }

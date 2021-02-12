@@ -1,4 +1,5 @@
-﻿using BL.InterfacesForManagers;
+﻿using AutoMapper;
+using BL.InterfacesForManagers;
 using DAL.InterfacesForRepos;
 using DAL.Models;
 using Shared.DTOs;
@@ -13,10 +14,12 @@ namespace BL.Managers
     public class PostManager : IPostManager
     {
         private readonly IPostRepository postRepository;
+        private readonly IMapper mapper;
 
-        public PostManager(IPostRepository _postRepository)
+        public PostManager(IPostRepository _postRepository, IMapper _mapper)
         {
             postRepository = _postRepository;
+            mapper = _mapper;
         }
 
         // Lekérdezések
@@ -24,33 +27,28 @@ namespace BL.Managers
         public async Task<PostDto> GetPostByIdAsync(int postId)
         {
             var post = await postRepository.GetPostById(postId);
-            return new PostDto(post.PostContent, post.CreationDate, post.EventId, post.UserId);
+            return mapper.Map<PostDto>(post);
         }
 
         public async Task<IReadOnlyCollection<PostDto>> GetPostsAsync()
         {
             var posts = await postRepository.GetAllPosts();
-            return posts.Select(p => new PostDto(p.PostContent, p.CreationDate, p.EventId, p.UserId)).ToList();
+            return mapper.Map<List<PostDto>>(posts);
         }
 
         public async Task<IReadOnlyCollection<PostDto>> GetPostsByEventIdAsync(int eventId)
         {
             var posts = await postRepository.GetPostsByEventId(eventId);
-            return posts.Select(p => new PostDto(p.PostContent, p.CreationDate, p.EventId, p.UserId)).ToList();
+            return mapper.Map<List<PostDto>>(posts);
         }
 
         // Létrehozás
 
-        public async Task CreatePostAsync(PostDto newPostDto)
+        public async Task<PostDto> CreatePostAsync(PostDto newPostDto)
         {
-            Post post = new Post()
-            {
-                PostContent = newPostDto.PostContent,
-                CreationDate = newPostDto.CreationDate,
-                EventId = newPostDto.EventId,
-                UserId = newPostDto.UserId
-            };
-            await postRepository.CreatePost(post);
+            Post post = mapper.Map<Post>(newPostDto);
+            var result = await postRepository.CreatePost(post);
+            return mapper.Map<PostDto>(result);
         }
 
         // Törlés
@@ -60,7 +58,10 @@ namespace BL.Managers
 
         // Módosítások
 
-        public async Task ModifyContentAsync(int postId, string postContent)
-            => await postRepository.ModifyContent(postId, postContent);
+        public async Task<PostDto> ModifyContentAsync(int postId, string postContent)
+        {
+            var result = await postRepository.ModifyContent(postId, postContent);
+            return mapper.Map<PostDto>(result);
+        }
     }
 }

@@ -17,26 +17,28 @@ namespace DAL.Repositories
         {
             db = _db;
         }
-        public async Task CreateTicket(Ticket newTicket)
+        public async Task<Ticket> CreateTicket(Ticket newTicket)
         {
-            if(newTicket==null) throw new Exception(ExceptionMessageConstants.NullObject);
-            if(TicketRepositoryExtension.IsTicketParamsNull(newTicket)) throw new Exception(ExceptionMessageConstants.RequiredParams);
+            if(newTicket==null) throw new NullReferenceException(ExceptionMessageConstants.NullObject);
+            if(TicketRepositoryExtension.IsTicketParamsNull(newTicket)) throw new ArgumentNullException(ExceptionMessageConstants.RequiredParams);
             db.Tickets.Add(newTicket);
             await db.SaveChangesAsync();
+            return newTicket;
         }
 
-        public async Task DecreaseInStockByOne(int ticketId)
+        public async Task<Ticket> DecreaseInStockByOne(int ticketId)
         {
             var ticket = await db.Tickets.Where(t => t.Id == ticketId).FirstOrDefaultAsync();
-            if(ticket == null) throw new Exception(ExceptionMessageConstants.NullObject);
+            if(ticket == null) throw new NullReferenceException(ExceptionMessageConstants.NullObject);
             ticket.InStock -= 1;
             await db.SaveChangesAsync();
+            return ticket;
         }
 
         public async Task DeleteTicket(int ticketId)
         {
             var ticket = await db.Tickets.Where(t => t.Id == ticketId).FirstOrDefaultAsync();
-            if (ticket == null) throw new Exception(ExceptionMessageConstants.NullObject);
+            if (ticket == null) throw new NullReferenceException(ExceptionMessageConstants.NullObject);
             db.Tickets.Remove(ticket);
             await db.SaveChangesAsync();
         }
@@ -56,28 +58,31 @@ namespace DAL.Repositories
             return await db.Tickets.GetTicketsByEventId(eventId);
         }
 
-        public async Task ModifyCategory(int ticketId, string newCategory)
+        public async Task<Ticket> ModifyCategory(int ticketId, string newCategory)
         {
             var ticket = await db.Tickets.Where(t => t.Id == ticketId).FirstOrDefaultAsync();
-            if (ticket == null) throw new Exception(ExceptionMessageConstants.NullObject);
+            if (ticket == null) throw new NullReferenceException(ExceptionMessageConstants.NullObject);
             ticket.Category = newCategory;
             await db.SaveChangesAsync();
+            return ticket;
         }
 
-        public async Task ModifyInStock(int ticketId, int newInStock)
+        public async Task<Ticket> ModifyInStock(int ticketId, int newInStock)
         {
             var ticket = await db.Tickets.Where(t => t.Id == ticketId).FirstOrDefaultAsync();
-            if (ticket == null) throw new Exception(ExceptionMessageConstants.NullObject);
+            if (ticket == null) throw new NullReferenceException(ExceptionMessageConstants.NullObject);
             ticket.InStock = newInStock;
             await db.SaveChangesAsync();
+            return ticket;
         }
 
-        public async Task ModifyPrice(int ticketId, int newPrice)
+        public async Task<Ticket> ModifyPrice(int ticketId, int newPrice)
         {
             var ticket = await db.Tickets.Where(t => t.Id == ticketId).FirstOrDefaultAsync();
-            if (ticket == null) throw new Exception(ExceptionMessageConstants.NullObject);
+            if (ticket == null) throw new NullReferenceException(ExceptionMessageConstants.NullObject);
             ticket.Price = newPrice;
             await db.SaveChangesAsync();
+            return ticket;
         }
     }
     internal static class TicketRepositoryExtension

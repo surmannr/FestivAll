@@ -18,12 +18,13 @@ namespace DAL.Repositories
             db = _db;
         }
 
-        public async Task CreatePost(Post newPost)
+        public async Task<Post> CreatePost(Post newPost)
         {
-            if(newPost==null) throw new Exception(ExceptionMessageConstants.NullObject);
-            if(PostRepositoryExtension.IsPostParamsNull(newPost)) throw new Exception(ExceptionMessageConstants.RequiredParams);
+            if(newPost==null) throw new NullReferenceException(ExceptionMessageConstants.NullObject);
+            if(PostRepositoryExtension.IsPostParamsNull(newPost)) throw new ArgumentNullException(ExceptionMessageConstants.RequiredParams);
             db.Posts.Add(newPost);
             await db.SaveChangesAsync();
+            return newPost;
         }
 
         public async Task DeletePost(int postId)
@@ -34,7 +35,7 @@ namespace DAL.Repositories
                 db.Posts.Remove(post);
                 await db.SaveChangesAsync();
             } 
-            else throw new Exception(ExceptionMessageConstants.NullObject);
+            else throw new NullReferenceException(ExceptionMessageConstants.NullObject);
         }
         
         public async Task<IReadOnlyCollection<Post>> GetAllPosts()
@@ -52,15 +53,16 @@ namespace DAL.Repositories
             return await db.Posts.GetPostsByEventId(eventId);
         }
         
-        public async Task ModifyContent(int postId, string content)
+        public async Task<Post> ModifyContent(int postId, string content)
         {
             var post = await db.Posts.Where(p => p.Id == postId).FirstOrDefaultAsync();
             if (post != null)
             {
                 post.PostContent = content;
                 await db.SaveChangesAsync();
+                return post;
             }
-            else throw new Exception(ExceptionMessageConstants.NullObject);
+            else throw new NullReferenceException(ExceptionMessageConstants.NullObject);
         }
     }
     internal static class PostRepositoryExtension

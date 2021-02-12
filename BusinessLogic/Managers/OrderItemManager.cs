@@ -1,4 +1,5 @@
-﻿using BL.InterfacesForManagers;
+﻿using AutoMapper;
+using BL.InterfacesForManagers;
 using DAL.InterfacesForRepos;
 using DAL.Models;
 using Shared.DTOs;
@@ -14,10 +15,12 @@ namespace BL.Managers
     public class OrderItemManager : IOrderItemManager
     {
         private readonly IOrderItemRepository orderItemRepository;
+        private readonly IMapper mapper;
 
-        public OrderItemManager(IOrderItemRepository _orderItemRepository)
+        public OrderItemManager(IOrderItemRepository _orderItemRepository, IMapper _mapper)
         {
             orderItemRepository = _orderItemRepository;
+            mapper = _mapper;
         }
 
         // Lekérdezések
@@ -25,34 +28,28 @@ namespace BL.Managers
         public async Task<OrderItemDto> GetOrderItemByIdAsync(int orderItemId)
         {
             var orderitem = await orderItemRepository.GetOrderItemById(orderItemId);
-            return new OrderItemDto(orderitem.Amount, orderitem.Price, orderitem.Status, orderitem.TicketId, orderitem.OrderId);
+            return mapper.Map<OrderItemDto>(orderitem);
         }
 
         public async Task<IReadOnlyCollection<OrderItemDto>> GetOrderItemsAsync()
         {
             var orders = await orderItemRepository.GetAllOrderItems();
-            return orders.Select(o => new OrderItemDto(o.Amount, o.Price, o.Status, o.TicketId, o.OrderId)).ToList();
+            return mapper.Map<List<OrderItemDto>>(orders);
         }
 
         public async Task<IReadOnlyCollection<OrderItemDto>> GetOrderItemsByOrderIdAsync(int orderId)
         {
             var orders = await orderItemRepository.GetOrderItemsByOrderId(orderId);
-            return orders.Select(o => new OrderItemDto(o.Amount, o.Price, o.Status, o.TicketId, o.OrderId)).ToList();
+            return mapper.Map<List<OrderItemDto>>(orders);
         }
 
         // Létrehozás
 
-        public async Task CreateOrderItemAsync(OrderItemDto orderItemDto)
+        public async Task<OrderItemDto> CreateOrderItemAsync(OrderItemDto orderItemDto)
         {
-            OrderItem orderItem = new OrderItem()
-            {
-                Amount = orderItemDto.Amount,
-                Price = orderItemDto.Price,
-                Status = orderItemDto.Status,
-                TicketId = orderItemDto.TicketId,
-                OrderId = orderItemDto.OrderId
-            };
-            await orderItemRepository.CreateOrderItem(orderItem);
+            OrderItem orderItem = mapper.Map<OrderItem>(orderItemDto);
+            var result = await orderItemRepository.CreateOrderItem(orderItem);
+            return mapper.Map<OrderItemDto>(result);
         }
 
         // Törlés
@@ -62,10 +59,16 @@ namespace BL.Managers
 
         // Módosítások
 
-        public async Task ModifyStatusAsync(int orderItemId, Status status)
-            => await orderItemRepository.ModifyStatus(orderItemId, status);
+        public async Task<OrderItemDto> ModifyStatusAsync(int orderItemId, Status status)
+        {
+            var result = await orderItemRepository.ModifyStatus(orderItemId, status);
+            return mapper.Map<OrderItemDto>(result);
+        }
 
-        public async Task SetOrderAsync(int orderItemId,int orderId)
-            => await orderItemRepository.SetOrder(orderItemId, orderId);
+        public async Task<OrderItemDto> SetOrderAsync(int orderItemId,int orderId)
+        {
+            var result = await orderItemRepository.SetOrder(orderItemId, orderId);
+            return mapper.Map<OrderItemDto>(result);
+        }
     }
 }

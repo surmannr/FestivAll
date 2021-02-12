@@ -1,4 +1,5 @@
-﻿using BL.InterfacesForManagers;
+﻿using AutoMapper;
+using BL.InterfacesForManagers;
 using DAL.InterfacesForRepos;
 using DAL.Models;
 using Shared.DTOs;
@@ -13,10 +14,12 @@ namespace BL.Managers
     public class EventManager : IEventManager
     {
         private readonly IEventRepository eventRepository;
+        private readonly IMapper mapper;
 
-        public EventManager(IEventRepository _eventRepository)
+        public EventManager(IEventRepository _eventRepository, IMapper _mapper)
         {
             eventRepository = _eventRepository;
+            mapper = _mapper;
         }
 
         // Lekérdezések
@@ -24,52 +27,46 @@ namespace BL.Managers
         public async Task<EventDto> GetEventByIdAsync(int eventId)
         {
             var _event = await eventRepository.GetEventById(eventId);
-            return new EventDto(creatorUserId: _event.CreatorUserId, name: _event.Name,
-                location: _event.Location, description: _event.Description, startDate: _event.StartDate);
+            return mapper.Map<EventDto>(_event);
         }
 
         public async Task<IReadOnlyCollection<EventDto>> GetEventsAsync()
         {
             var eventList = await eventRepository.GetAllEvents();
-            return eventList.Select(e => new EventDto(e.Name, e.Location, e.Description,e.StartDate,e.CreatorUserId)).ToList();
+            return mapper.Map<List<EventDto>>(eventList);
         }
 
         public async Task<IReadOnlyCollection<EventDto>> GetEventsByNameAsync(string name)
         {
             var eventList = await eventRepository.GetEventsByName(name);
-            return eventList.Select(e => new EventDto(e.Name, e.Location, e.Description, e.StartDate, e.CreatorUserId)).ToList();
+            return mapper.Map<List<EventDto>>(eventList);
         }
 
         public async Task<IReadOnlyCollection<EventDto>> GetEventsByLocationAsync(string location)
         {
             var eventList = await eventRepository.GetEventsByLocation(location);
-            return eventList.Select(e => new EventDto(e.Name, e.Location, e.Description, e.StartDate, e.CreatorUserId)).ToList();
+            return mapper.Map<List<EventDto>>(eventList);
         }
 
         public async Task<IReadOnlyCollection<EventDto>> GetEventsByStartDateAsync(DateTime startDate)
         {
             var eventList = await eventRepository.GetEventsByStartDate(startDate);
-            return eventList.Select(e => new EventDto(e.Name, e.Location, e.Description, e.StartDate, e.CreatorUserId)).ToList();
+            return mapper.Map<List<EventDto>>(eventList);
         }
 
         public async Task<IReadOnlyCollection<EventDto>> GetEventsByCreatorIdAsync(string userId)
         {
             var eventList = await eventRepository.GetEventsByCreatorUserId(userId);
-            return eventList.Select(e => new EventDto(e.Name, e.Location, e.Description, e.StartDate, e.CreatorUserId)).ToList();
+            return mapper.Map<List<EventDto>>(eventList);
         }
 
         // Létrehozás
 
-        public async Task CreateEventAsync(EventDto newEventDto)
+        public async Task<EventDto> CreateEventAsync(EventDto newEventDto)
         {
-            Event _event = new Event() { 
-                Name = newEventDto.Name,
-                Location = newEventDto.Location,
-                Description = newEventDto.Description,
-                StartDate = newEventDto.StartDate,
-                CreatorUserId=newEventDto.CreatorUserId
-            };
-            await eventRepository.CreateEvent(_event);
+            Event _event = mapper.Map<Event>(newEventDto);
+            var result = await eventRepository.CreateEvent(_event);
+            return mapper.Map<EventDto>(result);
         }
 
         // Törlés
@@ -81,13 +78,22 @@ namespace BL.Managers
 
         // Módosítás
 
-        public async Task ModifyLocationAsync(int eventId, string location)
-            => await eventRepository.ModifyEventLocation(eventId, location);
+        public async Task<EventDto> ModifyLocationAsync(int eventId, string location)
+        {
+            var result = await eventRepository.ModifyEventLocation(eventId, location);
+            return mapper.Map<EventDto>(result);
+        }
 
-        public async Task ModifyNameAsync(int eventId, string name)
-            => await eventRepository.ModifyEventName(eventId, name);
+        public async Task<EventDto> ModifyNameAsync(int eventId, string name)
+        {
+            var result = await eventRepository.ModifyEventName(eventId, name);
+            return mapper.Map<EventDto>(result);
+        }
 
-        public async Task ModifyStartDateAsync(int eventId, DateTime startDate)
-            => await eventRepository.ModifyEventStartDate(eventId, startDate);
+        public async Task<EventDto> ModifyStartDateAsync(int eventId, DateTime startDate)
+        {
+            var result = await eventRepository.ModifyEventStartDate(eventId, startDate);
+            return mapper.Map<EventDto>(result);
+        }
     }
 }

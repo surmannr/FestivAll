@@ -14,12 +14,12 @@ namespace DAL.InterfacesForRepos
         Task<IReadOnlyCollection<Ticket>> GetTicketsByEventId(int eventId);
         Task<IReadOnlyCollection<Ticket>> GetAllTickets();
         // Létrehozás
-        Task CreateTicket(Ticket newTicket);
+        Task<Ticket> CreateTicket(Ticket newTicket);
         // Módosítások
-        Task ModifyCategory(int ticketId, string newCategory);
-        Task ModifyPrice(int ticketId, int newPrice);
-        Task ModifyInStock(int ticketId, int newInStock);
-        Task DecreaseInStockByOne(int ticketId);
+        Task<Ticket> ModifyCategory(int ticketId, string newCategory);
+        Task<Ticket> ModifyPrice(int ticketId, int newPrice);
+        Task<Ticket> ModifyInStock(int ticketId, int newInStock);
+        Task<Ticket> DecreaseInStockByOne(int ticketId);
         // Törlés
         Task DeleteTicket(int ticketId);
     }

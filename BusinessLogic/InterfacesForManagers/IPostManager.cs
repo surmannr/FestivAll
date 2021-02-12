@@ -12,8 +12,8 @@ namespace BL.InterfacesForManagers
         Task<PostDto> GetPostByIdAsync(int postId);
         Task<IReadOnlyCollection<PostDto>> GetPostsAsync();
         Task<IReadOnlyCollection<PostDto>> GetPostsByEventIdAsync(int eventId);
-        Task CreatePostAsync(PostDto newPostDto);
+        Task<PostDto> CreatePostAsync(PostDto newPostDto);
         Task DeletePostAsync(int postId);
-        Task ModifyContentAsync(int postId, string postContent);
+        Task<PostDto> ModifyContentAsync(int postId, string postContent);
     }
 }

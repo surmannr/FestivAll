@@ -1,4 +1,5 @@
-﻿using BL.InterfacesForManagers;
+﻿using AutoMapper;
+using BL.InterfacesForManagers;
 using DAL.InterfacesForRepos;
 using DAL.Models;
 using Shared.DTOs;
@@ -13,10 +14,12 @@ namespace BL.Managers
     public class ReviewManager : IReviewManager
     {
         private readonly IReviewRepository reviewRepository;
+        private readonly IMapper mapper;
 
-        public ReviewManager(IReviewRepository _reviewRepository)
+        public ReviewManager(IReviewRepository _reviewRepository, IMapper _mapper)
         {
             reviewRepository = _reviewRepository;
+            mapper = _mapper;
         }
 
         // Lekérdezések
@@ -24,33 +27,27 @@ namespace BL.Managers
         public async Task<ReviewDto> GetReviewByIdAsync(int reviewId)
         {
             var review = await reviewRepository.GetReviewById(reviewId);
-            return new ReviewDto(review.Stars, review.Description, review.EventId, review.UserId);
+            return mapper.Map<ReviewDto>(review);
         }
-
         public async Task<IReadOnlyCollection<ReviewDto>> GetReviewsAsync()
         {
             var reviews = await reviewRepository.GetAllReviews();
-            return reviews.Select(r => new ReviewDto(r.Stars, r.Description, r.EventId, r.UserId)).ToList();
+            return mapper.Map<List<ReviewDto>>(reviews);
         }
 
         public async Task<IReadOnlyCollection<ReviewDto>> GetReviewsByEventIdAsync(int eventId)
         {
             var reviews = await reviewRepository.GetReviewsByEventId(eventId);
-            return reviews.Select(r => new ReviewDto(r.Stars, r.Description, r.EventId, r.UserId)).ToList();
+            return mapper.Map<List<ReviewDto>>(reviews);
         }
 
         // Létrehozás
 
-        public async Task CreateReviewAsync(ReviewDto newReviewDto)
+        public async Task<ReviewDto> CreateReviewAsync(ReviewDto newReviewDto)
         {
-            Review review = new Review()
-            {
-                Stars = newReviewDto.Stars,
-                Description = newReviewDto.Description,
-                EventId = newReviewDto.EventId,
-                UserId = newReviewDto.UserId
-            };
-            await reviewRepository.CreateReview(review);
+            Review review = mapper.Map<Review>(newReviewDto);
+            var result = await reviewRepository.CreateReview(review);
+            return mapper.Map<ReviewDto>(result);
         }
 
         // Törlés
@@ -60,10 +57,16 @@ namespace BL.Managers
 
         // Módosítások
 
-        public async Task ModifyStarsAsync(int reviewId, int stars)
-            => await reviewRepository.ModifyStars(reviewId, stars);
+        public async Task<ReviewDto> ModifyStarsAsync(int reviewId, int stars)
+        {
+            var result = await reviewRepository.ModifyStars(reviewId, stars);
+            return mapper.Map<ReviewDto>(result);
+        }
 
-        public async Task ModifyContentAsync(int reviewId, string description)
-            => await reviewRepository.ModifyDescription(reviewId, description);
+        public async Task<ReviewDto> ModifyContentAsync(int reviewId, string description)
+        {
+            var result = await reviewRepository.ModifyDescription(reviewId, description);
+            return mapper.Map<ReviewDto>(result);
+        }
     }
 }

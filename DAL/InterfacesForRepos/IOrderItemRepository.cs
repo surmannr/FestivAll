@@ -15,10 +15,10 @@ namespace DAL.InterfacesForRepos
         Task<IReadOnlyCollection<OrderItem>> GetOrderItemsByOrderId(int orderId);
         Task<IReadOnlyCollection<OrderItem>> GetAllOrderItems();
         // Létrehozás
-        Task CreateOrderItem(OrderItem newOrderItem);
+        Task<OrderItem> CreateOrderItem(OrderItem newOrderItem);
         // Módosítások
-        Task ModifyStatus(int orderItemId, Status status);
-        Task SetOrder(int orderItemId, int orderId);
+        Task<OrderItem> ModifyStatus(int orderItemId, Status status);
+        Task<OrderItem> SetOrder(int orderItemId, int orderId);
         // Törlés
         Task DeleteOrderItem(int orderItem);
     }

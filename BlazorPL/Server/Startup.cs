@@ -1,3 +1,4 @@
+using BL.AutoMappers;
 using BL.InterfacesForManagers;
 using BL.Managers;
 using DAL;
@@ -73,6 +74,15 @@ namespace BlazorPL.Server
             services.AddScoped<IUserManager, UserManager>();
             #endregion
             //services.AddIdentityServer().AddApiAuthorization<ApplicationUser, ApplicationDbContext>();
+
+            #region Dependency Injection - AutoMapperekhez
+            services.AddAutoMapper(typeof(EventProfile));
+            services.AddAutoMapper(typeof(OrderProfile));
+            services.AddAutoMapper(typeof(PostProfile));
+            services.AddAutoMapper(typeof(TicketProfile));
+            services.AddAutoMapper(typeof(ReviewProfile));
+            services.AddAutoMapper(typeof(UserProfile));
+            #endregion
 
             // Register the Swagger generator, defining 1 or more Swagger documents
             services.AddSwaggerGen(c =>

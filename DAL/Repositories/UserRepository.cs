@@ -29,7 +29,7 @@ namespace DAL.Repositories
             if (user != null)
             {
                 var _event = await db.Events.Where(e => e.Id == eventId).FirstOrDefaultAsync();
-                if(_event == null) throw new Exception(ExceptionMessageConstants.NullObject);
+                if(_event == null) throw new NullReferenceException(ExceptionMessageConstants.NullObject);
                 UserFollowedEvent ufe = new UserFollowedEvent()
                 {
                     Event = _event,
@@ -43,7 +43,7 @@ namespace DAL.Repositories
                 await db.SaveChangesAsync();
                 return ufe;
             }
-            else throw new Exception(ExceptionMessageConstants.NullObject);
+            else throw new NullReferenceException(ExceptionMessageConstants.NullObject);
         }
 
         public async Task<BoughtTicket> AddTicketToBoughtItems(string userId, int ticketId, int amount)
@@ -52,7 +52,7 @@ namespace DAL.Repositories
             if (user != null)
             {
                 var ticket = await db.Tickets.Where(e => e.Id == ticketId).FirstOrDefaultAsync();
-                if (ticket == null) throw new Exception(ExceptionMessageConstants.NullObject);
+                if (ticket == null) throw new NullReferenceException(ExceptionMessageConstants.NullObject);
                 BoughtTicket bt = new BoughtTicket()
                 {
                     Ticket = ticket,
@@ -67,7 +67,7 @@ namespace DAL.Repositories
                 await db.SaveChangesAsync();
                 return bt;
             }
-            else throw new Exception(ExceptionMessageConstants.NullObject);
+            else throw new NullReferenceException(ExceptionMessageConstants.NullObject);
         }
 
         public async Task<Cart> AddTicketToCart(string userId, int ticketId)
@@ -76,7 +76,7 @@ namespace DAL.Repositories
             if (user != null)
             {
                 var ticket = await db.Tickets.Where(e => e.Id == ticketId).FirstOrDefaultAsync();
-                if (ticket == null) throw new Exception(ExceptionMessageConstants.NullObject);
+                if (ticket == null) throw new NullReferenceException(ExceptionMessageConstants.NullObject);
                 Cart cart = new Cart()
                 {
                     Ticket = ticket,
@@ -90,12 +90,12 @@ namespace DAL.Repositories
                 await db.SaveChangesAsync();
                 return cart;
             }
-            else throw new Exception(ExceptionMessageConstants.NullObject);
+            else throw new NullReferenceException(ExceptionMessageConstants.NullObject);
         }
 
-        public async Task CreateUser(User newUser, string password)
+        public async Task<User> CreateUser(User newUser, string password)
         {
-            if(newUser==null) throw new Exception(ExceptionMessageConstants.NullObject);
+            if(newUser==null) throw new NullReferenceException(ExceptionMessageConstants.NullObject);
             var role = roleManager.FindByNameAsync(newUser.Role);
             if (role == null) await roleManager.CreateAsync(new IdentityRole { Name = newUser.Role });
             var result = await userManager.CreateAsync(newUser, password);
@@ -103,8 +103,9 @@ namespace DAL.Repositories
             if (result.Succeeded)
             {
                 await db.SaveChangesAsync();
+                return newUser;
             }
-            else throw new Exception("Nem sikerült létrehozni a felhasználót.");
+            else throw new ApplicationException("Nem sikerült létrehozni a felhasználót.");
         }
 
         public async Task DeleteUser(string userId)
@@ -115,7 +116,7 @@ namespace DAL.Repositories
                 db.Users.Remove(user);
                 await db.SaveChangesAsync();
             }
-            else throw new Exception(ExceptionMessageConstants.NullObject);
+            else throw new NullReferenceException(ExceptionMessageConstants.NullObject);
         }
 
         public async Task<IReadOnlyCollection<User>> GetAllUsers()
@@ -138,51 +139,55 @@ namespace DAL.Repositories
 
         }
 
-        public async Task ModifyEmail(string userId, string newEmail)
+        public async Task<User> ModifyEmail(string userId, string newEmail)
         {
             var user = await userManager.FindByIdAsync(userId);
-            if (user == null) throw new Exception(ExceptionMessageConstants.NullObject);
+            if (user == null) throw new NullReferenceException(ExceptionMessageConstants.NullObject);
             if(UserRepositoryExtension.ValidateEmail(newEmail))
             {
                 user.Email = newEmail;
                 await db.SaveChangesAsync();
+                return user;
             }
-            throw new Exception("Nem megfelelő formátumú email.");
+            throw new FormatException("Nem megfelelő formátumú email.");
         }
 
-        public async Task ModifyNickName(string userId, string newNickName)
+        public async Task<User> ModifyNickName(string userId, string newNickName)
         {
             var user = await userManager.FindByIdAsync(userId);
-            if (user == null) throw new Exception(ExceptionMessageConstants.NullObject);
+            if (user == null) throw new NullReferenceException(ExceptionMessageConstants.NullObject);
             if (newNickName != null)
             {
                 user.NickName = newNickName;
                 await db.SaveChangesAsync();
+                return user;
             }
             else
-                throw new Exception(ExceptionMessageConstants.NullObject);
+                throw new ArgumentNullException(ExceptionMessageConstants.NullObject);
         }
 
-        public async Task ModifyPassword(string userId, string newPassword)
+        public async Task<User> ModifyPassword(string userId, string newPassword)
         {
             var user = await userManager.FindByIdAsync(userId);
-            if (user == null) throw new Exception(ExceptionMessageConstants.NullObject);
+            if (user == null) throw new NullReferenceException(ExceptionMessageConstants.NullObject);
             bool valid = await UserRepositoryExtension.ValidatePassword(newPassword, userManager, user);
             if (valid)
             {
                 await userManager.AddPasswordAsync(user, newPassword);
                 await db.SaveChangesAsync();
+                return user;
             }
-            throw new Exception("Nem megfelelő a jelszó.");
+            throw new FormatException("Nem megfelelő a jelszó.");
         }
 
-        public async Task ModifyUserName(string userId, string newUserName)
+        public async Task<User> ModifyUserName(string userId, string newUserName)
         {
             var user = await userManager.FindByIdAsync(userId);
-            if (user == null) throw new Exception(ExceptionMessageConstants.NullObject);
-            if(newUserName == null) throw new Exception(ExceptionMessageConstants.NullObject);
+            if (user == null) throw new NullReferenceException(ExceptionMessageConstants.NullObject);
+            if(newUserName == null) throw new ArgumentNullException(ExceptionMessageConstants.NullObject);
             await userManager.SetUserNameAsync(user, newUserName);
             await db.SaveChangesAsync();
+            return user;
         }
     }
     internal static class UserRepositoryExtension

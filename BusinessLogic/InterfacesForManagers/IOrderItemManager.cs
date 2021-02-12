@@ -13,9 +13,9 @@ namespace BL.InterfacesForManagers
         Task<OrderItemDto> GetOrderItemByIdAsync(int orderItemId);
         Task<IReadOnlyCollection<OrderItemDto>> GetOrderItemsAsync();
         Task<IReadOnlyCollection<OrderItemDto>> GetOrderItemsByOrderIdAsync(int orderId);
-        Task CreateOrderItemAsync(OrderItemDto orderItemDto);
+        Task<OrderItemDto> CreateOrderItemAsync(OrderItemDto orderItemDto);
         Task DeleteOrderItemAsync(int orderItemId);
-        Task ModifyStatusAsync(int orderItemId, Status status);
-        Task SetOrderAsync(int orderItemId, int orderId);
+        Task<OrderItemDto> ModifyStatusAsync(int orderItemId, Status status);
+        Task<OrderItemDto> SetOrderAsync(int orderItemId, int orderId);
     }
 }

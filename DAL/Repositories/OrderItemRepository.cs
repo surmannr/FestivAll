@@ -18,12 +18,13 @@ namespace DAL.Repositories
         {
             db = _db;
         }
-        public async Task CreateOrderItem(OrderItem newOrderItem)
+        public async Task<OrderItem> CreateOrderItem(OrderItem newOrderItem)
         {
-            if (newOrderItem == null) throw new Exception(ExceptionMessageConstants.NullObject);
-            if (OrderItemRepositoryExtension.IsOrderItemParamsNull(newOrderItem)) throw new Exception(ExceptionMessageConstants.RequiredParams);
+            if (newOrderItem == null) throw new NullReferenceException(ExceptionMessageConstants.NullObject);
+            if (OrderItemRepositoryExtension.IsOrderItemParamsNull(newOrderItem)) throw new ArgumentNullException(ExceptionMessageConstants.RequiredParams);
             db.OrderItems.Add(newOrderItem);
             await db.SaveChangesAsync();
+            return newOrderItem;
         }
 
         public async Task DeleteOrderItem(int orderItemId)
@@ -34,7 +35,7 @@ namespace DAL.Repositories
                 db.OrderItems.Remove(orderItem);
                 await db.SaveChangesAsync();
             }
-            else throw new Exception(ExceptionMessageConstants.NullObject);
+            else throw new NullReferenceException(ExceptionMessageConstants.NullObject);
         }
 
         public async Task<IReadOnlyCollection<OrderItem>> GetAllOrderItems()
@@ -52,18 +53,19 @@ namespace DAL.Repositories
             return await db.OrderItems.GetOrderItemsByOrderId(orderId);
         }
 
-        public async Task ModifyStatus(int orderItemId, Status status)
+        public async Task<OrderItem> ModifyStatus(int orderItemId, Status status)
         {
             var orderItem = await db.OrderItems.Where(o => o.Id == orderItemId).FirstOrDefaultAsync();
             if (orderItem != null)
             {
                 orderItem.Status = status;
                 await db.SaveChangesAsync();
+                return orderItem;
             }
-            else throw new Exception(ExceptionMessageConstants.NullObject);
+            else throw new NullReferenceException(ExceptionMessageConstants.NullObject);
         }
 
-        public async Task SetOrder(int orderItemId, int orderId)
+        public async Task<OrderItem> SetOrder(int orderItemId, int orderId)
         {
             var order = await db.Orders.Where(o => o.Id == orderId).Include(o => o.OrderItems).FirstOrDefaultAsync();
             if (order != null)
@@ -74,10 +76,11 @@ namespace DAL.Repositories
                     orderItem.OrderId = orderId;
                     orderItem.Order = order;
                     await db.SaveChangesAsync();
+                    return orderItem;
                 }
-                else throw new Exception(ExceptionMessageConstants.NullObject);
+                else throw new NullReferenceException(ExceptionMessageConstants.NullObject);
             }
-            else throw new Exception(ExceptionMessageConstants.NullObject);
+            else throw new NullReferenceException(ExceptionMessageConstants.NullObject);
         }
     }
     internal static class OrderItemRepositoryExtension

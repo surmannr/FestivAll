@@ -19,12 +19,13 @@ namespace DAL.Repositories
             db = _db;
         }
 
-        public async Task CreateEvent(Event newEvent)
+        public async Task<Event> CreateEvent(Event newEvent)
         {
-            if (newEvent == null) throw new Exception(ExceptionMessageConstants.NullObject);
-            if(EventRepositoryExtension.IsEventParamsNull(newEvent)) throw new Exception(ExceptionMessageConstants.RequiredParams);
+            if (newEvent == null) throw new NullReferenceException(ExceptionMessageConstants.NullObject);
+            if(EventRepositoryExtension.IsEventParamsNull(newEvent)) throw new ArgumentNullException(ExceptionMessageConstants.RequiredParams);
             db.Events.Add(newEvent);
             await db.SaveChangesAsync();
+            return newEvent;
         }
 
         public async Task DeleteEvent(int eventId)
@@ -35,7 +36,7 @@ namespace DAL.Repositories
                 db.Events.Remove(dEvent);
                 await db.SaveChangesAsync();
             }
-            else throw new Exception(ExceptionMessageConstants.NullObject);
+            else throw new NullReferenceException(ExceptionMessageConstants.NullObject);
         }
 
         public async Task<IReadOnlyCollection<Event>> GetAllEvents()
@@ -68,25 +69,31 @@ namespace DAL.Repositories
             return await db.Events.GetEventsListByStartDate(startDate);
         }
 
-        public async Task ModifyEventLocation(int eventId, string newLocation)
+        public async Task<Event> ModifyEventLocation(int eventId, string newLocation)
         {
             var mevent = await db.Events.Where(e => e.Id == eventId).FirstOrDefaultAsync();
-            mevent.Location = newLocation ?? throw new Exception(ExceptionMessageConstants.NullObject);
+            if (mevent == null) throw new NullReferenceException(ExceptionMessageConstants.NullObject);
+            mevent.Location = newLocation ?? throw new ArgumentNullException(ExceptionMessageConstants.NullObject);
             await db.SaveChangesAsync();
+            return mevent;
         }
 
-        public async Task ModifyEventName(int eventId, string newName)
+        public async Task<Event> ModifyEventName(int eventId, string newName)
         {
             var mevent = await db.Events.Where(e => e.Id == eventId).FirstOrDefaultAsync();
-            mevent.Name = newName ?? throw new Exception(ExceptionMessageConstants.NullObject);
+            if (mevent == null) throw new NullReferenceException(ExceptionMessageConstants.NullObject);
+            mevent.Name = newName ?? throw new ArgumentNullException(ExceptionMessageConstants.NullObject);
             await db.SaveChangesAsync();
+            return mevent;
         }
 
-        public async Task ModifyEventStartDate(int eventId, DateTime newStartDate)
+        public async Task<Event> ModifyEventStartDate(int eventId, DateTime newStartDate)
         {
             var mevent = await db.Events.Where(e => e.Id == eventId).FirstOrDefaultAsync();
+            if (mevent == null) throw new NullReferenceException(ExceptionMessageConstants.NullObject);
             mevent.StartDate = newStartDate;
             await db.SaveChangesAsync();
+            return mevent;
         }
     }
 

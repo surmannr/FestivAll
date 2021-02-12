@@ -14,9 +14,9 @@ namespace DAL.InterfacesForRepos
         Task<IReadOnlyCollection<Post>> GetPostsByEventId(int eventId);
         Task<IReadOnlyCollection<Post>> GetAllPosts();
         // Létrehozás
-        Task CreatePost(Post newPost);
+        Task<Post> CreatePost(Post newPost);
         // Módosítások
-        Task ModifyContent(int postId, string content);
+        Task<Post> ModifyContent(int postId, string content);
         // Törlés
         Task DeletePost(int postId);
     }
