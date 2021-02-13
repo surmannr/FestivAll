@@ -127,14 +127,14 @@ namespace DAL.Repositories
         public async Task<User> GetUserById(string userId)
         {
             var user = await userManager.FindByIdAsync(userId);
-            if(user==null) throw new Exception(ExceptionMessageConstants.NullObject);
+            if(user==null) throw new NullReferenceException(ExceptionMessageConstants.NullObject);
             return user;
         }
 
         public async Task<User> GetUserByUsername(string userName)
         {
             var user = await userManager.FindByNameAsync(userName);
-            if (user == null) throw new Exception(ExceptionMessageConstants.NullObject);
+            if (user == null) throw new NullReferenceException(ExceptionMessageConstants.NullObject);
             return user;
 
         }
@@ -156,14 +156,13 @@ namespace DAL.Repositories
         {
             var user = await userManager.FindByIdAsync(userId);
             if (user == null) throw new NullReferenceException(ExceptionMessageConstants.NullObject);
-            if (newNickName != null)
+            if (!String.IsNullOrEmpty(newNickName))
             {
                 user.NickName = newNickName;
                 await db.SaveChangesAsync();
                 return user;
             }
-            else
-                throw new ArgumentNullException(ExceptionMessageConstants.NullObject);
+            else throw new ArgumentNullException(ExceptionMessageConstants.NullObject);
         }
 
         public async Task<User> ModifyPassword(string userId, string newPassword)
@@ -184,7 +183,7 @@ namespace DAL.Repositories
         {
             var user = await userManager.FindByIdAsync(userId);
             if (user == null) throw new NullReferenceException(ExceptionMessageConstants.NullObject);
-            if(newUserName == null) throw new ArgumentNullException(ExceptionMessageConstants.NullObject);
+            if(String.IsNullOrEmpty(newUserName)) throw new ArgumentNullException(ExceptionMessageConstants.NullObject);
             await userManager.SetUserNameAsync(user, newUserName);
             await db.SaveChangesAsync();
             return user;

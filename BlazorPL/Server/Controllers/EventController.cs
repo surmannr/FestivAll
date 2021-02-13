@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace BlazorPL.Server.Controllers
 {
     [Produces("application/json")]
-    [Route("api/[controller]")]
+    [Route("api/events")]
     [ApiController]
     public class EventController : Controller
     {
@@ -25,27 +25,24 @@ namespace BlazorPL.Server.Controllers
         public async Task<ActionResult<EventDto>> Get(int eventId)
         {
             var _event = await eventManager.GetEventByIdAsync(eventId);
-
-            if (_event == null)
-                return NotFound();
-            else
-                return Ok(_event);
+            return Ok(_event);
         }
         #endregion
 
+        [HttpGet]
+        public async Task<ActionResult<IReadOnlyCollection<EventDto>>> GetAll()
+        {
+            var events = await eventManager.GetEventsAsync();
+            return Ok(events);
+        }
+
+        #region Create
         [HttpPost]
         public async Task<ActionResult> Create([FromBody] EventDto newEventDto)
         {
-            try
-            {
-                await eventManager.CreateEventAsync(newEventDto);
-                return Ok(eventManager);
-
-            }
-            catch (Exception e)
-            {
-                return BadRequest(e.Message);
-            }
+            var newEvent = await eventManager.CreateEventAsync(newEventDto);
+            return Ok(newEvent);
         }
+        #endregion
     }
 }

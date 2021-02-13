@@ -58,7 +58,7 @@ namespace DAL.Repositories
             var post = await db.Posts.Where(p => p.Id == postId).FirstOrDefaultAsync();
             if (post != null)
             {
-                post.PostContent = content;
+                post.PostContent = content ?? throw new ArgumentNullException(ExceptionMessageConstants.RequiredParams);
                 await db.SaveChangesAsync();
                 return post;
             }
@@ -69,7 +69,7 @@ namespace DAL.Repositories
     {
         public static bool IsPostParamsNull(Post post)
         {
-            return post.EventId == 0 && post.UserId == null && post.PostContent == null;
+            return post.EventId <= 0 || String.IsNullOrEmpty(post.UserId) || post.PostContent == null;
         }
 
         public static async Task<IReadOnlyCollection<Post>> GetPostsList(this IQueryable<Post> posts)

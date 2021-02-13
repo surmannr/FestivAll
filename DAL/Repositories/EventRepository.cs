@@ -73,7 +73,7 @@ namespace DAL.Repositories
         {
             var mevent = await db.Events.Where(e => e.Id == eventId).FirstOrDefaultAsync();
             if (mevent == null) throw new NullReferenceException(ExceptionMessageConstants.NullObject);
-            mevent.Location = newLocation ?? throw new ArgumentNullException(ExceptionMessageConstants.NullObject);
+            mevent.Location = newLocation ?? throw new ArgumentNullException(ExceptionMessageConstants.RequiredParams);
             await db.SaveChangesAsync();
             return mevent;
         }
@@ -82,7 +82,7 @@ namespace DAL.Repositories
         {
             var mevent = await db.Events.Where(e => e.Id == eventId).FirstOrDefaultAsync();
             if (mevent == null) throw new NullReferenceException(ExceptionMessageConstants.NullObject);
-            mevent.Name = newName ?? throw new ArgumentNullException(ExceptionMessageConstants.NullObject);
+            mevent.Name = newName ?? throw new ArgumentNullException(ExceptionMessageConstants.RequiredParams);
             await db.SaveChangesAsync();
             return mevent;
         }
@@ -101,7 +101,7 @@ namespace DAL.Repositories
     {
         public static bool IsEventParamsNull(Event evento)
         {
-            return evento.Name == null && evento.Location == null && evento.CreatorUserId == null;
+            return String.IsNullOrEmpty(evento.Name) || String.IsNullOrEmpty(evento.Location) || String.IsNullOrEmpty(evento.CreatorUserId);
         }
 
         public static async Task<Event> GetByIdOrNull(this IQueryable<Event> events, int eventId)

@@ -87,7 +87,7 @@ namespace DAL.Repositories
     {
         public static bool IsOrderItemParamsNull(OrderItem orderItem)
         {
-            return orderItem.TicketId == 0 && orderItem.Amount == 0 && orderItem.Price == -1;
+            return orderItem.TicketId <= 0 || orderItem.Amount < 0 || orderItem.Price < 0 ;
         }
 
         public static async Task<IReadOnlyCollection<OrderItem>> GetOrderItemsList(this IQueryable<OrderItem> orderItems)

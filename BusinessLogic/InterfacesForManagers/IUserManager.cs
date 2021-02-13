@@ -13,6 +13,8 @@ namespace BL.InterfacesForManagers
         Task<IReadOnlyCollection<UserDto>> GetUsersAsync();
         Task<UserDto> GetUserByNameAsync(string name);
         Task<UserDto> CreateUserAsync(UserDto newUserDto, string password);
+        Task<UserDto> CreateAdminAsync(UserDto newUserDto, string password);
+        Task<UserDto> CreateOrganizerAsync(UserDto newUserDto, string password);
         Task DeleteUserAsync(string userId);
         Task<UserDto> ModifyUserNameAsync(string userId, string userName);
         Task<UserDto> ModifyPasswordAsync(string userId, string password);

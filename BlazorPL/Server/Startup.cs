@@ -5,9 +5,11 @@ using DAL;
 using DAL.InterfacesForRepos;
 using DAL.Models;
 using DAL.Repositories;
+using Hellang.Middleware.ProblemDetails;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.ResponseCompression;
@@ -84,6 +86,7 @@ namespace BlazorPL.Server
             services.AddAutoMapper(typeof(UserProfile));
             #endregion
 
+            #region Swagger
             // Register the Swagger generator, defining 1 or more Swagger documents
             services.AddSwaggerGen(c =>
             {
@@ -109,6 +112,10 @@ namespace BlazorPL.Server
                 //var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 //c.IncludeXmlComments(xmlPath);
             });
+            #endregion
+
+            services.AddProblemDetails(ConfigureProblemDetails).AddControllers()
+                .AddJsonOptions(x => x.JsonSerializerOptions.IgnoreNullValues = true);
 
             services.AddRouting();
             services.AddControllersWithViews();
@@ -131,6 +138,8 @@ namespace BlazorPL.Server
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+
+            app.UseProblemDetails();
 
             app.UseHttpsRedirection();
             app.UseBlazorFrameworkFiles();
@@ -159,6 +168,18 @@ namespace BlazorPL.Server
                 endpoints.MapControllers();
                 endpoints.MapFallbackToFile("index.html");
             });
+        }
+
+        private void ConfigureProblemDetails(ProblemDetailsOptions options)
+        {
+            // NullReferenceException -> NotFound : Ha nem találja meg az adott entitást, akkor NotFound-dal tér vissza.
+            options.MapToStatusCode<NullReferenceException>(StatusCodes.Status404NotFound);
+            // ArgumentNullException -> BadRequest : Ha a kötelezõ paraméterek nincsenek kitöltve (azaz null), akkor BadRequest-tel tér vissza.
+            options.MapToStatusCode<ArgumentNullException>(StatusCodes.Status400BadRequest);
+            // ApplicationException -> InternalServerError : Ha nem sikerült létrehozni az entitást.
+            options.MapToStatusCode<ApplicationException>(StatusCodes.Status500InternalServerError);
+            // FormatException -> PreconditionFailed : Az adott validáció nem sikerül, a felhasználó által beírt adat nem megfelelõ.
+            options.MapToStatusCode<FormatException>(StatusCodes.Status412PreconditionFailed);
         }
     }
 }

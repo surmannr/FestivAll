@@ -46,6 +46,27 @@ namespace BL.Managers
 
         public async Task<UserDto> CreateUserAsync(UserDto newUserDto, string password)
         {
+            newUserDto.Role = "User";
+            var result = await Create(newUserDto, password);
+            return result;
+        }
+
+        public async Task<UserDto> CreateAdminAsync(UserDto newUserDto, string password)
+        {
+            newUserDto.Role = "Admin";
+            var result = await Create(newUserDto, password);
+            return result;
+        }
+
+        public async Task<UserDto> CreateOrganizerAsync(UserDto newUserDto, string password)
+        {
+            newUserDto.Role = "Organizer";
+            var result = await Create(newUserDto, password);
+            return result;
+        }
+
+        public async Task<UserDto> Create(UserDto newUserDto, string password)
+        {
             User user = mapper.Map<User>(newUserDto);
             var result = await userRepository.CreateUser(user, password);
             return mapper.Map<UserDto>(result);
@@ -81,5 +102,6 @@ namespace BL.Managers
             var result = await userRepository.ModifyEmail(userId, email);
             return mapper.Map<UserDto>(result);
         }
+
     }
 }

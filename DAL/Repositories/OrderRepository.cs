@@ -86,7 +86,7 @@ namespace DAL.Repositories
     {
         public static bool IsOrderParamsNull(Order order)
         {
-            return order.UserId == null;
+            return String.IsNullOrEmpty(order.UserId);
         }
 
         public static async Task<IReadOnlyCollection<Order>> GetOrdersList(this IQueryable<Order> orders)

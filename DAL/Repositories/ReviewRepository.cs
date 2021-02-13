@@ -58,6 +58,7 @@ namespace DAL.Repositories
             var review = await db.Reviews.Where(r => r.Id == reviewId).FirstOrDefaultAsync();
             if (review != null)
             {
+                if (String.IsNullOrEmpty(newDescription)) throw new ArgumentNullException(ExceptionMessageConstants.RequiredParams);
                 review.Description = newDescription;
                 await db.SaveChangesAsync();
                 return review;
@@ -70,6 +71,7 @@ namespace DAL.Repositories
             var review = await db.Reviews.Where(r => r.Id == reviewId).FirstOrDefaultAsync();
             if (review != null)
             {
+                if (newStars <= 0 || newStars > 5) throw new ArgumentNullException(ExceptionMessageConstants.RequiredParams);
                 review.Stars = newStars;
                 await db.SaveChangesAsync();
                 return review;
@@ -81,8 +83,8 @@ namespace DAL.Repositories
     {
         public static bool IsReviewParamsNull(Review review)
         {
-            return review.EventId == 0 && review.UserId == null
-                && review.Stars == 0 && review.Description == null;
+            return review.EventId <= 0 || String.IsNullOrEmpty(review.UserId)
+                || review.Stars <= 0 || review.Stars > 5 || String.IsNullOrEmpty(review.Description);
         }
 
         public static async Task<IReadOnlyCollection<Review>> GetReviewsList(this IQueryable<Review> reviews)
