@@ -57,7 +57,7 @@ namespace BlazorPL.Server.Controllers
 
         #region Delete
 
-        [HttpDelete]
+        [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(int id)
         {
             await postManager.DeletePostAsync(id);

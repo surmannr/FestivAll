@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace BlazorPL.Server.Controllers
 {
-    [Route("api/posts")]
+    [Route("api/reviews")]
     [ApiController]
     public class ReviewController : Controller
     {

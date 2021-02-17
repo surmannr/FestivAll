@@ -8,15 +8,15 @@ namespace Shared.DTOs
     public class UserDto
     {
         [JsonPropertyName("username")]
-        public string UserName;
+        public string UserName { get; set; }
         [JsonPropertyName("password")]
-        public string Password;
+        public string Password { get; set; }
         [JsonPropertyName("email")]
-        public string Email;
+        public string Email { get; set; }
         [JsonPropertyName("role")]
-        public string Role;
+        public string Role { get; set; }
         [JsonPropertyName("nickname")]
-        public string NickName;
+        public string NickName { get; set; }
 
         public UserDto() { }
 
