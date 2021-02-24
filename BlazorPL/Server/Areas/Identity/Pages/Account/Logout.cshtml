@@ -1,0 +1,27 @@
+﻿@page "/logout"
+@model LogoutModel
+@{
+    ViewData["Title"] = "Kijelentkezés";
+}
+
+<div class="row">
+    <div class="col-md-2"></div>
+    <div class="col-md-8 text-center">
+        <section>
+            <h1>@ViewData["Title"]</h1>
+            @{
+                if (User.Identity.IsAuthenticated)
+                {
+                    <form class="form-inline text-center d-flex justify-content-around" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Page("/", new { area = "" })" method="post">
+                        <button type="submit" class="nav-link btn btn-link text-white">Biztosan ki akarsz jelentkezni? Kattints ide ha igen.</button>
+                    </form>
+                }
+                else
+                {
+                    <p class="mt-3">Sikeresen kijelentkeztél az oldalról. Köszönjük, hogy benéztél hozzánk!</p>
+                }
+            }
+        </section>
+    </div>
+    <div class="col-md-2"></div>
+</div>

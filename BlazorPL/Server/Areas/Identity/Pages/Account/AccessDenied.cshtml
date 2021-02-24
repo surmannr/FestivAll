@@ -1,0 +1,16 @@
+﻿@page "/accessdenied"
+@model AccessDeniedModel
+@{
+    ViewData["Title"] = "Hozzáférés megtagadva";
+}
+
+<div class="row">
+    <div class="col-md-2"></div>
+    <div class="col-md-8 text-center">
+        <section>
+            <h1 class="text-danger">@ViewData["Title"]</h1>
+            <p class="text-danger">Nincs jogosultságod az adott oldal megjelenítéséhez.</p>
+        </section>
+    </div>
+    <div class="col-md-2"></div>
+</div>

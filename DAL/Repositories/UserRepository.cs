@@ -102,6 +102,14 @@ namespace DAL.Repositories
             await userManager.AddToRoleAsync(newUser, newUser.Role);
             if (result.Succeeded)
             {
+                /*var token = await userManager.GenerateEmailConfirmationTokenAsync(newUser);
+                var confirmationLink = Url.Action("ConfirmEmail", "Email", new { token, email = newUser.Email }, Request.Scheme);
+                EmailHelper emailHelper = new EmailHelper();
+                bool emailResponse = emailHelper.SendEmail(newUser.Email, confirmationLink);
+
+                if (emailResponse)
+                    return RedirectToAction("Index");
+                */
                 await db.SaveChangesAsync();
                 return newUser;
             }

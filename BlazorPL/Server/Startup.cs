@@ -1,6 +1,7 @@
 using BL.AutoMappers;
 using BL.InterfacesForManagers;
 using BL.Managers;
+using BlazorPL.Server.Areas.Identity;
 using DAL;
 using DAL.InterfacesForRepos;
 using DAL.Models;
@@ -12,6 +13,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -31,24 +33,32 @@ namespace BlazorPL.Server
         }
 
         public IConfiguration Configuration { get; }
-        private string dbConnectionString = null;
+        //private string dbConnectionString = null;
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
             // Connection string lekérdezése a user secrets-bõl (secret.json)
-            dbConnectionString = Configuration["ConnectionStrings:festivalldb"];
+            //dbConnectionString = Configuration["ConnectionStrings:festivalldb"];
 
             // Adatbázis beállítása
             services.AddDbContext<FestivallDb>(options =>
-                options.UseSqlServer(dbConnectionString));
+                options.UseSqlServer(@"Server=(localdb)\mssqllocaldb;Database=FestivallDB;Trusted_Connection=True;"));
 
             // Userkezelés beállítása
             services.AddIdentity<User, IdentityRole>().AddEntityFrameworkStores<FestivallDb>().AddDefaultTokenProviders();
 
             services.AddDatabaseDeveloperPageExceptionFilter();
 
-           // services.AddDefaultIdentity<User>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<FestivallDb>();
+            services.Configure<IdentityOptions>(opts =>
+            {
+                opts.User.RequireUniqueEmail = true;
+                opts.Password.RequiredLength = 8;
+
+                opts.SignIn.RequireConfirmedEmail = true;
+            });
+
+            // services.AddDefaultIdentity<User>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<FestivallDb>();
 
             //services.AddIdentityServer()
             //    .AddApiAuthorization<User, FestivallDb>();
@@ -86,6 +96,8 @@ namespace BlazorPL.Server
             services.AddAutoMapper(typeof(UserProfile));
             #endregion
 
+            services.AddTransient<IEmailSender, EmailSender>();
+            services.Configure<AuthMessageSenderOptions>(Configuration);
             #region Swagger
             // Register the Swagger generator, defining 1 or more Swagger documents
             services.AddSwaggerGen(c =>
