@@ -93,27 +93,15 @@ namespace DAL.Repositories
             else throw new NullReferenceException(ExceptionMessageConstants.NullObject);
         }
 
-        public async Task<User> CreateUser(User newUser, string password)
+        public async Task<IdentityResult> CreateUser(User newUser, string password)
         {
             if(newUser==null) throw new NullReferenceException(ExceptionMessageConstants.NullObject);
-            var role = roleManager.FindByNameAsync(newUser.Role);
+            var role = await roleManager.FindByNameAsync(newUser.Role);
             if (role == null) await roleManager.CreateAsync(new IdentityRole { Name = newUser.Role });
             var result = await userManager.CreateAsync(newUser, password);
             await userManager.AddToRoleAsync(newUser, newUser.Role);
-            if (result.Succeeded)
-            {
-                /*var token = await userManager.GenerateEmailConfirmationTokenAsync(newUser);
-                var confirmationLink = Url.Action("ConfirmEmail", "Email", new { token, email = newUser.Email }, Request.Scheme);
-                EmailHelper emailHelper = new EmailHelper();
-                bool emailResponse = emailHelper.SendEmail(newUser.Email, confirmationLink);
-
-                if (emailResponse)
-                    return RedirectToAction("Index");
-                */
-                await db.SaveChangesAsync();
-                return newUser;
-            }
-            else throw new ApplicationException("Nem sikerült létrehozni a felhasználót.");
+            return result;
+            //throw new ApplicationException("Nem sikerült létrehozni a felhasználót.");
         }
 
         public async Task DeleteUser(string userId)

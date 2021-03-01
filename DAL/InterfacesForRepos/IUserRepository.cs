@@ -1,4 +1,5 @@
 ﻿using DAL.Models;
+using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,7 +15,7 @@ namespace DAL.InterfacesForRepos
         Task<User> GetUserByUsername(string userName);
         Task<IReadOnlyCollection<User>> GetAllUsers();
         // Létrehozás
-        Task<User> CreateUser(User newUser, string password);
+        Task<IdentityResult> CreateUser(User newUser, string password);
         // Módosítások
         Task<User> ModifyUserName(string userId, string newUserName);
         Task<User> ModifyNickName(string userId, string newNickName);

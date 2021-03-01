@@ -60,11 +60,9 @@ namespace BlazorPL.Server
 
             // services.AddDefaultIdentity<User>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<FestivallDb>();
 
-            //services.AddIdentityServer()
-            //    .AddApiAuthorization<User, FestivallDb>();
-
-            services.AddAuthentication()
-                .AddIdentityServerJwt();
+            //services.AddIdentityServer().AddApiAuthorization<User, FestivallDb>();
+            services.AddIdentityServer().AddApiAuthorization<User, FestivallDb>();
+            services.AddAuthentication().AddIdentityServerJwt();
 
             #region Dependency Injection - Repository-khoz
             services.AddScoped<IEventRepository, EventRepository>();
@@ -85,7 +83,7 @@ namespace BlazorPL.Server
             services.AddScoped<ITicketManager, TicketManager>();
             services.AddScoped<IUserManager, UserManager>();
             #endregion
-            //services.AddIdentityServer().AddApiAuthorization<ApplicationUser, ApplicationDbContext>();
+            //services.AddIdentityServer().AddApiAuthorization<User, FestivallDb>();
 
             #region Dependency Injection - AutoMapperekhez
             services.AddAutoMapper(typeof(EventProfile));
@@ -159,7 +157,7 @@ namespace BlazorPL.Server
 
             app.UseRouting();
 
-            //app.UseIdentityServer();
+            app.UseIdentityServer();
             app.UseAuthentication();
             app.UseAuthorization();
 

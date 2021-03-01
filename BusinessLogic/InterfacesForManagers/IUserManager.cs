@@ -1,4 +1,6 @@
-﻿using Shared.DTOs;
+﻿using DAL.Models;
+using Microsoft.AspNetCore.Identity;
+using Shared.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,9 +14,9 @@ namespace BL.InterfacesForManagers
         Task<UserDto> GetUserByIdAsync(string userId);
         Task<IReadOnlyCollection<UserDto>> GetUsersAsync();
         Task<UserDto> GetUserByNameAsync(string name);
-        Task<UserDto> CreateUserAsync(UserDto newUserDto, string password);
-        Task<UserDto> CreateAdminAsync(UserDto newUserDto, string password);
-        Task<UserDto> CreateOrganizerAsync(UserDto newUserDto, string password);
+        Task<IdentityResult> CreateUserAsync(User newUserDto, string password);
+        Task<IdentityResult> CreateAdminAsync(UserDto newUserDto, string password);
+        Task<IdentityResult> CreateOrganizerAsync(User newUserDto, string password);
         Task DeleteUserAsync(string userId);
         Task<UserDto> ModifyUserNameAsync(string userId, string userName);
         Task<UserDto> ModifyPasswordAsync(string userId, string password);

@@ -47,20 +47,6 @@ namespace BlazorPL.Server.Controllers
 
         #region Create
 
-        [HttpPost("registeruser")]
-        public async Task<ActionResult<UserDto>> CreateUser([FromBody] UserDto userDto)
-        {
-            var result = await userManager.CreateUserAsync(userDto, userDto.Password);
-            return Ok(result);
-        }
-
-        [HttpPost("registerorganizer")]
-        public async Task<ActionResult<UserDto>> CreateOrganizer([FromBody] UserDto userDto)
-        {
-            var result = await userManager.CreateOrganizerAsync(userDto, userDto.Password);
-            return Ok(result);
-        }
-
         [HttpPost("registeradmin")]
         public async Task<ActionResult<UserDto>> CreateAdmin([FromBody] UserDto userDto)
         {

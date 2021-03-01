@@ -2,6 +2,7 @@
 using BL.InterfacesForManagers;
 using DAL.InterfacesForRepos;
 using DAL.Models;
+using Microsoft.AspNetCore.Identity;
 using Shared.DTOs;
 using System;
 using System.Collections.Generic;
@@ -44,32 +45,38 @@ namespace BL.Managers
 
         // Létrehozás
 
-        public async Task<UserDto> CreateUserAsync(UserDto newUserDto, string password)
+        public async Task<IdentityResult> CreateUserAsync(User newUserDto, string password)
         {
             newUserDto.Role = "User";
-            var result = await Create(newUserDto, password);
+            var result = await CreateWithNormalModel(newUserDto, password);
             return result;
         }
 
-        public async Task<UserDto> CreateAdminAsync(UserDto newUserDto, string password)
+        public async Task<IdentityResult> CreateAdminAsync(UserDto newUserDto, string password)
         {
             newUserDto.Role = "Admin";
             var result = await Create(newUserDto, password);
             return result;
         }
 
-        public async Task<UserDto> CreateOrganizerAsync(UserDto newUserDto, string password)
+        public async Task<IdentityResult> CreateOrganizerAsync(User newUserDto, string password)
         {
             newUserDto.Role = "Organizer";
-            var result = await Create(newUserDto, password);
+            var result = await CreateWithNormalModel(newUserDto, password);
             return result;
         }
 
-        public async Task<UserDto> Create(UserDto newUserDto, string password)
+        public async Task<IdentityResult> Create(UserDto newUserDto, string password)
         {
             User user = mapper.Map<User>(newUserDto);
             var result = await userRepository.CreateUser(user, password);
-            return mapper.Map<UserDto>(result);
+            return result;
+        }
+
+        public async Task<IdentityResult> CreateWithNormalModel(User newUser, string password)
+        {
+            var result = await userRepository.CreateUser(newUser, password);
+            return result;
         }
 
         // Törlés

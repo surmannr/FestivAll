@@ -9,9 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BL", "BusinessLogic\BL.cspr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shared", "Shared\Shared.csproj", "{1DA1437C-C155-44DF-B8B3-966BC89CEB9C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorPL.Server", "BlazorPL\Server\BlazorPL.Server.csproj", "{C79405CA-07E7-4113-8A6D-69C74A3D86B2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorPL.Server", "BlazorPL\Server\BlazorPL.Server.csproj", "{C79405CA-07E7-4113-8A6D-69C74A3D86B2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorPL.Client", "BlazorPL\Client\BlazorPL.Client.csproj", "{6BB43414-EF75-45CF-B079-A09B479DCD69}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorPL.Client", "BlazorPL\Client\BlazorPL.Client.csproj", "{6BB43414-EF75-45CF-B079-A09B479DCD69}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

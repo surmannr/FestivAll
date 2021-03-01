@@ -1,17 +1,26 @@
-﻿@page
+﻿@page "/register"
 @model RegisterModel
 @{
-    ViewData["Title"] = "Register";
+    ViewData["Title"] = "Regisztrálás";
 }
 
-<h1>@ViewData["Title"]</h1>
-
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-md-3"></div>
+    <div class="col-md-6">
+        <h1>@ViewData["Title"]</h1>
         <form asp-route-returnUrl="@Model.ReturnUrl" method="post">
-            <h4>Create a new account.</h4>
+            <h4>Új felhasználó létrehozása.</h4>
             <hr />
-            <div asp-validation-summary="All" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Input.UserName">Felhasználónév</label>
+                <input asp-for="Input.UserName" class="form-control" />
+                <span asp-validation-for="Input.UserName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Input.NickName">Becenév (opcionális)</label>
+                <input asp-for="Input.NickName" class="form-control" />
+                <span asp-validation-for="Input.NickName" class="text-danger"></span>
+            </div>
             <div class="form-group">
                 <label asp-for="Input.Email"></label>
                 <input asp-for="Input.Email" class="form-control" />
@@ -27,9 +36,21 @@
                 <input asp-for="Input.ConfirmPassword" class="form-control" />
                 <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
             </div>
-            <button type="submit" class="btn btn-primary">Register</button>
+            <div class="form-group d-flex justify-content-center">
+                <div class="checkbox mr-3">
+                    <input asp-for="Input.IsOrganizer" />
+                </div>
+                <label asp-for="Input.IsOrganizer"> Jelöld be a négyzetet, ha szervezőként regisztrálsz</label>
+            </div>
+            <div class="form-group d-flex justify-content-around">
+                <button type="submit" class="btn btn-primary">Regisztrálás</button>
+            </div>
+            <div class="form-group d-flex justify-content-around">
+                <button type="button" class="btn btn-primary">Mégse</button>
+            </div>
         </form>
     </div>
+    <div class="col-md-3"></div>
 </div>
 
 @section Scripts {
