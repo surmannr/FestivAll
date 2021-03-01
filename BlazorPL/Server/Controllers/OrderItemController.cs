@@ -70,14 +70,14 @@ namespace BlazorPL.Server.Controllers
         #region Modify
 
         [HttpPatch("edit/{id}/status")]
-        public async Task<ActionResult<OrderItemDto>> ModifyStatus(int id, [FromBody] Status status)
+        public async Task<ActionResult<OrderItemDto>> ModifyStatus(int id, [FromQuery] Status status)
         {
             var result = await orderItemManager.ModifyStatusAsync(id, status);
             return Ok(result);
         }
 
         [HttpPatch("edit/{id}/order")]
-        public async Task<ActionResult<OrderItemDto>> ModifyStatus(int id, [FromBody] int orderId)
+        public async Task<ActionResult<OrderItemDto>> ModifyStatus(int id, [FromQuery] int orderId)
         {
             var result = await orderItemManager.SetOrderAsync(id, orderId);
             return Ok(result);

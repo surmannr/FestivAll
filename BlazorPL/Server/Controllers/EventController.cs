@@ -87,21 +87,21 @@ namespace BlazorPL.Server.Controllers
 
         #region Modify
         [HttpPatch("edit/{id}/location")]
-        public async Task<ActionResult<EventDto>> ModifyLocation(int id, [FromBody] string location)
+        public async Task<ActionResult<EventDto>> ModifyLocation(int id, [FromQuery] string location)
         {
             var result = await eventManager.ModifyLocationAsync(id, location);
             return Ok(result);
         }
 
         [HttpPatch("edit/{id}/name")]
-        public async Task<ActionResult<EventDto>> ModifyName(int id, [FromBody] string name)
+        public async Task<ActionResult<EventDto>> ModifyName(int id, [FromQuery] string name)
         {
             var result = await eventManager.ModifyNameAsync(id, name);
             return Ok(result);
         }
 
         [HttpPatch("edit/{id}/date")]
-        public async Task<ActionResult<EventDto>> ModifyStartDate(int id, [FromBody] int date)
+        public async Task<ActionResult<EventDto>> ModifyStartDate(int id, [FromQuery] int date)
         {
             int year = date / 10000;
             int month = ((date - (10000 * year)) / 100);
