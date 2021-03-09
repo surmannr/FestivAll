@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DAL", "DAL\DAL.csproj", "{5
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BL", "BusinessLogic\BL.csproj", "{CF7F7D0D-5386-4FE4-9AA4-A9C259E39DCC}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shared", "Shared\Shared.csproj", "{1DA1437C-C155-44DF-B8B3-966BC89CEB9C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharedLayer", "Shared\SharedLayer.csproj", "{1DA1437C-C155-44DF-B8B3-966BC89CEB9C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorPL.Server", "BlazorPL\Server\BlazorPL.Server.csproj", "{C79405CA-07E7-4113-8A6D-69C74A3D86B2}"
 EndProject

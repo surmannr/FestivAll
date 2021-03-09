@@ -2,7 +2,7 @@
 using DAL.InterfacesForRepos;
 using DAL.Models;
 using Microsoft.EntityFrameworkCore;
-using Shared.Enums;
+using SharedLayer.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;

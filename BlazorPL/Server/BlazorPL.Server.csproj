@@ -21,7 +21,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\BusinessLogic\BL.csproj" />
     <ProjectReference Include="..\..\DAL\DAL.csproj" />
-    <ProjectReference Include="..\..\Shared\Shared.csproj" />
+    <ProjectReference Include="..\..\Shared\SharedLayer.csproj" />
     <ProjectReference Include="..\Client\BlazorPL.Client.csproj" />
   </ItemGroup>
 

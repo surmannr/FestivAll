@@ -2,8 +2,8 @@
 using BL.InterfacesForManagers;
 using DAL.InterfacesForRepos;
 using DAL.Models;
-using Shared.DTOs;
-using Shared.Enums;
+using SharedLayer.DTOs;
+using SharedLayer.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;

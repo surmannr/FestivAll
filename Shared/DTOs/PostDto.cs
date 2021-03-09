@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.Json.Serialization;
 
-namespace Shared.DTOs
+namespace SharedLayer.DTOs
 {
     public class PostDto
     {

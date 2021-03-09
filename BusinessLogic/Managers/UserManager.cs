@@ -3,7 +3,7 @@ using BL.InterfacesForManagers;
 using DAL.InterfacesForRepos;
 using DAL.Models;
 using Microsoft.AspNetCore.Identity;
-using Shared.DTOs;
+using SharedLayer.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;

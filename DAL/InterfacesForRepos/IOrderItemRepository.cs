@@ -1,5 +1,5 @@
 ﻿using DAL.Models;
-using Shared.Enums;
+using SharedLayer.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;

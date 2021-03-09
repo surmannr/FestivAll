@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Shared
+namespace SharedLayer
 {
     public class EmailSender : IEmailSender
     {

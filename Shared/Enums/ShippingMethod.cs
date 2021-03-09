@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Shared.Enums
+namespace SharedLayer.Enums
 {
     public enum ShippingMethod
     {

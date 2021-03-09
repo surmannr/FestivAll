@@ -1,7 +1,7 @@
 ﻿using BL.InterfacesForManagers;
 using Microsoft.AspNetCore.Mvc;
-using Shared.DTOs;
-using Shared.Enums;
+using SharedLayer.DTOs;
+using SharedLayer.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
