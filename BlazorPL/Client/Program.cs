@@ -8,6 +8,9 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using Radzen;
+using Microsoft.AspNetCore.Components.Authorization;
+using MudBlazor.Services;
 
 namespace BlazorPL.Client
 {
@@ -24,7 +27,16 @@ namespace BlazorPL.Client
             // Supply HttpClient instances that include access tokens when making requests to the server project
             builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("BlazorPL.ServerAPI"));
 
+            //builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
+            //builder.Services.AddOptions();
             builder.Services.AddApiAuthorization();
+
+            builder.Services.AddScoped<DialogService>();
+            builder.Services.AddScoped<NotificationService>();
+            builder.Services.AddScoped<TooltipService>();
+            builder.Services.AddScoped<ContextMenuService>();
+
+            builder.Services.AddMudServices();
 
             await builder.Build().RunAsync();
         }

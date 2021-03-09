@@ -1,7 +1,27 @@
 ﻿@page "/"
 
-<h1>Hello, world!</h1>
+<div class="row d-flex flex-column align-items-center">
+    <RadzenImage Path="mainlogo.png" Style="width: 60%;"></RadzenImage>
+    <MudText Typo="Typo.h4" Align="Align.Center" Style="margin-top: 10px">Készen állsz egy felejthetetlen élményre?</MudText>
+    <MudText Typo="Typo.h5" Align="Align.Center" Style="margin-top: 10px">Nézz körbe az oldalunkon, hogy megtaláld a számodra megfelelő programot!</MudText>
+    <MudText Typo="Typo.body1" Align="Align.Justify" Style="margin-top: 20px">
+        Az oldalon megtalálható sok-sok program közül választhatsz. Hívd el barátaidat és bulizz egyet velük a Szigeten, a Balaton Soundon vagy
+        más egyéb fesztiválon! A legnagyobb és a legváltozatosabb előadók sorra lépnek fel. A fesztiválokon már a
+        kora délutáni óráktól bulizhatsz kedvenceidre egészen másnap reggelig, de a programok legszínesebb választékából válogathatsz, ha éppen máshoz
+        lenne lenne kedved vagy megpihennél két koncert között! Rengeteg nem zenei programmal is várunk, legyen szó művészeti előadásokról, izgalmas
+        ismeretterjesztő beszélgetésekről, gaming-ről, sportól vagy vízparti kikapcsolódásról!
+    </MudText>
+    <br />
+    <div class="container d-flex flex-row justify-content-center">
+        <RadzenCard Style="max-width:30%">
+            <RadzenImage Path="mainpage.jpg" Style="width:100%; height:auto"></RadzenImage>
+        </RadzenCard>
+        <RadzenCard Style="max-width:30%; margin-left:20px; margin-right:20px">
+            <RadzenImage Path="mainpage2.jpg" Style="width:100%; height:auto;"></RadzenImage>
+        </RadzenCard>
+        <RadzenCard Style="max-width:30%">
+            <RadzenImage Path="mainpage3.jpg" Style="width:100%; height:auto"></RadzenImage>
+        </RadzenCard>
+    </div>
 
-Welcome to your new app.
-
-<SurveyPrompt Title="How is Blazor working for you?" />
+</div>

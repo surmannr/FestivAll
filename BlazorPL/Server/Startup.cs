@@ -1,6 +1,7 @@
 using BL.AutoMappers;
 using BL.InterfacesForManagers;
 using BL.Managers;
+using BlazorPL.Client;
 using BlazorPL.Server.Areas.Identity;
 using DAL;
 using DAL.InterfacesForRepos;
@@ -9,6 +10,7 @@ using DAL.Repositories;
 using Hellang.Middleware.ProblemDetails;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -46,7 +48,14 @@ namespace BlazorPL.Server
                 options.UseSqlServer(@"Server=(localdb)\mssqllocaldb;Database=FestivallDB;Trusted_Connection=True;"));
 
             // Userkezelés beállítása
-            services.AddIdentity<User, IdentityRole>().AddEntityFrameworkStores<FestivallDb>().AddDefaultTokenProviders();
+            services.AddDefaultIdentity<User>(options =>
+            {
+                options.User.RequireUniqueEmail = true;
+                options.SignIn.RequireConfirmedAccount = true;
+            }).AddRoles<IdentityRole>()
+              .AddDefaultTokenProviders()
+              .AddEntityFrameworkStores<FestivallDb>()
+              .AddClaimsPrincipalFactory<MyUserClaimsPrincipalFactory>();
 
             services.AddDatabaseDeveloperPageExceptionFilter();
 
@@ -59,9 +68,12 @@ namespace BlazorPL.Server
             });
 
             // services.AddDefaultIdentity<User>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<FestivallDb>();
-
+            //services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
             //services.AddIdentityServer().AddApiAuthorization<User, FestivallDb>();
-            services.AddIdentityServer().AddApiAuthorization<User, FestivallDb>();
+            services.AddIdentityServer().AddApiAuthorization<User, FestivallDb>(options => 
+            { 
+                options.IdentityResources["openid"].UserClaims.Add("role");
+            });
             services.AddAuthentication().AddIdentityServerJwt();
 
             #region Dependency Injection - Repository-khoz
