@@ -108,18 +108,18 @@ namespace DAL.Repositories
             => await events.Where(e => e.Id == eventId).FirstOrDefaultAsync();
 
         public static async Task<IReadOnlyCollection<Event>> GetEventsList(this IQueryable<Event> events)
-            => await events.ToListAsync();
+            => await events.Include(r => r.Reviews).ToListAsync();
 
         public static async Task<IReadOnlyCollection<Event>> GetEventsListByCreatorId(this IQueryable<Event> events, string creatorUserId)
-            => await events.Where(e => e.CreatorUserId == creatorUserId).ToListAsync();
+            => await events.Include(r => r.Reviews).Where(e => e.CreatorUserId == creatorUserId).ToListAsync();
 
         public static async Task<IReadOnlyCollection<Event>> GetEventsListByLocation(this IQueryable<Event> events, string location)
-            => await events.Where(e => e.Location == location).ToListAsync();
+            => await events.Include(r => r.Reviews).Where(e => e.Location == location).ToListAsync();
 
         public static async Task<IReadOnlyCollection<Event>> GetEventsListByName(this IQueryable<Event> events, string name)
-            => await events.Where(e => e.Name == name).ToListAsync();
+            => await events.Include(r => r.Reviews).Where(e => e.Name == name).ToListAsync();
 
         public static async Task<IReadOnlyCollection<Event>> GetEventsListByStartDate(this IQueryable<Event> events, DateTime startDate)
-            => await events.Where(e => e.StartDate == startDate).ToListAsync();
+            => await events.Include(r => r.Reviews).Where(e => e.StartDate == startDate).ToListAsync();
     }
 }

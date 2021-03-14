@@ -38,34 +38,49 @@ namespace DAL.Repositories
                     UserId = userId
                 };
                 db.UserFollowedEvents.Add(ufe);
-                user.FollowedEvents.ToList().Add(ufe);
-                _event.FollowedByUsers.ToList().Add(ufe);
                 await db.SaveChangesAsync();
                 return ufe;
             }
             else throw new NullReferenceException(ExceptionMessageConstants.NullObject);
         }
 
-        public async Task<BoughtTicket> AddTicketToBoughtItems(string userId, int ticketId, int amount)
+        public async Task AddTicketsFromCartToBoughtItems(Order order)
         {
-            var user = await userManager.FindByIdAsync(userId);
+            var user = await userManager.FindByIdAsync(order.UserId);
             if (user != null)
             {
-                var ticket = await db.Tickets.Where(e => e.Id == ticketId).FirstOrDefaultAsync();
-                if (ticket == null) throw new NullReferenceException(ExceptionMessageConstants.NullObject);
-                BoughtTicket bt = new BoughtTicket()
+
+                if (order == null) throw new NullReferenceException(ExceptionMessageConstants.NullObject);
+                var boughts = await db.BoughtTickets.Where(o => o.UserId == user.Id).ToListAsync();
+                foreach(var o in order.OrderItems)
                 {
-                    Ticket = ticket,
-                    TicketId = ticketId,
-                    User = user,
-                    UserId = userId,
-                    Amount = amount
-                };
-                db.BoughtTickets.Add(bt);
-                user.TicketsBought.ToList().Add(bt);
-                ticket.BoughtByUsers.ToList().Add(bt);
+                    bool bennevan = false;
+                    foreach (var b in boughts)
+                    {
+                        if(b.TicketId == o.TicketId)
+                        {
+                            bennevan = true;
+                            b.Amount++;
+                        }
+                    }
+                    if (!bennevan)
+                    {
+                        BoughtTicket boughtTicket = new BoughtTicket()
+                        {
+                            Amount = o.Amount,
+                            TicketId = o.TicketId,
+                            UserId = order.UserId
+                        };
+                        db.BoughtTickets.Add(boughtTicket);
+                    }
+                    
+                }
+                var carts = await db.Carts.Where(u => u.UserId == order.UserId).ToListAsync();
+                foreach(var c in carts)
+                {
+                    db.Carts.Remove(c);
+                }
                 await db.SaveChangesAsync();
-                return bt;
             }
             else throw new NullReferenceException(ExceptionMessageConstants.NullObject);
         }

@@ -54,6 +54,19 @@ namespace BlazorPL.Server.Controllers
             return Ok(result);
         }
 
+        [HttpPost("ticket-to-cart")]
+        public async Task<ActionResult> CreateTicketToCart([FromQuery] int ticketid, [FromQuery] string userid)
+        {
+            await userManager.AddTicketToCartAsync(userid, ticketid);
+            return Ok();
+        }
+
+        [HttpPost("cart-to-bought")]
+        public async Task<ActionResult> CreateBoughtItemsFromCart([FromBody] OrderDto order)
+        {
+            await userManager.AddTicketsFromCartToBought(order);
+            return Ok();
+        }
         #endregion
 
         #region Delete

@@ -10,11 +10,14 @@ namespace DAL.Models
         [Key]
         public int Id { get; set; }
         [Required]
+        [MaxLength(100,ErrorMessage = "A név túl hosszú.")]
         public string Name { get; set; }
         [Required]
+        [MaxLength(100, ErrorMessage = "A hely túl hosszú.")]
         public string Location { get; set; }
         [Required]
         public DateTime StartDate { get; set; }
+        [MaxLength(2000, ErrorMessage = "A leírás túl hosszú.")]
         public string Description { get; set; }
 
         public string CreatorUserId { get; set; }

@@ -26,7 +26,7 @@ namespace BlazorPL.Client
 
             // Supply HttpClient instances that include access tokens when making requests to the server project
             builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("BlazorPL.ServerAPI"));
-
+            builder.Services.AddHttpClient("BlazorPL.PublicServerAPI", client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));
             //builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
             //builder.Services.AddOptions();
             builder.Services.AddApiAuthorization();

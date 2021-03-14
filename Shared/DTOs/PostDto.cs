@@ -7,6 +7,8 @@ namespace SharedLayer.DTOs
 {
     public class PostDto
     {
+        [JsonPropertyName("id")]
+        public int Id { get; set; }
         [JsonPropertyName("postcontent")]
         public string PostContent { get; set; }
         [JsonPropertyName("creationdate")]

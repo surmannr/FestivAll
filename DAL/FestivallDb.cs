@@ -1,6 +1,7 @@
 ﻿using DAL.Models;
 using IdentityServer4.EntityFramework.Options;
 using Microsoft.AspNetCore.ApiAuthorization.IdentityServer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -45,6 +46,33 @@ namespace DAL
             {
                 entity.HasKey(c => new { c.UserId, c.EventId });
             });
+            builder.Entity<IdentityRole>().HasData(new IdentityRole
+            {
+                Id = "admin",
+                Name = "Admin",
+                NormalizedName = "ADMIN"
+            });
+            var hasher = new PasswordHasher<User>();
+            builder.Entity<User>().HasData(
+                    new User()
+                    {
+                        Id = "admin",
+                        Email = "admin@admin.hu",
+                        EmailConfirmed = true,
+                        NickName = "Admin",
+                        UserName = "admin",
+                        NormalizedEmail = "ADMIN@ADMIN.HU",
+                        NormalizedUserName = "ADMIN",
+                        PasswordHash = hasher.HashPassword(null,"asd123ASD?"),
+                        Role = "Admin"
+                    }
+                );
+            builder.Entity<IdentityUserRole<string>>().HasData(new IdentityUserRole<string>
+            {
+                RoleId = "admin",
+                UserId = "admin"
+            });
+
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

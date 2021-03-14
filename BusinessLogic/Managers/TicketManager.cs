@@ -15,11 +15,13 @@ namespace BL.Managers
     {
         private readonly ITicketRepository ticketRepository;
         private readonly IMapper mapper;
+        private readonly IEventRepository eventRepository;
 
-        public TicketManager(ITicketRepository _ticketRepository, IMapper _mapper)
+        public TicketManager(ITicketRepository _ticketRepository, IMapper _mapper, IEventRepository _event)
         {
             ticketRepository = _ticketRepository;
             mapper = _mapper;
+            eventRepository = _event;
         }
 
         // Lekérdezések
@@ -27,21 +29,67 @@ namespace BL.Managers
         public async Task<TicketDto> GetTicketByIdAsync(int ticketId)
         {
             var ticket = await ticketRepository.GetTicketById(ticketId);
-            return mapper.Map<TicketDto>(ticket);
+            var ticketdto = mapper.Map<TicketDto>(ticket);
+            ticketdto.EventName = ticket.Event.Name;
+            return ticketdto;
         }
 
         public async Task<IReadOnlyCollection<TicketDto>> GetTicketsAsync()
         {
             var tickets = await ticketRepository.GetAllTickets();
-            return mapper.Map<List<TicketDto>>(tickets);
+            var ticketdtos = mapper.Map<List<TicketDto>>(tickets);
+            var zip = tickets.Zip(ticketdtos, (t, dt) => new {Ticket = t, TicketDto = dt });
+            foreach( var z in zip)
+            {
+                z.TicketDto.EventName = z.Ticket.Event.Name;
+            }
+            return ticketdtos;
         }
 
         public async Task<IReadOnlyCollection<TicketDto>> GetTicketsByEventIdAsync(int eventId)
         {
             var tickets = await ticketRepository.GetTicketsByEventId(eventId);
-            return mapper.Map<List<TicketDto>>(tickets);
+            var ticketdtos = mapper.Map<List<TicketDto>>(tickets);
+            var zip = tickets.Zip(ticketdtos, (t, dt) => new { Ticket = t, TicketDto = dt });
+            foreach (var z in zip)
+            {
+                z.TicketDto.EventName = z.Ticket.Event.Name;
+            }
+            return ticketdtos;
         }
 
+        public async Task<IReadOnlyCollection<TicketDto>> GetTicketsInCartByUserAsync(string userid)
+        {
+            var tickets = await ticketRepository.GetTicketsInCartByUser(userid);
+            var ticketdtos = mapper.Map<List<TicketDto>>(tickets);
+            var zip = tickets.Zip(ticketdtos, (t, dt) => new { Ticket = t, TicketDto = dt });
+            foreach (var z in zip)
+            {
+                z.TicketDto.EventName = z.Ticket.Event.Name;
+            }
+            return ticketdtos;
+        }
+
+        public async Task<IReadOnlyCollection<BoughtTicketDto>> GetBoughtTicketByUser(string userid)
+        {
+            var boughts = await ticketRepository.GetBoughtTicketsByUser(userid);
+            List<BoughtTicketDto> btlist = new List<BoughtTicketDto>();
+            foreach(var b in boughts)
+            {
+                var ticket = await ticketRepository.GetTicketById(b.TicketId);
+                BoughtTicketDto bt = new BoughtTicketDto()
+                {
+                    TicketId = ticket.Id,
+                    Amount = b.Amount,
+                    Category = ticket.Category,
+                    EventName = b.Ticket.Event.Name,
+                    EventStartDate = ticket.Event.StartDate,
+                    Price = ticket.Price
+                };
+                btlist.Add(bt);
+            }
+            return btlist;
+        }
         // Létrehozás
 
         public async Task<TicketDto> CreateTicketAsync(TicketDto newTicketDto)

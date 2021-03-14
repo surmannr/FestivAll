@@ -1,0 +1,72 @@
+﻿@page "/tickets"
+@using System.Net.Http
+@inject HttpClient Http
+@inject IHttpClientFactory HttpClientFactory
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+
+
+
+    <MudGrid Style="margin-top:10px; margin-bottom: 10px">
+        <MudItem xs="12">
+            <MudPaper Class="d-flex justify-center py-7 p-5" Style="margin-top:15px" Square="false">
+                <MudText Typo="Typo.h2" Align="Align.Center" Style="margin-top: 10px; margin-bottom:20px"><b>Jegyek</b></MudText>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+    <MudPaper Class="d-flex flex-column align-items-center p-4" Style="margin-top:15px; height:75%;" Square="false">
+        <MudGrid>
+
+            <MudItem xs="12">
+                <MudPaper Class="d-flex justify-center mud-width-full py-7 p-5" Square="false">
+                    <MudGrid Spacing="10" Justify="Justify.Center" Class="align-items-end pb-5">
+                        <MudItem xs="2" sm="2" Class="d-flex align-center justify-center mud-width-full py-8">
+                            <MudText Typo="Typo.body1" Align="Align.Right" Style="font-size:20px">Szűrés:</MudText>
+                        </MudItem>
+                        <MudItem xs="4" sm="4" Class="d-flex align-center justify-center mud-width-full py-8">
+                            <MudTextField T="string" Label="Szűrési feltétel..." Required="false" />
+                        </MudItem>
+                        <MudItem xs="4" sm="4" Class="d-flex align-center justify-center mud-width-full py-8">
+                            <MudSelect T="string" Label="Mi alapján szűrjön..." Required="true" RequiredError="Kérlek válaszd ki mi alapján szűrjön!">
+                                <MudSelectItem Value="@("Program neve")" />
+                                <MudSelectItem Value="@("Ár")" />
+                                <MudSelectItem Value="@("Dátum (yyyy-MM-dd)")" />
+                                <MudSelectItem Value="@("Kategória")" />
+                            </MudSelect>
+                        </MudItem>
+                        <MudItem xs="2" sm="2" Class="d-flex align-center justify-center mud-width-full py-8">
+                            <MudButton Variant="Variant.Outlined">Szűrés</MudButton>
+                        </MudItem>
+
+                    </MudGrid>
+                </MudPaper>
+            </MudItem>
+        </MudGrid>
+                <div style="height: 60vh; overflow-y: scroll; width: 100%; display:flex; flex-wrap:wrap; flex-shrink:4; margin-top:20px">
+
+
+                    @if (tickets != null)
+                    {
+
+                        if (tickets.Count() > 0)
+                        {
+                            <Virtualize Items="tickets" Context="t">
+                                <TicketComponent Category="@t.Category" EventId="@t.EventId" Id="@t.Id" InStock="@t.InStock" Price="@t.Price" EventName="@t.EventName"></TicketComponent>
+                            </Virtualize>
+                        }
+                        else
+                        {
+                            <MudText Typo="Typo.h6" Align="Align.Center" Style="margin-top:40px">Nincsen egyetlen egy jegy sem.</MudText>
+                        }
+                    }
+                </div>
+    </MudPaper>
+
+@code {
+    private TicketDto[] tickets;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var http = HttpClientFactory.CreateClient("BlazorPL.PublicServerAPI");
+        tickets = await http.GetFromJsonAsync<TicketDto[]>("api/tickets");
+    }
+}

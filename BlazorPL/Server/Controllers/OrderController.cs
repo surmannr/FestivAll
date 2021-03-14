@@ -28,6 +28,12 @@ namespace BlazorPL.Server.Controllers
             var result = await orderManager.GetOrderByIdAsync(id);
             return Ok(result);
         }
+        [HttpGet("lastorder/{id}")]
+        public async Task<ActionResult<OrderDto>> GetLast(string id)
+        {
+            var result = await orderManager.GetLastOrderByUser(id);
+            return Ok(result);
+        }
 
         [HttpGet]
         public async Task<ActionResult<IReadOnlyCollection<OrderDto>>> GetAll()

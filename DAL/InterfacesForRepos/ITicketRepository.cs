@@ -13,6 +13,8 @@ namespace DAL.InterfacesForRepos
         Task<Ticket> GetTicketById(int ticketId);
         Task<IReadOnlyCollection<Ticket>> GetTicketsByEventId(int eventId);
         Task<IReadOnlyCollection<Ticket>> GetAllTickets();
+        Task<IReadOnlyCollection<Ticket>> GetTicketsInCartByUser(string userid);
+        Task<IReadOnlyCollection<BoughtTicket>> GetBoughtTicketsByUser(string userid);
         // Létrehozás
         Task<Ticket> CreateTicket(Ticket newTicket);
         // Módosítások

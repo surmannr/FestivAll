@@ -1,0 +1,30 @@
+﻿.example-scroll-to-top-visible {
+    font-size: 20px;
+    transition: all 1s;
+    bottom: 10px;
+    left: 8px;
+}
+
+.example-scroll-to-top-hidden {
+    visibility: hidden;
+    transition: all 1s;
+    bottom: 10px;
+    left: -100%;
+}
+
+.example-custom-button {
+    padding: 12px 24px;
+    border-radius: 4px;
+    background-color: #ff9800;
+    box-shadow: var(--mud-elevation-24);
+}
+/* Hide scrollbar for Chrome, Safari and Opera */
+.row::-webkit-scrollbar {
+    display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.row {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+}

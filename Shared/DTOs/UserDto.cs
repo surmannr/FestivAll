@@ -7,6 +7,8 @@ namespace SharedLayer.DTOs
 {
     public class UserDto
     {
+        [JsonPropertyName("id")]
+        public string Id { get; set; }
         [JsonPropertyName("username")]
         public string UserName { get; set; }
         [JsonPropertyName("password")]

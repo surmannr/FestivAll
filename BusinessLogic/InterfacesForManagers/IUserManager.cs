@@ -17,6 +17,8 @@ namespace BL.InterfacesForManagers
         Task<IdentityResult> CreateUserAsync(User newUserDto, string password);
         Task<IdentityResult> CreateAdminAsync(UserDto newUserDto, string password);
         Task<IdentityResult> CreateOrganizerAsync(User newUserDto, string password);
+        Task AddTicketToCartAsync(string userId, int ticketId);
+        Task AddTicketsFromCartToBought(OrderDto orderDto);
         Task DeleteUserAsync(string userId);
         Task<UserDto> ModifyUserNameAsync(string userId, string userName);
         Task<UserDto> ModifyPasswordAsync(string userId, string password);

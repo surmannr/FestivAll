@@ -75,7 +75,7 @@ namespace BlazorPL.Server
                 options.IdentityResources["openid"].UserClaims.Add("role");
             });
             services.AddAuthentication().AddIdentityServerJwt();
-
+            services.AddHttpContextAccessor();
             #region Dependency Injection - Repository-khoz
             services.AddScoped<IEventRepository, EventRepository>();
             services.AddScoped<IOrderItemRepository, OrderItemRepository>();

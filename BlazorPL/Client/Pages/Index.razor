@@ -1,27 +1,31 @@
 ﻿@page "/"
 
-<div class="row d-flex flex-column align-items-center">
-    <RadzenImage Path="mainlogo.png" Style="width: 60%;"></RadzenImage>
-    <MudText Typo="Typo.h4" Align="Align.Center" Style="margin-top: 10px">Készen állsz egy felejthetetlen élményre?</MudText>
-    <MudText Typo="Typo.h5" Align="Align.Center" Style="margin-top: 10px">Nézz körbe az oldalunkon, hogy megtaláld a számodra megfelelő programot!</MudText>
-    <MudText Typo="Typo.body1" Align="Align.Justify" Style="margin-top: 20px">
-        Az oldalon megtalálható sok-sok program közül választhatsz. Hívd el barátaidat és bulizz egyet velük a Szigeten, a Balaton Soundon vagy
-        más egyéb fesztiválon! A legnagyobb és a legváltozatosabb előadók sorra lépnek fel. A fesztiválokon már a
-        kora délutáni óráktól bulizhatsz kedvenceidre egészen másnap reggelig, de a programok legszínesebb választékából válogathatsz, ha éppen máshoz
-        lenne lenne kedved vagy megpihennél két koncert között! Rengeteg nem zenei programmal is várunk, legyen szó művészeti előadásokról, izgalmas
-        ismeretterjesztő beszélgetésekről, gaming-ről, sportól vagy vízparti kikapcsolódásról!
-    </MudText>
-    <br />
-    <div class="container d-flex flex-row justify-content-center">
-        <RadzenCard Style="max-width:30%">
-            <RadzenImage Path="mainpage.jpg" Style="width:100%; height:auto"></RadzenImage>
-        </RadzenCard>
-        <RadzenCard Style="max-width:30%; margin-left:20px; margin-right:20px">
-            <RadzenImage Path="mainpage2.jpg" Style="width:100%; height:auto;"></RadzenImage>
-        </RadzenCard>
-        <RadzenCard Style="max-width:30%">
-            <RadzenImage Path="mainpage3.jpg" Style="width:100%; height:auto"></RadzenImage>
-        </RadzenCard>
-    </div>
+
+
+<div class="row d-flex flex-column align-items-center" style="margin-top:20px">
+    <MudPaper Style="padding:10px; margin-top:13px; display:flex; justify-content:center">
+        <RadzenImage Path="mainlogo.png" Style="width: 60%;"></RadzenImage>
+    </MudPaper>
+    <MudPaper Style="padding:10px;" Square="false">
+        <MudText Typo="Typo.h4" Align="Align.Center" Style="margin: 10px">Készen állsz egy felejthetetlen élményre?</MudText>
+        <MudText Typo="Typo.h5" Align="Align.Center" Style="margin: 10px">Nézz körbe az oldalunkon, hogy megtaláld a számodra megfelelő programot!</MudText>
+    </MudPaper>
+    <MudPaper Style="padding:10px">
+        <MudText Typo="Typo.body1" Align="Align.Justify" Style="margin: 20px">
+            Az oldalon megtalálható sok-sok program közül választhatsz. Hívd el barátaidat és bulizz egyet velük a Szigeten, a Balaton Soundon vagy
+            más egyéb fesztiválon! A legnagyobb és a legváltozatosabb előadók sorra lépnek fel. A fesztiválokon már a
+            kora délutáni óráktól bulizhatsz kedvenceidre egészen másnap reggelig, de a programok legszínesebb választékából válogathatsz, ha éppen máshoz
+            lenne lenne kedved vagy megpihennél két koncert között! Rengeteg nem zenei programmal is várunk, legyen szó művészeti előadásokról, izgalmas
+            ismeretterjesztő beszélgetésekről, gaming-ről, sportól vagy vízparti kikapcsolódásról!
+        </MudText>
+    </MudPaper>
+    <MudPaper Style="padding:15px; display:flex; justify-content:space-around">
+            <RadzenImage Path="mainpage.jpg" Style="width:30%; height:auto"></RadzenImage>
+            <RadzenImage Path="mainpage2.jpg" Style="width:30%; height:auto;"></RadzenImage>
+            <RadzenImage Path="mainpage3.jpg" Style="width:30%; height:auto"></RadzenImage>
+    </MudPaper>
+
+    
 
 </div>
+    

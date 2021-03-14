@@ -14,6 +14,7 @@ namespace DAL.InterfacesForRepos
         Task<Order> GetOrderById(int orderId);
         Task<IReadOnlyCollection<Order>> GetOrdersByUserId(string userId);
         Task<IReadOnlyCollection<Order>> GetAllOrders();
+        Task<Order> GetLastOrderByUser(string userId);
         // Létrehozás
         Task<Order> CreateOrder(Order newOrder);
         // Módosítások

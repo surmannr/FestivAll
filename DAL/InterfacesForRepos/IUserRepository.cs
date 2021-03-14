@@ -23,7 +23,7 @@ namespace DAL.InterfacesForRepos
         Task<User> ModifyEmail(string userId, string newEmail);
         Task<UserFollowedEvent> AddFollowedEvent(string userId, int eventId);
         Task<Cart> AddTicketToCart(string userId, int ticketId);
-        Task<BoughtTicket> AddTicketToBoughtItems(string userId, int ticketId, int amount);
+        Task AddTicketsFromCartToBoughtItems(Order order);
         // Törlés
         Task DeleteUser(string userId);
     }

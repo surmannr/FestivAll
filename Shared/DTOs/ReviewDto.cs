@@ -7,6 +7,8 @@ namespace SharedLayer.DTOs
 {
     public class ReviewDto
     {
+        [JsonPropertyName("id")]
+        public int Id { get; set; }
         [JsonPropertyName("stars")]
         public int Stars { get; set; }
         [JsonPropertyName("description")]

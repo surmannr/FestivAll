@@ -64,7 +64,11 @@ namespace DAL.Repositories
         {
             return await db.Orders.GetOrderById(orderId);
         }
-
+        public async Task<Order> GetLastOrderByUser(string userId)
+        {
+            var list = await db.Orders.Include(o => o.OrderItems).Where(o => o.UserId == userId).ToListAsync();
+            return list.LastOrDefault();
+        }
         public async Task<IReadOnlyCollection<Order>> GetOrdersByUserId(string userId)
         {
             return await db.Orders.GetOrdersByUserId(userId);

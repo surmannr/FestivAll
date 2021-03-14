@@ -11,6 +11,7 @@ namespace DAL.Models
         public int Id { get; set; }
         [Required]
         public int Stars { get; set; }
+        [MaxLength(500, ErrorMessage = "A leírás túl hosszú.")]
         public string Description { get; set; }
 
         public int EventId { get; set; }

@@ -58,6 +58,23 @@ namespace DAL.Repositories
             return await db.Tickets.GetTicketsByEventId(eventId);
         }
 
+        public async Task<IReadOnlyCollection<Ticket>> GetTicketsInCartByUser(string userid)
+        {
+            var carts = await db.Carts.Where(u => u.UserId == userid).Include(t=>t.Ticket.Event).ToListAsync();
+            List<Ticket> result = new List<Ticket>();
+            foreach(var c in carts)
+            {
+                result.Add(c.Ticket);
+            }
+            return result;
+        }
+
+        public async Task<IReadOnlyCollection<BoughtTicket>> GetBoughtTicketsByUser(string userid)
+        {
+            var boughts = await db.BoughtTickets.Where(o => o.UserId == userid).Include(o => o.Ticket).ThenInclude(x => x.Event).ToListAsync();
+            return boughts;
+        }
+
         public async Task<Ticket> ModifyCategory(int ticketId, string newCategory)
         {
             var ticket = await db.Tickets.Where(t => t.Id == ticketId).FirstOrDefaultAsync();
@@ -96,13 +113,13 @@ namespace DAL.Repositories
         }
 
         public static async Task<IReadOnlyCollection<Ticket>> GetTicketsList(this IQueryable<Ticket> tickets)
-            => await tickets.ToListAsync();
+            => await tickets.Include(e => e.Event).ToListAsync();
 
         public static async Task<Ticket> GetTicketById(this IQueryable<Ticket> tickets, int ticketId)
-            => await tickets.Where(t => t.Id == ticketId).FirstOrDefaultAsync();
+            => await tickets.Include(e => e.Event).Where(t => t.Id == ticketId).FirstOrDefaultAsync();
 
         public static async Task<IReadOnlyCollection<Ticket>> GetTicketsByEventId(this IQueryable<Ticket> tickets, int eventId)
-            => await tickets.Where(t => t.EventId == eventId).ToListAsync();
+            => await tickets.Include(e => e.Event).Where(t => t.EventId == eventId).ToListAsync();
 
     }
 }

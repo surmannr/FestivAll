@@ -1,0 +1,176 @@
+﻿@page "/cart"
+@inject AuthenticationStateProvider AuthState
+@inject HttpClient Http
+@inject IHttpClientFactory HttpClientFactory
+@inject NavigationManager uriHelper
+@using SharedLayer.Enums
+
+<AuthorizeView>
+    <Authorized>
+        <MudPaper Class="d-flex justify-center py-7 p-5" Style="margin-top:15px" Square="false">
+            <MudText Typo="Typo.h2" Align="Align.Center" Style="margin-top: 10px; margin-bottom:10px"><b>Kosár</b></MudText>
+        </MudPaper>
+        <MudPaper Class="d-flex flex-column align-items-center py-7 p-5" Style="margin-top:15px; height:80%" Square="false">
+
+            @if (orderitems != null || tickets != null)
+            {
+                @if (orderitems.Count() > 0)
+                {
+                    <MudTable Items="orderitems" Context="o" FixedHeader="true" Style="width:100%" Height="400px" @onkeydown="SumPrice" @onchange="SumPrice" @oninput="SumPrice">
+                        <ColGroup>
+                            <col style="width:35%;" />
+                            <col style="width: 35%;" />
+                            <col style="width:10%;" />
+                            <col style="width:10%;" />
+                            <col style="width:10%;" />
+                        </ColGroup>
+                        <HeaderContent>
+                            <MudTh>Program neve</MudTh>
+                            <MudTh Style="text-align: left">Jegy kategória</MudTh>
+                            <MudTh Style="text-align: right">Mennyiség</MudTh>
+                            <MudTh Style="text-align: right">Ár</MudTh>
+                            <MudTh></MudTh>
+                        </HeaderContent>
+                        <RowTemplate>
+                            <MudTd DataLabel="Program neve">@o.EventName</MudTd>
+                            <MudTd Style="text-align: left" DataLabel="Jegy kategória">@o.TicketCategory</MudTd>
+                            <MudTd DataLabel="Mennyiség" @onkeydown="SumPrice" @onchange="SumPrice" @oninput="SumPrice">
+                                <MudTextField @bind-Value="o.Amount" Placeholder="Mennyiség" Variant="Variant.Text" InputType="InputType.Number" @onkeydown="SumPrice" @oninput="SumPrice" @onchange="SumPrice"></MudTextField>
+                            </MudTd>
+                            <MudTd Style="text-align: right" DataLabel="Ár">@o.Price Ft</MudTd>
+                            <MudTd Style="text-align: center">
+                                <MudIcon Icon="@Icons.Material.Filled.Delete" />
+                            </MudTd>
+                        </RowTemplate>
+                        <PagerContent>
+                            <MudTablePager RowsPerPageString="Találatok száma" PageSizeOptions="new int[]{5,10}" DisableRowsPerPage="true" />
+                        </PagerContent>
+                    </MudTable>
+                    <MudGrid Justify="Justify.SpaceAround" Style="width:100%; margin-top:10px">
+                        <MudItem xs="3" Style="display:flex; align-items:flex-end">
+                            <MudText Typo="Typo.body1" Align="Align.Left" Style="font-size:20px"><b>Fizetési mód</b></MudText>
+                        </MudItem>
+                        <MudItem xs="3" Class="d-flex align-items-baseline justify-center mud-width-full">
+                            <MudSelect T="string" Label="Fizetési mód" @bind-Value="selectedPaymentMethod">
+                                @foreach (var a in paymentmethods)
+                                {
+                                    <MudSelectItem Value="@a.ToString()" />
+                                }
+                            </MudSelect>
+                        </MudItem>
+                        <MudItem xs="6" Style="display:flex; align-items:flex-end">
+                            <MudDivider DividerType="DividerType.Middle" Style="width:100%; background-color:black; color:black"></MudDivider>
+                        </MudItem>
+                    </MudGrid>
+                    <MudGrid Justify="Justify.SpaceAround" Style="width:100%; margin-top:10px">
+                        <MudItem xs="3" Style="display:flex; align-items:flex-end">
+                            <MudText Typo="Typo.body1" Align="Align.Left" Style="font-size:20px"><b>Szállítási mód:</b></MudText>
+                        </MudItem>
+                        <MudItem xs="3" Class="d-flex align-items-baseline justify-center mud-width-full">
+                            <MudSelect T="string" Label="Szállítási mód" @bind-Value="selectedShippingMethod">
+                                @foreach (var a in shippingmethods)
+                                {
+                                    <MudSelectItem Value="@a.ToString()" />
+                                }
+                            </MudSelect>
+                        </MudItem>
+                        <MudItem xs="6" Style="display:flex; align-items:flex-end; justify-content:center">
+                            <MudText Typo="Typo.h5" Align="Align.Center" Color="Color.Dark" Style="font-size:30px"><u>Végösszeg: @sumprice.ToString("N0") Ft</u></MudText>
+                        </MudItem>
+                    </MudGrid>
+                    <MudGrid Justify="Justify.Center" Style="width:100%; margin-top:20px">
+                        <MudItem xs="12" Style="display:flex; align-items:flex-end; justify-content:center; margin-top:10px">
+                            <MudButton Variant="Variant.Filled" EndIcon="@Icons.Material.Filled.ShoppingCart" Color="Color.Info" @onclick="Buy">Vásárlás</MudButton>
+                        </MudItem>
+
+                    </MudGrid>
+                }
+                else
+                {
+                    <MudText Typo="Typo.h6" Align="Align.Center" Style="margin-top: 10px; margin-bottom:20px">A kosár üres.</MudText>
+                }
+            }
+
+        </MudPaper>
+    </Authorized>
+    <NotAuthorized>
+        <RedirectToLogin></RedirectToLogin>
+    </NotAuthorized>
+
+</AuthorizeView>
+
+
+@code {
+
+    public TicketDto[] tickets { get; set; }
+    public List<OrderItemDto> orderitems { get; set; } = new List<OrderItemDto>();
+    public Array paymentmethods { get; set; }
+    public Array shippingmethods { get; set; }
+    public int sumprice { get; set; } = 0;
+    public string userId { get; set; }
+    public string selectedPaymentMethod { get; set; }
+    public string selectedShippingMethod { get; set; }
+    public HttpClient http { get; set; }
+
+    protected async override Task OnInitializedAsync()
+    {
+        var auth = await AuthState.GetAuthenticationStateAsync();
+        var claimsPrincipal = auth.User;
+        userId = claimsPrincipal.FindFirst(x => x.Type.Equals("sub")).Value;
+
+        http = HttpClientFactory.CreateClient("BlazorPL.PublicServerAPI");
+        tickets = await http.GetFromJsonAsync<TicketDto[]>($"api/tickets/cart?userid={userId}");
+
+        paymentmethods = Enum.GetValues(typeof(PaymentMethod));
+        shippingmethods = Enum.GetValues(typeof(ShippingMethod));
+
+        foreach (TicketDto t in tickets)
+        {
+            orderitems.Add(new OrderItemDto()
+            {
+                TicketId = t.Id,
+                Amount = 1,
+                Price = t.Price,
+                TicketCategory = t.Category,
+                Status = Status.New,
+                EventName = t.EventName
+            });
+        }
+
+        foreach (var o in orderitems)
+        {
+            sumprice += o.Price;
+        }
+    }
+    public void SumPrice()
+    {
+        
+        sumprice = 0;
+        foreach (var o in orderitems)
+        {
+            sumprice += o.Price * o.Amount;
+        }
+    }
+    public async Task Buy()
+    {
+        PaymentMethod pmeth = (PaymentMethod)Enum.Parse(typeof(PaymentMethod), selectedPaymentMethod, true);
+        ShippingMethod smeth = (ShippingMethod)Enum.Parse(typeof(ShippingMethod), selectedShippingMethod, true);
+        OrderDto orderDto = new OrderDto()
+        {
+            Status = Status.New,
+            UserId = userId,
+            OrderItems = orderitems,
+            PaymentMethod = pmeth,
+            ShippingMethod = smeth
+        };
+        var temp = await http.PostAsJsonAsync<OrderDto>($"api/orders", orderDto);
+        var order = await temp.Content.ReadFromJsonAsync<OrderDto>();
+        foreach (var item in orderitems)
+        {
+            item.OrderId = order.Id;
+            await http.PostAsJsonAsync<OrderItemDto>($"api/orderitems", item);
+        }
+        await http.PostAsJsonAsync($"api/users/cart-to-bought", orderDto);
+        uriHelper.NavigateTo(uriHelper.Uri, forceLoad: true);
+    }
+}

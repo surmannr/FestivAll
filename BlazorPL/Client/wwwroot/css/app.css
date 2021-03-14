@@ -3,14 +3,14 @@
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     background-image: url(../background.jpg);
-    min-height: 100%;
     background-repeat: no-repeat;
     background-attachment: fixed;
     background-size: cover;
+    height: 85vh;
 }
 
 #app {
-    
+    min-height:100%;
 }
 
 a, .btn-link {

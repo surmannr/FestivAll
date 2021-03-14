@@ -1,5 +1,156 @@
-﻿<h3>EventComponent</h3>
+﻿@using System.Net.Http
+@inject HttpClient Http
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@using System.Security.Claims
+@inject NavigationManager uriHelper
+
+<MudExpansionPanel IsExpanded="@Expand">
+    <TitleContent>
+
+        <MudGrid Justify="Justify.Center" Spacing="3" Style="margin-left:30px;">
+            <MudItem xs="3">
+                <a href="/event/@Id"><MudText Class="mt-1">@EventName</MudText></a>
+            </MudItem>
+            <MudItem xs="3">
+                <MudText Class="mt-1">@Location</MudText>
+            </MudItem>
+            <MudItem xs="2">
+                <MudText Class="mt-1">@EventDate.ToShortDateString()</MudText>
+            </MudItem>
+            <MudItem xs="2">
+                <MudRating SelectedValue="@AverageReview" ReadOnly="true" />
+            </MudItem>
+            <MudItem xs="2" Style="letter-spacing:10px">
+
+                <AuthorizeView>
+                    <Authorized>
+                        <MudIcon Icon="@Icons.Material.Filled.Favorite" Color="Color.Error" />
+                        <a href="/tickets">
+                            <MudIcon Icon="@Icons.Material.Filled.ShoppingCart" Color="Color.Dark" />
+                        </a>
+                        <MudIcon Icon="@Icons.Material.Filled.RateReview" Color="Color.Dark" @onclick="() => AddReviewToEvent(context.User)" />
+                    </Authorized>
+                    <NotAuthorized>
+                        <a href="/login">
+                            <MudIcon Icon="@Icons.Material.Filled.Favorite" Color="Color.Error" />
+                        </a>
+                        <a href="/login">
+                            <MudIcon Icon="@Icons.Material.Filled.ShoppingCart" Color="Color.Dark" />
+                        </a>
+                        <a href="/login">
+                            <MudIcon Icon="@Icons.Material.Filled.RateReview" Color="Color.Dark" />
+                        </a>
+</NotAuthorized>
+                </AuthorizeView>
+
+            </MudItem>
+        </MudGrid>
+    </TitleContent>
+    <ChildContent>
+        <MudDivider />
+        <MudGrid Justify="Justify.Center" Spacing="3" Style="margin-left:30px; align-items:baseline;">
+            <MudItem xs="3">
+                <MudText Class="mt-1">Vélemény írása:</MudText>
+            </MudItem>
+            <MudItem xs="4">
+                <MudTextField T="string" Label="Vélemény írása..." @bind-value=newReviewDescription />
+            </MudItem>
+            <MudItem xs="3">
+                <MudText Align="Align.Center" Class="mt-1">Értékelés:</MudText>
+            </MudItem>
+            <MudItem xs="2">
+                <MudRating @bind-value=newReviewStars @bind-SelectedValue="newReviewStars" @bind-value:event="onchange" @onclick="ExpandFalse" />
+            </MudItem>
+        </MudGrid>
+    </ChildContent>
+</MudExpansionPanel>
+
+<MudMessageBox @ref="mbox" Title="@DialogTitle">
+    <MessageContent>
+        @DialogMessage
+    </MessageContent>
+    <YesButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Error">Rendben</MudButton>
+    </YesButton>
+</MudMessageBox>
+
+
 
 @code {
 
+    #region Paraméterek
+    // Paraméterek a komponenshez
+
+    [Parameter]
+    public int Id { get; set; }
+
+    [Parameter]
+    public string EventName { get; set; }
+
+    [Parameter]
+    public DateTime EventDate { get; set; }
+
+    [Parameter]
+    public string Location { get; set; }
+
+    [Parameter]
+    public List<ReviewDto> Reviews { get; set; }
+
+    public int AverageReview { get; set; } = 0;
+    #endregion
+
+    #region Új értékeléshez
+
+    // Új értékeléshez adatok
+
+    public int newReviewStars { get; set; } = 1;
+
+    public string newReviewDescription { get; set; }
+
+    MudMessageBox mbox { get; set; }
+
+    public bool Expand { get; set; }
+
+    public string DialogTitle { get; set; } = "Hiba";
+    public string DialogMessage { get; set; } = "Az értékeléshez minden értéket ki kell tölteni!";
+
+    #endregion
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        foreach (ReviewDto r in Reviews)
+        {
+            AverageReview += r.Stars;
+        }
+        if (Reviews.Count() == 0) AverageReview = 0;
+        else AverageReview = AverageReview / Reviews.Count();
+    }
+    public void ExpandFalse()
+    {
+        Expand = true;
+    }
+    public async Task AddReviewToEvent(ClaimsPrincipal principal)
+    {
+        if (String.IsNullOrEmpty(newReviewDescription) || newReviewStars == 0)
+        {
+            DialogTitle = "Hiba";
+            DialogMessage = "Az értékeléshez minden értéket ki kell tölteni!";
+            await mbox.Show();
+        }
+        else
+        {
+            DialogTitle = "Sikeres értékelés";
+            DialogMessage = "Értékelted az eseményt!";
+            ReviewDto newReview = new ReviewDto();
+            newReview.Description = newReviewDescription;
+            newReview.Stars = newReviewStars;
+            newReview.EventId = Id;
+            newReview.UserId = principal.FindFirst(x => x.Type.Equals("sub")).Value;
+            await Http.PostAsJsonAsync("api/reviews", newReview);
+            await mbox.Show();
+            if(!mbox.IsVisible) uriHelper.NavigateTo(uriHelper.Uri, forceLoad: true);
+        }
+        ExpandFalse();
+    }
 }

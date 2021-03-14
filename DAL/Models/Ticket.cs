@@ -9,15 +9,18 @@ namespace DAL.Models
     {
         [Key]
         public int Id { get; set; }
+        [Required]
+        [MaxLength(100, ErrorMessage = "A kategória túl hosszú.")]
         public string Category { get; set; }
+        public string EventName { get; set; }
         [Required]
         public int Price { get; set; }
         [Required]
         public int InStock { get; set; }
 
-        public IReadOnlyCollection<Cart> AddToCartByUsers { get; set; }
-        public IReadOnlyCollection<BoughtTicket> BoughtByUsers { get; set; }
-        public IReadOnlyCollection<OrderItem> OrderedItems { get; set; }
+        public IReadOnlyCollection<Cart> AddToCartByUsers { get; set; } = new List<Cart>();
+        public IReadOnlyCollection<BoughtTicket> BoughtByUsers { get; set; } = new List<BoughtTicket>();
+        //public IReadOnlyCollection<OrderItem> OrderedItems { get; set; }
 
         public int EventId { get; set; }
         public Event Event { get; set; }
@@ -26,7 +29,7 @@ namespace DAL.Models
         {
             AddToCartByUsers = new List<Cart>();
             BoughtByUsers = new List<BoughtTicket>();
-            OrderedItems = new List<OrderItem>();
+            //OrderedItems = new List<OrderItem>();
         }
     }
 }

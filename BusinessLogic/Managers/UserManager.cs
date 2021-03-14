@@ -79,6 +79,16 @@ namespace BL.Managers
             return result;
         }
 
+        public async Task AddTicketToCartAsync(string userId, int ticketId)
+        {
+            await userRepository.AddTicketToCart(userId, ticketId);
+        }
+        public async Task AddTicketsFromCartToBought(OrderDto orderDto)
+        {
+            var order = mapper.Map<Order>(orderDto);
+            await userRepository.AddTicketsFromCartToBoughtItems(order);
+        }
+
         // Törlés
 
         public async Task DeleteUserAsync(string userId)

@@ -12,6 +12,8 @@ namespace BL.InterfacesForManagers
         Task<TicketDto> GetTicketByIdAsync(int ticketId);
         Task<IReadOnlyCollection<TicketDto>> GetTicketsAsync();
         Task<IReadOnlyCollection<TicketDto>> GetTicketsByEventIdAsync(int eventId);
+        Task<IReadOnlyCollection<TicketDto>> GetTicketsInCartByUserAsync(string userid);
+        Task<IReadOnlyCollection<BoughtTicketDto>> GetBoughtTicketByUser(string userid);
         Task<TicketDto> CreateTicketAsync(TicketDto newTicketDto);
         Task DeleteTicketAsync(int ticketId);
         Task<TicketDto> ModifyCategoryAsync(int ticketId, string category);

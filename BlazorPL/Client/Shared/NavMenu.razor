@@ -1,7 +1,7 @@
 ﻿
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container container-fluid text-left justify-content-around pl-4">
-                <img class="navbar-brand logo" src="logo_white.png" />
+                <a href="/"><img class="navbar-brand logo" src="logo_white.png" /></a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
@@ -10,18 +10,18 @@
                         <AuthorizeView Roles="Admin">
                             <Authorized>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="#">Adminfelület</a>
+                                    <a class="nav-link" href="/admin">Adminfelület</a>
                                 </li>
                             </Authorized>
                         </AuthorizeView>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">Programok</a>
+                            <a class="nav-link" href="/events">Programok</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">Jegyek</a>
+                            <a class="nav-link" href="/tickets">Jegyek</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">Kosár</a>
+                            <a class="nav-link" href="/cart">Kosár</a>
                         </li>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -30,12 +30,12 @@
                             <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
                                 <AuthorizeView Roles="Organizer">
                                     <Authorized>
-                                        <li><a class="dropdown-item" href="#">Az én programjaim</a></li>
+                                        <li><a class="dropdown-item" href="/my-events">Az én programjaim</a></li>
                                     </Authorized>
                                 </AuthorizeView>
                                 <AuthorizeView>
                                     <Authorized>
-                                        <li><a class="dropdown-item" href="#">Követett programok</a></li>
+                                        <li><a class="dropdown-item" href="/followed-events">Követett programok</a></li>
                                         <li><a class="dropdown-item" href="/bought-tickets">Megvásárolt jegyek</a></li>
                                         <li><a class="dropdown-item" href="/profile-modify">Profil módosítása</a></li>
                                         <li><a class="dropdown-item" href="/logout">Kijelentkezés</a></li>

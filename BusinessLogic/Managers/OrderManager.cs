@@ -44,7 +44,11 @@ namespace BL.Managers
             var orders = await orderRepository.GetOrdersByUserId(userId);
             return mapper.Map<List<OrderDto>>(orders);
         }
-
+        public async Task<OrderDto> GetLastOrderByUser(string userId)
+        {
+            var order = await orderRepository.GetLastOrderByUser(userId);
+            return mapper.Map<OrderDto>(order);
+        }
         // Létrehozás
 
         public async Task<OrderDto> CreateOrderAsync(OrderDto newOrderDto)

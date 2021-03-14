@@ -9,6 +9,7 @@ namespace DAL.Models
     {
         [Key]
         public int Id { get; set; }
+        [MaxLength(500,ErrorMessage = "A poszt túl hosszú.")]
         public string PostContent { get; set; }
         public DateTime CreationDate { get; set; }
         

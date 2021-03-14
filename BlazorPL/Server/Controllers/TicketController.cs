@@ -34,6 +34,20 @@ namespace BlazorPL.Server.Controllers
             var result = await ticketManager.GetTicketsAsync();
             return Ok(result);
         }
+        [HttpGet("cart")]
+        public async Task<ActionResult<IReadOnlyCollection<TicketDto>>> GetTicketCartByUserId([FromQuery] string userid)
+        {
+            var result = await ticketManager.GetTicketsInCartByUserAsync(userid);
+            return Ok(result);
+        }
+
+        [HttpGet("boughttickets/{userid}")]
+        public async Task<ActionResult<IReadOnlyCollection<BoughtTicketDto>>> GetBoughtTicketsByUser(string userid)
+        {
+            var result = await ticketManager.GetBoughtTicketByUser(userid);
+            return Ok(result);
+        }
+
 
         [HttpGet("event")]
         public async Task<ActionResult<IReadOnlyCollection<TicketDto>>> GetTicketByEvent([FromQuery] int eventId)

@@ -8,6 +8,8 @@ namespace SharedLayer.DTOs
 {
     public class OrderDto
     {
+        [JsonPropertyName("id")]
+        public int Id { get; set; }
         [JsonPropertyName("paymentmethod")]
         public PaymentMethod PaymentMethod { get; set; }
         [JsonPropertyName("shippingmethod")]

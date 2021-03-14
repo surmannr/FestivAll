@@ -1,0 +1,76 @@
+﻿@page "/bought-tickets"
+@inject AuthenticationStateProvider AuthState
+@inject HttpClient Http
+@inject IHttpClientFactory HttpClientFactory
+
+<AuthorizeView>
+    <Authorized>
+        <MudPaper Class="d-flex justify-center py-7 p-5" Style="margin-top:25px" Square="false">
+            <MudText Typo="Typo.h2" Align="Align.Center" Style="margin-top: 10px; margin-bottom:15px"><b>Megvásárolt jegyek</b></MudText>
+        </MudPaper>
+        <MudPaper Class="d-flex flex-column align-items-center p-5" Style="margin-top:15px; height:75%;" Square="false">
+            <MudPaper Class="d-flex justify-center p-5" Square="false" Style="width:100%; margin-bottom:15px">
+                <MudGrid Spacing="10" Justify="Justify.Center" Class="align-items-end pb-5">
+                    <MudItem xs="2" sm="2" Class="d-flex align-center justify-center mud-width-full py-8">
+                        <MudText Typo="Typo.body1" Align="Align.Right" Style="font-size:20px">Szűrés:</MudText>
+                    </MudItem>
+                    <MudItem xs="4" sm="4" Class="d-flex align-center justify-center mud-width-full py-8">
+                        <MudTextField T="string" Label="Szűrési feltétel..." Required="false" />
+                    </MudItem>
+                    <MudItem xs="4" sm="4" Class="d-flex align-center justify-center mud-width-full py-8">
+                        <MudSelect T="string" Label="Mi alapján szűrjön..." Required="true" RequiredError="Kérlek válaszd ki mi alapján szűrjön!">
+                            <MudSelectItem Value="@("Program neve")" />
+                            <MudSelectItem Value="@("Ár")" />
+                            <MudSelectItem Value="@("Dátum (yyyy-MM-dd)")" />
+                            <MudSelectItem Value="@("Kategória")" />
+                        </MudSelect>
+                    </MudItem>
+                    <MudItem xs="2" sm="2" Class="d-flex align-center justify-center mud-width-full py-8">
+                        <MudButton Variant="Variant.Outlined">Szűrés</MudButton>
+                    </MudItem>
+
+                </MudGrid>
+            </MudPaper>
+            @if (tickets != null)
+            {
+                <div style="height:100%;overflow-y:scroll ;width:100%">
+
+                    <Virtualize Items="tickets" Context="t" OverscanCount="4">
+                        <ItemContent>
+                            <BoughtComponent BoughtTicket="t" UserId="@userId"></BoughtComponent>
+                        </ItemContent>
+                    </Virtualize>
+
+                </div>
+            }
+            else
+            {
+                <MudText Typo="Typo.h6" Align="Align.Center" Style="margin-top: 10px; margin-bottom:20px">Nincsenek megvásárolt jegyek.</MudText>
+            }
+        </MudPaper>
+    </Authorized>
+    <NotAuthorized>
+        <RedirectToLogin></RedirectToLogin>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+
+    public BoughtTicketDto[] tickets { get; set; }
+
+    public string userId { get; set; }
+
+    public HttpClient http { get; set; }
+
+    protected async override Task OnInitializedAsync()
+    {
+        var auth = await AuthState.GetAuthenticationStateAsync();
+        var claimsPrincipal = auth.User;
+        userId = claimsPrincipal.FindFirst(x => x.Type.Equals("sub")).Value;
+
+        http = HttpClientFactory.CreateClient("BlazorPL.PublicServerAPI");
+        tickets = await http.GetFromJsonAsync<BoughtTicketDto[]>($"api/tickets/boughttickets/{userId}");
+
+
+    }
+}
