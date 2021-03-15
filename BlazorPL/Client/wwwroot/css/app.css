@@ -8,7 +8,29 @@ html, body {
     background-size: cover;
     height: 85vh;
 }
+html {
+    overflow: scroll;
+    overflow-x: hidden;
+}
 
+::-webkit-scrollbar {
+    width: 0; /* Remove scrollbar space */
+    background: transparent; /* Optional: just make scrollbar invisible */
+}
+/* Optional: show position indicator in red */
+::-webkit-scrollbar-thumb {
+    background: #FF0000;
+}
+.bastya {
+    overflow-y: scroll;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* Internet Explorer 10+ */
+}
+
+.bastya::-webkit-scrollbar { /* WebKit */
+    width: 0;
+    height: 0;
+}
 #app {
     min-height:100%;
 }

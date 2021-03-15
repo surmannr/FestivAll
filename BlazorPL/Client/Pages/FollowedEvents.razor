@@ -1,14 +1,19 @@
-﻿@page "/bought-tickets"
+﻿@page "/followed-events"
 @inject AuthenticationStateProvider AuthState
 @inject HttpClient Http
 @inject IHttpClientFactory HttpClientFactory
+@inject NavigationManager uriHelper
+@inject FollowedEventState State
+@implements IDisposable
 
 <AuthorizeView>
     <Authorized>
+
         <MudPaper Class="d-flex justify-center py-7 p-5" Style="margin-top:20px; background-color: rgba(0,0,0,0.5)" Square="false">
-            <MudText Typo="Typo.h2" Align="Align.Center" Style="margin-top: 10px; margin-bottom:20px; color: #ECEFF1"><b>Megvásárolt jegyek</b></MudText>
+            <MudText Typo="Typo.h2" Align="Align.Center" Style="margin-top: 10px; margin-bottom:20px; color: #ECEFF1"><b>Követett események</b></MudText>
         </MudPaper>
-        <MudPaper Class="d-flex flex-column align-items-center p-5" Style="margin-top:15px; height:80%; background-color: rgba(0,0,0,0.5)" Square="false">
+
+        <MudPaper Class="d-flex flex-column align-items-center py-7 p-5" Style="margin-top:15px; height:75%; background-color: rgba(0,0,0,0.5)" Square="false">
             <MudPaper Class="d-flex justify-center p-5" Square="false" Style="width:100%; margin-bottom:15px">
                 <MudGrid Spacing="10" Justify="Justify.Center" Class="align-items-end pb-5">
                     <MudItem xs="2" sm="2" Class="d-flex align-center justify-center mud-width-full py-8">
@@ -31,46 +36,50 @@
 
                 </MudGrid>
             </MudPaper>
-            @if (tickets != null)
+            @if (State.Events != null)
             {
-                <div class="bastya" style="height:100%;overflow-y:scroll ;width:100%">
-
-                    <Virtualize Items="tickets" Context="t" OverscanCount="4">
-                        <ItemContent>
-                            <BoughtComponent BoughtTicket="t" UserId="@userId"></BoughtComponent>
-                        </ItemContent>
+                <div class="bastya" style="height:100%;overflow-y:scroll ;width:100%;">
+                    <Virtualize Items="State.Events" Context="e" OverscanCount="4">
+                        <FollowedComponent _event="e"></FollowedComponent>
                     </Virtualize>
-
                 </div>
             }
-            else
-            {
-                <MudText Typo="Typo.h6" Align="Align.Center" Style="margin-top: 10px; margin-bottom:20px">Nincsenek megvásárolt jegyek.</MudText>
-            }
+
         </MudPaper>
+
     </Authorized>
     <NotAuthorized>
+
         <RedirectToLogin></RedirectToLogin>
+
     </NotAuthorized>
 </AuthorizeView>
 
 @code {
 
-    public BoughtTicketDto[] tickets { get; set; }
-
-    public string userId { get; set; }
-
-    public HttpClient http { get; set; }
+    public EventDto[] events { get; set; }
+    public string UserId { get; set; }
 
     protected async override Task OnInitializedAsync()
     {
         var auth = await AuthState.GetAuthenticationStateAsync();
         var claimsPrincipal = auth.User;
-        userId = claimsPrincipal.FindFirst(x => x.Type.Equals("sub")).Value;
+        UserId = claimsPrincipal.FindFirst(x => x.Type.Equals("sub")).Value;
 
-        http = HttpClientFactory.CreateClient("BlazorPL.PublicServerAPI");
-        tickets = await http.GetFromJsonAsync<BoughtTicketDto[]>($"api/tickets/boughttickets/{userId}");
+        var http = HttpClientFactory.CreateClient("BlazorPL.PublicServerAPI");
+        events = await http.GetFromJsonAsync<EventDto[]>($"api/events/followed-event/{UserId}");
 
+        State.Initialize(events);
 
+    }
+
+    protected override void OnInitialized()
+    {
+        State.OnChange += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        State.OnChange -= StateHasChanged;
     }
 }

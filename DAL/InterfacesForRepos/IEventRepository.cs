@@ -14,6 +14,7 @@ namespace DAL.InterfacesForRepos
         Task<IReadOnlyCollection<Event>> GetEventsByName(string name);
         Task<IReadOnlyCollection<Event>> GetEventsByLocation(string location);
         Task<IReadOnlyCollection<Event>> GetEventsByStartDate(DateTime startDate);
+        Task<IReadOnlyCollection<Event>> GetEventsFollowedByUser(string userid);
         Task<IReadOnlyCollection<Event>> GetEventsByCreatorUserId(string userId);
         Task<IReadOnlyCollection<Event>> GetAllEvents();
         // Létrehozás
@@ -24,5 +25,6 @@ namespace DAL.InterfacesForRepos
         Task<Event> ModifyEventStartDate(int eventId, DateTime newStartDate);
         // Törlés
         Task DeleteEvent(int eventId);
+        Task DeleteUserFollowedEvent(string userid, int eventid);
     }
 }

@@ -1,9 +1,10 @@
-﻿@using System.Net.Http
-@inject AuthenticationStateProvider AuthState
+﻿@inject AuthenticationStateProvider AuthState
 @inject HttpClient Http
 @inject IHttpClientFactory HttpClientFactory
 @inject NavigationManager uriHelper
 @inject ISnackbar Snackbar
+@inject FollowedEventState State
+
 
 <MudExpansionPanel IsExpanded="@Expand" Dense="true" DisableGutters="true">
     <TitleContent>
@@ -26,7 +27,7 @@
 
                     <AuthorizeView>
                         <Authorized>
-                            <MudIcon Icon="@Icons.Material.Filled.Favorite" Color="Color.Error" @onclick="AddFollowedEvent" />
+                            <MudIcon Icon="@Icons.Material.Filled.Clear" Color="Color.Error" @onclick="RemoveFollowedEvent" />
                             <a href="/tickets">
                                 <MudIcon Icon="@Icons.Material.Filled.ShoppingCart" Color="Color.Dark" />
                             </a>
@@ -34,7 +35,7 @@
                         </Authorized>
                         <NotAuthorized>
                             <a href="/login">
-                                <MudIcon Icon="@Icons.Material.Filled.Favorite" Color="Color.Error" />
+                                <MudIcon Icon="@Icons.Material.Filled.Clear" Color="Color.Error" />
                             </a>
                             <a href="/login">
                                 <MudIcon Icon="@Icons.Material.Filled.ShoppingCart" Color="Color.Dark" />
@@ -50,9 +51,9 @@
         }
 
     </TitleContent>
-    
 
-    
+
+
     <ChildContent>
         <div style="background-color:#dfe4ea;padding-bottom:10px;display:flex; justify-content:center">
             <MudDivider />
@@ -76,7 +77,6 @@
 
 
 @code {
-
     #region Paraméterek
     // Paraméterek a komponenshez
 
@@ -106,7 +106,7 @@
     protected override void OnInitialized()
     {
 
-        if(_event != null)
+        if (_event != null)
         {
             foreach (ReviewDto r in _event.Reviews)
             {
@@ -115,6 +115,7 @@
             if (_event.Reviews.Count() == 0) AverageReview = 0;
             else AverageReview = AverageReview / _event.Reviews.Count();
         }
+        
 
     }
     public void ExpandFalse()
@@ -149,27 +150,33 @@
                 SnackbarMessage = "Az értékelésnél hiba történt. Kérlek próbáld meg újból.";
                 Snackbar.Add(SnackbarMessage, Severity.Error);
             }
-            if (Snackbar.ShownSnackbars.Count() == 0) uriHelper.NavigateTo(uriHelper.Uri, forceLoad: true);
+            StateHasChanged();
         }
         ExpandFalse();
     }
 
-    public async Task AddFollowedEvent()
+    public async Task RemoveFollowedEvent()
     {
         var auth = await AuthState.GetAuthenticationStateAsync();
         var claimsPrincipal = auth.User;
         userId = claimsPrincipal.FindFirst(x => x.Type.Equals("sub")).Value;
-        var result = await Http.PostAsJsonAsync($"api/users/followed-event?userid={userId}&eventid={_event.Id}", _event.Name);
+        var result = await Http.DeleteAsync($"api/events/user-followed?eventid={_event.Id}&userid={userId}");
         if (result.IsSuccessStatusCode)
         {
-            SnackbarMessage = $"Sikeresen a kedvencek közé adtad a(z) {_event.Name} eseményt!";
+            SnackbarMessage = $"Sikeresen törölted a kedvenceid közül a(z) {_event.Name} eseményt!";
             Snackbar.Add(SnackbarMessage, Severity.Success);
-        } else
+            Console.WriteLine($"Törlés előtt: {State.Events.Count()}");
+            State.Remove(_event);
+            StateHasChanged();
+            Console.WriteLine($"Törlés után: {State.Events.Count()}");
+        }
+        else
         {
-            SnackbarMessage = $"Nem sikerült a kedvencek közé adni a(z) {_event.Name} eseményt!\n" +
-                    $"Lehet már ott van a kedvenceid között.";
+            SnackbarMessage = "Sikertelen törlés.";
             Snackbar.Add(SnackbarMessage, Severity.Error);
         }
         ExpandFalse();
     }
+
+    
 }

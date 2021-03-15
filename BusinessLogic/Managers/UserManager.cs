@@ -44,7 +44,10 @@ namespace BL.Managers
         }
 
         // Létrehozás
-
+        public async Task AddFollowedEventToUser(int eventid, string userid)
+        {
+            await userRepository.AddFollowedEvent(userid, eventid);
+        }
         public async Task<IdentityResult> CreateUserAsync(User newUserDto, string password)
         {
             newUserDto.Role = "User";
@@ -93,6 +96,9 @@ namespace BL.Managers
 
         public async Task DeleteUserAsync(string userId)
             => await userRepository.DeleteUser(userId);
+
+        public async Task DeleteTicketFromCart(string userid, int ticketid)
+            => await userRepository.DeleteFromCart(userid, ticketid);
 
         // Módosítások
 

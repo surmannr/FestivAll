@@ -48,6 +48,13 @@ namespace BlazorPL.Server.Controllers
             return Ok(events);
         }
 
+        [HttpGet("followed-event/{userid}")]
+        public async Task<ActionResult<IReadOnlyCollection<EventDto>>> GetFollowedEventsByUser(string userid)
+        {
+            var events = await eventManager.GetFollowedEventByUser(userid);
+            return Ok(events);
+        }
+
         [HttpGet("creator")]
         public async Task<ActionResult<IReadOnlyCollection<EventDto>>> GetEventsByCreator([FromQuery] string userId)
         {
@@ -72,6 +79,12 @@ namespace BlazorPL.Server.Controllers
         public async Task<ActionResult> Delete(int id)
         {
             await eventManager.DeleteEventAsync(id);
+            return Ok();
+        }
+        [HttpDelete("user-followed")]
+        public async Task<ActionResult> Delete([FromQuery] int eventid, [FromQuery] string userid)
+        {
+            await eventManager.DeleteUserFollowedEventAsync(userid,eventid);
             return Ok();
         }
         #endregion

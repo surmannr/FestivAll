@@ -11,6 +11,8 @@ using System.Threading.Tasks;
 using Radzen;
 using Microsoft.AspNetCore.Components.Authorization;
 using MudBlazor.Services;
+using MudBlazor;
+using BlazorPL.Client.States;
 
 namespace BlazorPL.Client
 {
@@ -31,12 +33,29 @@ namespace BlazorPL.Client
             //builder.Services.AddOptions();
             builder.Services.AddApiAuthorization();
 
-            builder.Services.AddScoped<DialogService>();
+            builder.Services.AddScoped<Radzen.DialogService>();
             builder.Services.AddScoped<NotificationService>();
             builder.Services.AddScoped<TooltipService>();
             builder.Services.AddScoped<ContextMenuService>();
 
-            builder.Services.AddMudServices();
+            builder.Services.AddMudServices(config =>
+            {
+                config.SnackbarConfiguration.PositionClass = Defaults.Classes.Position.BottomCenter;
+
+                config.SnackbarConfiguration.PreventDuplicates = false;
+                config.SnackbarConfiguration.NewestOnTop = false;
+                config.SnackbarConfiguration.ShowCloseIcon = true;
+                config.SnackbarConfiguration.BackgroundBlurred = true;
+                config.SnackbarConfiguration.VisibleStateDuration = 10000;
+                config.SnackbarConfiguration.HideTransitionDuration = 500;
+                config.SnackbarConfiguration.ShowTransitionDuration = 500;
+                config.SnackbarConfiguration.SnackbarVariant = Variant.Filled;
+
+            }); ;
+
+            // Stzatatasststssdû
+
+            builder.Services.AddScoped<FollowedEventState>();
 
             await builder.Build().RunAsync();
         }

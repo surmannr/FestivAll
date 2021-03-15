@@ -23,13 +23,13 @@ namespace DAL.Models
         public string CreatorUserId { get; set; }
         public User CreatorUser { get; set; }
 
-        public IReadOnlyCollection<UserFollowedEvent> FollowedByUsers { get; set; }
-       
-        public IReadOnlyCollection<Review> Reviews { get; set; }
+        public IReadOnlyCollection<UserFollowedEvent> FollowedByUsers { get; set; } = new List<UserFollowedEvent>();
 
-        public IReadOnlyCollection<Post> Posts { get; set; }
+        public IReadOnlyCollection<Review> Reviews { get; set; } = new List<Review>();
 
-        public IReadOnlyCollection<Ticket> Tickets { get; set; }
+        public IReadOnlyCollection<Post> Posts { get; set; } = new List<Post>();
+
+        public IReadOnlyCollection<Ticket> Tickets { get; set; } = new List<Ticket>();
 
         public Event()
         {

@@ -18,8 +18,10 @@ namespace BL.InterfacesForManagers
         Task<IdentityResult> CreateAdminAsync(UserDto newUserDto, string password);
         Task<IdentityResult> CreateOrganizerAsync(User newUserDto, string password);
         Task AddTicketToCartAsync(string userId, int ticketId);
+        Task AddFollowedEventToUser(int eventid, string userid);
         Task AddTicketsFromCartToBought(OrderDto orderDto);
         Task DeleteUserAsync(string userId);
+        Task DeleteTicketFromCart(string userid, int ticketid);
         Task<UserDto> ModifyUserNameAsync(string userId, string userName);
         Task<UserDto> ModifyPasswordAsync(string userId, string password);
         Task<UserDto> ModifyNickNameAsync(string userId, string nickName);

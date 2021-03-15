@@ -61,6 +61,14 @@ namespace BlazorPL.Server.Controllers
             return Ok();
         }
 
+        [HttpPost("followed-event")]
+        public async Task<ActionResult> CreateFollowedEventToUser([FromQuery] int eventid, [FromQuery] string userid)
+        {
+            await userManager.AddFollowedEventToUser(eventid,userid);
+            return Ok();
+        }
+
+
         [HttpPost("cart-to-bought")]
         public async Task<ActionResult> CreateBoughtItemsFromCart([FromBody] OrderDto order)
         {
@@ -75,6 +83,13 @@ namespace BlazorPL.Server.Controllers
         public async Task<ActionResult> Delete(string id)
         {
             await userManager.DeleteUserAsync(id);
+            return Ok();
+        }
+
+        [HttpDelete("delete-cart")]
+        public async Task<ActionResult> DeleteTicketFromCart([FromQuery] string userid, [FromQuery] int ticketid)
+        {
+            await userManager.DeleteTicketFromCart(userid,ticketid);
             return Ok();
         }
 

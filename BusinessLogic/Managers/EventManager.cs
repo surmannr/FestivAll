@@ -41,7 +41,11 @@ namespace BL.Managers
             var eventList = await eventRepository.GetEventsByName(name);
             return mapper.Map<List<EventDto>>(eventList);
         }
-
+        public async Task<IReadOnlyCollection<EventDto>> GetFollowedEventByUser(string userid)
+        {
+            var eventList = await eventRepository.GetEventsFollowedByUser(userid);
+            return mapper.Map<List<EventDto>>(eventList);
+        }
         public async Task<IReadOnlyCollection<EventDto>> GetEventsByLocationAsync(string location)
         {
             var eventList = await eventRepository.GetEventsByLocation(location);
@@ -74,6 +78,11 @@ namespace BL.Managers
         public async Task DeleteEventAsync(int eventId)
         {
             await eventRepository.DeleteEvent(eventId);
+        }
+
+        public async Task DeleteUserFollowedEventAsync(string userid, int eventid)
+        {
+            await eventRepository.DeleteUserFollowedEvent(userid, eventid);
         }
 
         // Módosítás

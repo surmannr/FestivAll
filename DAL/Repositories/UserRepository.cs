@@ -84,7 +84,12 @@ namespace DAL.Repositories
             }
             else throw new NullReferenceException(ExceptionMessageConstants.NullObject);
         }
-
+        public async Task DeleteFromCart(string userid, int ticketid)
+        {
+            var cart = await db.Carts.Where(c => c.TicketId == ticketid && c.UserId == userid).FirstOrDefaultAsync();
+            db.Carts.Remove(cart);
+            await db.SaveChangesAsync();
+        }
         public async Task<Cart> AddTicketToCart(string userId, int ticketId)
         {
             var user = await userManager.FindByIdAsync(userId);

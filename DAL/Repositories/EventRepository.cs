@@ -38,10 +38,25 @@ namespace DAL.Repositories
             }
             else throw new NullReferenceException(ExceptionMessageConstants.NullObject);
         }
-
+        public async Task DeleteUserFollowedEvent(string userid, int eventid)
+        {
+            var followedevent = await db.UserFollowedEvents.Include(u => u.Event).ThenInclude(r => r.Reviews).Where(u => u.UserId == userid && u.EventId==eventid).FirstOrDefaultAsync();
+            db.UserFollowedEvents.Remove(followedevent);
+            await db.SaveChangesAsync();
+        }
         public async Task<IReadOnlyCollection<Event>> GetAllEvents()
         {
             return await db.Events.GetEventsList();
+        }
+        public async Task<IReadOnlyCollection<Event>> GetEventsFollowedByUser(string userid)
+        {
+            var followedevents = await db.UserFollowedEvents.Include(u => u.Event).ThenInclude(r=>r.Reviews).Where(u => u.UserId == userid).ToListAsync();
+            List<Event> listevent = new List<Event>();
+            foreach (var _event in followedevents)
+            {
+                listevent.Add(_event.Event);
+            }
+            return listevent;
         }
 
         public async Task<Event> GetEventById(int id)
@@ -105,7 +120,7 @@ namespace DAL.Repositories
         }
 
         public static async Task<Event> GetByIdOrNull(this IQueryable<Event> events, int eventId)
-            => await events.Where(e => e.Id == eventId).FirstOrDefaultAsync();
+            => await events.Include(r => r.Reviews).Where(e => e.Id == eventId).FirstOrDefaultAsync();
 
         public static async Task<IReadOnlyCollection<Event>> GetEventsList(this IQueryable<Event> events)
             => await events.Include(r => r.Reviews).ToListAsync();

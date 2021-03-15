@@ -7,10 +7,10 @@
 
 <AuthorizeView>
     <Authorized>
-        <MudPaper Class="d-flex justify-center py-7 p-5" Style="margin-top:15px" Square="false">
-            <MudText Typo="Typo.h2" Align="Align.Center" Style="margin-top: 10px; margin-bottom:10px"><b>Kosár</b></MudText>
+        <MudPaper Class="d-flex justify-center py-7 p-5" Style="margin-top:20px; background-color: rgba(0,0,0,0.5)" Square="false">
+            <MudText Typo="Typo.h2" Align="Align.Center" Style="margin-top: 10px; margin-bottom:20px; color: #ECEFF1"><b>Kosár</b></MudText>
         </MudPaper>
-        <MudPaper Class="d-flex flex-column align-items-center py-7 p-5" Style="margin-top:15px; height:80%" Square="false">
+        <MudPaper Class="d-flex flex-column align-items-center py-7 p-5" Style="margin-top:15px; height:80%; background-color: rgba(0,0,0,0.5)" Square="false">
 
             @if (orderitems != null || tickets != null)
             {
@@ -35,7 +35,7 @@
                             <MudTd DataLabel="Program neve">@o.EventName</MudTd>
                             <MudTd Style="text-align: left" DataLabel="Jegy kategória">@o.TicketCategory</MudTd>
                             <MudTd DataLabel="Mennyiség" @onkeydown="SumPrice" @onchange="SumPrice" @oninput="SumPrice">
-                                <MudTextField @bind-Value="o.Amount" Placeholder="Mennyiség" Variant="Variant.Text" InputType="InputType.Number" @onkeydown="SumPrice" @oninput="SumPrice" @onchange="SumPrice"></MudTextField>
+                                <MudTextField @bind-Value="o.Amount" Placeholder="Mennyiség" Variant="Variant.Text" InputType="InputType.Number" @onkeydown="SumPrice" @oninput="SumPrice" @onchange="SumPrice" @onfocusout="SumPrice" ></MudTextField>
                             </MudTd>
                             <MudTd Style="text-align: right" DataLabel="Ár">@o.Price Ft</MudTd>
                             <MudTd Style="text-align: center">
@@ -46,44 +46,47 @@
                             <MudTablePager RowsPerPageString="Találatok száma" PageSizeOptions="new int[]{5,10}" DisableRowsPerPage="true" />
                         </PagerContent>
                     </MudTable>
-                    <MudGrid Justify="Justify.SpaceAround" Style="width:100%; margin-top:10px">
-                        <MudItem xs="3" Style="display:flex; align-items:flex-end">
-                            <MudText Typo="Typo.body1" Align="Align.Left" Style="font-size:20px"><b>Fizetési mód</b></MudText>
-                        </MudItem>
-                        <MudItem xs="3" Class="d-flex align-items-baseline justify-center mud-width-full">
-                            <MudSelect T="string" Label="Fizetési mód" @bind-Value="selectedPaymentMethod">
-                                @foreach (var a in paymentmethods)
-                                {
-                                    <MudSelectItem Value="@a.ToString()" />
-                                }
-                            </MudSelect>
-                        </MudItem>
-                        <MudItem xs="6" Style="display:flex; align-items:flex-end">
-                            <MudDivider DividerType="DividerType.Middle" Style="width:100%; background-color:black; color:black"></MudDivider>
-                        </MudItem>
-                    </MudGrid>
-                    <MudGrid Justify="Justify.SpaceAround" Style="width:100%; margin-top:10px">
-                        <MudItem xs="3" Style="display:flex; align-items:flex-end">
-                            <MudText Typo="Typo.body1" Align="Align.Left" Style="font-size:20px"><b>Szállítási mód:</b></MudText>
-                        </MudItem>
-                        <MudItem xs="3" Class="d-flex align-items-baseline justify-center mud-width-full">
-                            <MudSelect T="string" Label="Szállítási mód" @bind-Value="selectedShippingMethod">
-                                @foreach (var a in shippingmethods)
-                                {
-                                    <MudSelectItem Value="@a.ToString()" />
-                                }
-                            </MudSelect>
-                        </MudItem>
-                        <MudItem xs="6" Style="display:flex; align-items:flex-end; justify-content:center">
-                            <MudText Typo="Typo.h5" Align="Align.Center" Color="Color.Dark" Style="font-size:30px"><u>Végösszeg: @sumprice.ToString("N0") Ft</u></MudText>
-                        </MudItem>
-                    </MudGrid>
-                    <MudGrid Justify="Justify.Center" Style="width:100%; margin-top:20px">
-                        <MudItem xs="12" Style="display:flex; align-items:flex-end; justify-content:center; margin-top:10px">
-                            <MudButton Variant="Variant.Filled" EndIcon="@Icons.Material.Filled.ShoppingCart" Color="Color.Info" @onclick="Buy">Vásárlás</MudButton>
-                        </MudItem>
+                    <MudPaper Width="100" Style="width:100%; margin-top:10px; padding:20px; height:50%">
+                        <MudGrid Justify="Justify.SpaceAround" Style="width:100%;">
+                            <MudItem xs="3" Style="display:flex; align-items:flex-end">
+                                <MudText Typo="Typo.body1" Align="Align.Left" Style="font-size:20px"><b>Fizetési mód:</b></MudText>
+                            </MudItem>
+                            <MudItem xs="3" Class="d-flex align-items-baseline justify-center mud-width-full">
+                                <MudSelect T="string" Label="Fizetési mód" @bind-Value="selectedPaymentMethod">
+                                    @foreach (var a in paymentmethods)
+                                    {
+                                        <MudSelectItem Value="@a.ToString()" />
+                                    }
+                                </MudSelect>
+                            </MudItem>
+                            <MudItem xs="6" Style="display:flex; align-items:flex-end">
+                                <MudDivider DividerType="DividerType.Middle" Style="width:100%; background-color:black; color:black"></MudDivider>
+                            </MudItem>
+                        </MudGrid>
+                        <MudGrid Justify="Justify.SpaceAround" Style="width:100%; margin-top:10px">
+                            <MudItem xs="3" Style="display:flex; align-items:flex-end">
+                                <MudText Typo="Typo.body1" Align="Align.Left" Style="font-size:20px"><b>Szállítási mód:</b></MudText>
+                            </MudItem>
+                            <MudItem xs="3" Class="d-flex align-items-baseline justify-center mud-width-full">
+                                <MudSelect T="string" Label="Szállítási mód" @bind-Value="selectedShippingMethod">
+                                    @foreach (var a in shippingmethods)
+                                    {
+                                        <MudSelectItem Value="@a.ToString()" />
+                                    }
+                                </MudSelect>
+                            </MudItem>
+                            <MudItem xs="6" Style="display:flex; align-items:flex-end; justify-content:center">
+                                <MudText Typo="Typo.h5" Align="Align.Center" Color="Color.Dark" Style="font-size:30px"><u>Végösszeg: @sumprice.ToString("N0") Ft</u></MudText>
+                            </MudItem>
+                        </MudGrid>
+                        <MudGrid Justify="Justify.Center" Style="width:100%;">
+                            <MudItem xs="12" Style="display:flex; align-items:flex-end; justify-content:center; margin-top:10px">
+                                <MudButton Variant="Variant.Filled" EndIcon="@Icons.Material.Filled.ShoppingCart" Color="Color.Info" @onclick="Buy">Vásárlás</MudButton>
+                            </MudItem>
 
-                    </MudGrid>
+                        </MudGrid>
+                    </MudPaper>
+                    
                 }
                 else
                 {

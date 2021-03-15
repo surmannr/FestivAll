@@ -26,5 +26,6 @@ namespace DAL.InterfacesForRepos
         Task AddTicketsFromCartToBoughtItems(Order order);
         // Törlés
         Task DeleteUser(string userId);
+        Task DeleteFromCart(string userid, int ticketid);
     }
 }

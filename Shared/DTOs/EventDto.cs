@@ -19,7 +19,7 @@ namespace SharedLayer.DTOs
         public string Description { get; set; }
         [JsonPropertyName("creatoruserid")]
         public string CreatorUserId { get; set; }
-        [JsonPropertyName("review")]
+        [JsonPropertyName("reviews")]
         public List<ReviewDto> Reviews { get; set; } = new List<ReviewDto>();
 
         public EventDto() { }
