@@ -4,6 +4,9 @@
 @inject IHttpClientFactory HttpClientFactory
 @inject NavigationManager uriHelper
 @using SharedLayer.Enums
+@inject CartState State
+@implements IDisposable
+@inject ISnackbar Snackbar
 
 <AuthorizeView>
     <Authorized>
@@ -12,11 +15,11 @@
         </MudPaper>
         <MudPaper Class="d-flex flex-column align-items-center py-7 p-5" Style="margin-top:15px; height:80%; background-color: rgba(0,0,0,0.5)" Square="false">
 
-            @if (orderitems != null || tickets != null)
+            @if (State.OrderItems != null)
             {
-                @if (orderitems.Count() > 0)
+                @if (State.OrderItems.Count() > 0)
                 {
-                    <MudTable Items="orderitems" Context="o" FixedHeader="true" Style="width:100%" Height="400px" @onkeydown="SumPrice" @onchange="SumPrice" @oninput="SumPrice">
+                    <MudTable Items="State.OrderItems" Context="o" FixedHeader="true" Style="width:100%" Height="400px" @onkeydown="SumPrice" @onchange="SumPrice" @oninput="SumPrice">
                         <ColGroup>
                             <col style="width:35%;" />
                             <col style="width: 35%;" />
@@ -35,11 +38,11 @@
                             <MudTd DataLabel="Program neve">@o.EventName</MudTd>
                             <MudTd Style="text-align: left" DataLabel="Jegy kategória">@o.TicketCategory</MudTd>
                             <MudTd DataLabel="Mennyiség" @onkeydown="SumPrice" @onchange="SumPrice" @oninput="SumPrice">
-                                <MudTextField @bind-Value="o.Amount" Placeholder="Mennyiség" Variant="Variant.Text" InputType="InputType.Number" @onkeydown="SumPrice" @oninput="SumPrice" @onchange="SumPrice" @onfocusout="SumPrice" ></MudTextField>
+                                <MudTextField @bind-Value="o.Amount" Placeholder="Mennyiség" Variant="Variant.Text" InputType="InputType.Number" @onkeydown="SumPrice" @oninput="SumPrice" @onchange="SumPrice" @onfocusout="SumPrice"></MudTextField>
                             </MudTd>
                             <MudTd Style="text-align: right" DataLabel="Ár">@o.Price Ft</MudTd>
                             <MudTd Style="text-align: center">
-                                <MudIcon Icon="@Icons.Material.Filled.Delete" />
+                                <MudIcon Icon="@Icons.Material.Filled.Delete" @onclick="() => RemoveOrderItem(o)" />
                             </MudTd>
                         </RowTemplate>
                         <PagerContent>
@@ -86,7 +89,7 @@
 
                         </MudGrid>
                     </MudPaper>
-                    
+
                 }
                 else
                 {
@@ -106,14 +109,20 @@
 @code {
 
     public TicketDto[] tickets { get; set; }
-    public List<OrderItemDto> orderitems { get; set; } = new List<OrderItemDto>();
-    public Array paymentmethods { get; set; }
-    public Array shippingmethods { get; set; }
+
+    public Array paymentmethods { get; set; } = Enum.GetValues(typeof(PaymentMethod));
+    public Array shippingmethods { get; set; } = Enum.GetValues(typeof(ShippingMethod));
+
     public int sumprice { get; set; } = 0;
+
     public string userId { get; set; }
-    public string selectedPaymentMethod { get; set; }
-    public string selectedShippingMethod { get; set; }
+
+    public string selectedPaymentMethod { get; set; } = PaymentMethod.Cash.ToString();
+    public string selectedShippingMethod { get; set; } = ShippingMethod.DeliverByPost.ToString();
+
     public HttpClient http { get; set; }
+
+    public string SnackbarMessage { get; set; } = "alap";
 
     protected async override Task OnInitializedAsync()
     {
@@ -127,29 +136,49 @@
         paymentmethods = Enum.GetValues(typeof(PaymentMethod));
         shippingmethods = Enum.GetValues(typeof(ShippingMethod));
 
-        foreach (TicketDto t in tickets)
+        if (tickets != null)
         {
-            orderitems.Add(new OrderItemDto()
-            {
-                TicketId = t.Id,
-                Amount = 1,
-                Price = t.Price,
-                TicketCategory = t.Category,
-                Status = Status.New,
-                EventName = t.EventName
-            });
-        }
+            State.Initialize(tickets);
 
-        foreach (var o in orderitems)
+            foreach (var o in State.OrderItems)
+            {
+                sumprice += o.Price;
+            }
+        }
+        else State.OrderItems = new List<OrderItemDto>();
+
+    }
+    protected override void OnInitialized()
+    {
+        State.OnChange += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        State.OnChange -= StateHasChanged;
+    }
+
+    public async Task RemoveOrderItem(OrderItemDto o)
+    {
+        var result = await Http.DeleteAsync($"api/users/delete-cart?ticketid={o.TicketId}&userid={userId}");
+        if (result.IsSuccessStatusCode)
         {
-            sumprice += o.Price;
+            SnackbarMessage = $"Sikeresen törölted a kedvenceid közül a jegyet!";
+            Snackbar.Add(SnackbarMessage, Severity.Success);
+            State.Remove(o);
+            StateHasChanged();
+        }
+        else
+        {
+            SnackbarMessage = "Sikertelen törlés.";
+            Snackbar.Add(SnackbarMessage, Severity.Error);
         }
     }
     public void SumPrice()
     {
-        
+
         sumprice = 0;
-        foreach (var o in orderitems)
+        foreach (var o in State.OrderItems)
         {
             sumprice += o.Price * o.Amount;
         }
@@ -162,13 +191,13 @@
         {
             Status = Status.New,
             UserId = userId,
-            OrderItems = orderitems,
+            OrderItems = State.OrderItems,
             PaymentMethod = pmeth,
             ShippingMethod = smeth
         };
         var temp = await http.PostAsJsonAsync<OrderDto>($"api/orders", orderDto);
         var order = await temp.Content.ReadFromJsonAsync<OrderDto>();
-        foreach (var item in orderitems)
+        foreach (var item in State.OrderItems)
         {
             item.OrderId = order.Id;
             await http.PostAsJsonAsync<OrderItemDto>($"api/orderitems", item);

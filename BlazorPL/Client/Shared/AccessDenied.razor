@@ -1,0 +1,10 @@
+﻿@inject NavigationManager Navigation
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@inject NavigationManager uriHelper
+@code {
+
+    protected override void OnInitialized()
+    {
+        uriHelper.NavigateTo("/accessdenied", forceLoad: true);
+    }
+}

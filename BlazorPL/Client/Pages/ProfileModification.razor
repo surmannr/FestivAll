@@ -1,0 +1,255 @@
+﻿@page "/profile-modify"
+@inject AuthenticationStateProvider AuthState
+@inject HttpClient Http
+@inject IHttpClientFactory HttpClientFactory
+@inject ISnackbar Snackbar
+@using System.Text.Json
+@using System.Text
+<AuthorizeView>
+    <Authorized>
+
+        <MudPaper Class="d-flex justify-center py-7 p-5" Style="margin-top:20px; background-color: rgba(0,0,0,0.5)" Square="false">
+            <MudText Typo="Typo.h2" Align="Align.Center" Style="margin-top: 10px; margin-bottom:20px; color: #ECEFF1"><b>Profil módosítás</b></MudText>
+        </MudPaper>
+
+        <MudPaper Class="d-flex flex-column align-items-center p-5" Style="margin-top:15px; height:75%; background-color: rgba(0,0,0,0.5)" Square="false">
+
+            <MudGrid>
+
+                <MudItem xs="12">
+
+                    <MudPaper Width="100">
+
+                        @if (User != null && Option != null)
+                        {
+                            <MudTabs Style="padding:10px" Outlined="true" Position="Position.Left" Centered="false" Rounded="true" Border="true" ApplyEffectsToContainer="true" Class="mt-8" PanelClass="pa-6">
+
+                                <MudTabPanel Style="justify-content:left;padding:10px" Text="Felhasználónév változtatás" @ref="mtp_username" OnClick="() => { Option = mtp_username.Text; }">
+                                    <div class="d-flex justify-content-center w-100 align-items-center flex-column">
+                                        <MudText Align="Align.Center" Typo="Typo.h4">@Option</MudText>
+                                        <MudText Align="Align.Center" Typo="Typo.h6">@User.UserName</MudText>
+                                    </div>
+                                </MudTabPanel>
+                                <MudTabPanel Style="justify-content:left;padding:10px" Text="Jelszó változtatás" @ref="mtp_password" OnClick="() => { Option = mtp_password.Text; }">
+                                    <div class="d-flex justify-content-center w-100 align-items-center flex-column">
+                                        <MudText Align="Align.Center" Typo="Typo.h4">@Option</MudText>
+                                    </div>
+                                </MudTabPanel>
+                                <MudTabPanel Style="justify-content:left;padding:10px" Text="Email cím változtatás" @ref="mtp_email" OnClick="() => { Option = mtp_email.Text; }">
+                                    <div class="d-flex justify-content-center w-100 align-items-center flex-column">
+                                        <MudText Align="Align.Center" Typo="Typo.h4">@Option</MudText>
+                                        <MudText Align="Align.Center" Typo="Typo.h6">@User.Email</MudText>
+                                    </div>
+                                </MudTabPanel>
+
+                            </MudTabs>
+                        }
+
+                    </MudPaper>
+
+                </MudItem>
+                <MudItem xs="12" Style="height:100%">
+
+                    <MudPaper Width="100" Style="height:95%; display:flex; justify-content:center">
+                        @if (Option == "Felhasználónév változtatás")
+                        {
+                            <div class="d-flex flex-column align-content-center justify-content-center flex-wrap" style="width:80%; height:100%">
+                                <MudGrid Spacing="1">
+                                    <MudItem xs="12">
+                                        <MudTextField T="string" Label="Felhasználónév" @bind-Value="UserName" />
+                                    </MudItem>
+                                    <MudItem xs="12">
+                                        <MudTextField T="string" Label="Felhasználónév újra" @bind-Value="UserNameAgain" />
+                                    </MudItem>
+                                    <MudItem xs="12">
+                                        <MudButton Variant="Variant.Filled" Color="Color.Info" Style="margin-top:20px" @onclick="ModifyUserName">
+                                            Módosítása
+                                        </MudButton>
+                                    </MudItem>
+                                </MudGrid>
+                            </div>
+                        }
+                        @if (Option == "Jelszó változtatás")
+                        {
+                            <div class="d-flex flex-column align-content-center justify-content-center flex-wrap" style="width:80%; height:100%">
+                                <MudGrid Spacing="1">
+                                    <MudItem xs="12">
+                                        <MudTextField Class="m-0" Margin="0" T="string" HelperText="Szükséges elemek: kisbetű, nagybetű, szám és speciális karakter" Label="Jelszó" InputType="InputType.Password" @bind-Value="Password" />
+                                    </MudItem>
+                                    <MudItem xs="12" Style="margin-top:-16px">
+                                        <MudTextField Class="m-0" Margin="0" T="string" HelperText="Szükséges elemek: kisbetű, nagybetű, szám és speciális karakter" Label="Jelszó újra" InputType="InputType.Password" @bind-Value="PasswordAgain" />
+                                    </MudItem>
+                                    <MudItem xs="12">
+                                        <MudButton Variant="Variant.Filled" Color="Color.Info" @onclick="ModifyPassword" Style="margin-top:10px">
+                                            Módosítása
+                                        </MudButton>
+                                    </MudItem>
+                                </MudGrid>
+                            </div>
+                        }
+                        @if (Option == "Email cím változtatás")
+                        {
+                            <div class="d-flex flex-column align-content-center justify-content-center flex-wrap" style="width:80%; height:100%">
+                                <MudGrid Spacing="1">
+                                    <MudItem xs="12">
+                                        <MudTextField T="string" Label="Email cím" InputType="InputType.Email" @bind-Value="Email" />
+                                    </MudItem>
+                                    <MudItem xs="12">
+                                        <MudTextField T="string" Label="Email cím újra" InputType="InputType.Email" @bind-Value="EmailAgain" />
+                                    </MudItem>
+                                    <MudItem xs="12">
+                                        <MudButton Variant="Variant.Filled" Color="Color.Info" Style="margin-top:20px" @onclick="ModifyEmail">
+                                            Módosítása
+                                        </MudButton>
+                                    </MudItem>
+                                </MudGrid>
+                            </div>
+                        }
+                    </MudPaper>
+
+                </MudItem>
+            </MudGrid>
+
+        </MudPaper>
+
+    </Authorized>
+    <NotAuthorized>
+
+        <RedirectToLogin></RedirectToLogin>
+
+    </NotAuthorized>
+</AuthorizeView>
+
+
+@code {
+
+    public MudTabPanel mtp_username { get; set; }
+    public MudTabPanel mtp_password { get; set; }
+    public MudTabPanel mtp_email { get; set; }
+
+    public string Option { get; set; }
+
+    public string UserId { get; set; }
+    public UserDto User { get; set; }
+
+    public string UserName { get; set; }
+    public string UserNameAgain { get; set; }
+
+    public string Password { get; set; }
+    public string PasswordAgain { get; set; }
+
+    public string Email { get; set; }
+    public string EmailAgain { get; set; }
+
+    HttpClient http { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Option = "Felhasználónév változtatás";
+
+        var auth = await AuthState.GetAuthenticationStateAsync();
+        var claimsPrincipal = auth.User;
+        UserId = claimsPrincipal.FindFirst(x => x.Type.Equals("sub")).Value;
+
+        http = HttpClientFactory.CreateClient("BlazorPL.PublicServerAPI");
+        User = await http.GetFromJsonAsync<UserDto>($"api/users/{UserId}");
+    }
+
+    public async Task ModifyUserName()
+    {
+        if (UserName != null && UserNameAgain != null)
+        {
+
+            if (UserName == UserNameAgain)
+            {
+
+                var result = await http.PatchAsync($"api/users/edit/{UserId}/username?username={UserName}", null);
+                if (result.IsSuccessStatusCode)
+                {
+                    Snackbar.Add("Sikeresen megváltoztattad a felhasználóneved.", Severity.Success);
+                    User.UserName = UserName;
+                }
+                else
+                {
+                    Snackbar.Add("Nem sikerült megváltoztatnod a felhasználóneved.", Severity.Error);
+                }
+
+            }
+            else
+            {
+                Snackbar.Add("A két értéknek meg kell egyeznie.", Severity.Error);
+            }
+
+        }
+        else
+        {
+            Snackbar.Add("Minden mezőt kötelező kitölteni.", Severity.Error);
+        }
+    }
+
+    public async Task ModifyPassword()
+    {
+        if (Password != null && PasswordAgain != null)
+        {
+
+            if (Password == PasswordAgain)
+            {
+                var jsonRequest = System.Text.Json.JsonSerializer.Serialize(Password);
+                var content = new StringContent(jsonRequest, Encoding.UTF8, "application/json-patch+json");
+                var result = await http.PatchAsync($"api/users/edit/{UserId}/password", content);
+                if (result.IsSuccessStatusCode)
+                {
+                    Snackbar.Add("Sikeresen megváltoztattad a jelszavad.", Severity.Success);
+                    User.UserName = UserName;
+                }
+                else
+                {
+                    Snackbar.Add("Nem sikerült megváltoztatnod a jelszavad.", Severity.Error);
+                }
+
+            }
+            else
+            {
+                Snackbar.Add("A két értéknek meg kell egyeznie.", Severity.Error);
+            }
+
+        }
+        else
+        {
+            Snackbar.Add("Minden mezőt kötelező kitölteni.", Severity.Error);
+        }
+    }
+
+    public async Task ModifyEmail()
+    {
+        if (Email != null && EmailAgain != null)
+        {
+
+            if (Email == EmailAgain)
+            {
+                var jsonRequest = System.Text.Json.JsonSerializer.Serialize(Email);
+                var content = new StringContent(jsonRequest, Encoding.UTF8, "application/json-patch+json");
+                var result = await http.PatchAsync($"api/users/edit/{UserId}/email", content);
+                if (result.IsSuccessStatusCode)
+                {
+                    Snackbar.Add("Sikeresen megváltoztattad az emailed.", Severity.Success);
+                    User.Email = Email;
+                }
+                else
+                {
+                    Snackbar.Add("Nem sikerült megváltoztatnod az emailed.", Severity.Error);
+                }
+
+            }
+            else
+            {
+                Snackbar.Add("A két értéknek meg kell egyeznie.", Severity.Error);
+            }
+
+        }
+        else
+        {
+            Snackbar.Add("Minden mezőt kötelező kitölteni.", Severity.Error);
+        }
+    }
+}

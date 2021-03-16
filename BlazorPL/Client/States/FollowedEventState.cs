@@ -21,7 +21,6 @@ namespace BlazorPL.Client.States
         {
             Events.Remove(eventDto);
             NotifyStateChanged();
-            Console.WriteLine("batman");
         }
         private void NotifyStateChanged() => OnChange?.Invoke();
     }

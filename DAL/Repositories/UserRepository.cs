@@ -60,7 +60,7 @@ namespace DAL.Repositories
                         if(b.TicketId == o.TicketId)
                         {
                             bennevan = true;
-                            b.Amount++;
+                            b.Amount += o.Amount;
                         }
                     }
                     if (!bennevan)

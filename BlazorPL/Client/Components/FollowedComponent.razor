@@ -165,10 +165,8 @@
         {
             SnackbarMessage = $"Sikeresen törölted a kedvenceid közül a(z) {_event.Name} eseményt!";
             Snackbar.Add(SnackbarMessage, Severity.Success);
-            Console.WriteLine($"Törlés előtt: {State.Events.Count()}");
             State.Remove(_event);
             StateHasChanged();
-            Console.WriteLine($"Törlés után: {State.Events.Count()}");
         }
         else
         {

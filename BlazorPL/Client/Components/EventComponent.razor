@@ -94,6 +94,7 @@
 
     public string newReviewDescription { get; set; }
 
+    public ReviewDto newReview { get; set; } = new ReviewDto();
 
     public bool Expand { get; set; }
 
@@ -105,17 +106,23 @@
 
     protected override void OnInitialized()
     {
+        newReview.Stars = newReviewStars;
+        CountAverageReview();
 
-        if(_event != null)
+    }
+    public void CountAverageReview()
+    {
+        if (_event != null)
         {
+            AverageReview = 0;
             foreach (ReviewDto r in _event.Reviews)
             {
                 AverageReview += r.Stars;
             }
             if (_event.Reviews.Count() == 0) AverageReview = 0;
             else AverageReview = AverageReview / _event.Reviews.Count();
-        }
 
+        }
     }
     public void ExpandFalse()
     {
@@ -134,7 +141,6 @@
         else
         {
             SnackbarMessage = $"Sikeresen értékelted a(z) {_event.Name} eseményt!";
-            ReviewDto newReview = new ReviewDto();
             newReview.Description = newReviewDescription;
             newReview.Stars = newReviewStars;
             newReview.EventId = _event.Id;
@@ -142,6 +148,8 @@
             var result = await Http.PostAsJsonAsync("api/reviews", newReview);
             if (result.IsSuccessStatusCode)
             {
+                _event.Reviews.Add(newReview);
+                CountAverageReview();
                 Snackbar.Add(SnackbarMessage, Severity.Success);
             }
             else
