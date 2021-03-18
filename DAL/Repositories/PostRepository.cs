@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SharedLayer.Exceptions;
 
 namespace DAL.Repositories
 {
@@ -20,8 +21,10 @@ namespace DAL.Repositories
 
         public async Task<Post> CreatePost(Post newPost)
         {
-            if(newPost==null) throw new NullReferenceException(ExceptionMessageConstants.NullObject);
-            if(PostRepositoryExtension.IsPostParamsNull(newPost)) throw new ArgumentNullException(ExceptionMessageConstants.RequiredParams);
+            if(newPost==null)
+                throw new DbModelNullException(ExceptionMessageConstants.NullObject);
+            if(PostRepositoryExtension.IsPostParamsNull(newPost))
+                throw new DbModelParamsNullException(ExceptionMessageConstants.RequiredParams);
             db.Posts.Add(newPost);
             await db.SaveChangesAsync();
             return newPost;
@@ -35,7 +38,7 @@ namespace DAL.Repositories
                 db.Posts.Remove(post);
                 await db.SaveChangesAsync();
             } 
-            else throw new NullReferenceException(ExceptionMessageConstants.NullObject);
+            else throw new DbModelNullException(ExceptionMessageConstants.NullObject);
         }
         
         public async Task<IReadOnlyCollection<Post>> GetAllPosts()
@@ -58,11 +61,11 @@ namespace DAL.Repositories
             var post = await db.Posts.Where(p => p.Id == postId).FirstOrDefaultAsync();
             if (post != null)
             {
-                post.PostContent = content ?? throw new ArgumentNullException(ExceptionMessageConstants.RequiredParams);
+                post.PostContent = content ?? throw new DbModelParamsNullException(ExceptionMessageConstants.RequiredParams);
                 await db.SaveChangesAsync();
                 return post;
             }
-            else throw new NullReferenceException(ExceptionMessageConstants.NullObject);
+            else throw new DbModelNullException(ExceptionMessageConstants.NullObject);
         }
     }
     internal static class PostRepositoryExtension

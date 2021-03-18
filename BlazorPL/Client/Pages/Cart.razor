@@ -7,6 +7,7 @@
 @inject CartState State
 @implements IDisposable
 @inject ISnackbar Snackbar
+@inject Blazored.LocalStorage.ISyncLocalStorageService localStorage
 
 <AuthorizeView>
     <Authorized>
@@ -19,7 +20,7 @@
             {
                 @if (State.OrderItems.Count() > 0)
                 {
-                    <MudTable Items="State.OrderItems" Context="o" FixedHeader="true" Style="width:100%" Height="400px" @onkeydown="SumPrice" @onchange="SumPrice" @oninput="SumPrice">
+                    <MudTable Items="State.OrderItems" Context="o" FixedHeader="true" Style="width:100%" Height="400px">
                         <ColGroup>
                             <col style="width:35%;" />
                             <col style="width: 35%;" />
@@ -37,8 +38,8 @@
                         <RowTemplate>
                             <MudTd DataLabel="Program neve">@o.EventName</MudTd>
                             <MudTd Style="text-align: left" DataLabel="Jegy kategória">@o.TicketCategory</MudTd>
-                            <MudTd DataLabel="Mennyiség" @onkeydown="SumPrice" @onchange="SumPrice" @oninput="SumPrice">
-                                <MudTextField @bind-Value="o.Amount" Placeholder="Mennyiség" Variant="Variant.Text" InputType="InputType.Number" @onkeydown="SumPrice" @oninput="SumPrice" @onchange="SumPrice" @onfocusout="SumPrice"></MudTextField>
+                            <MudTd DataLabel="Mennyiség">
+                                <MudTextField T="int" @bind-Value="o.Amount" @onfocusin="() => State.ButtonDisabled = true" @onfocusout="State.SumPrice" @oninput="State.SumPrice" Placeholder="Mennyiség" Variant="Variant.Text" InputType="InputType.Number"></MudTextField>
                             </MudTd>
                             <MudTd Style="text-align: right" DataLabel="Ár">@o.Price Ft</MudTd>
                             <MudTd Style="text-align: center">
@@ -79,12 +80,12 @@
                                 </MudSelect>
                             </MudItem>
                             <MudItem xs="6" Style="display:flex; align-items:flex-end; justify-content:center">
-                                <MudText Typo="Typo.h5" Align="Align.Center" Color="Color.Dark" Style="font-size:30px"><u>Végösszeg: @sumprice.ToString("N0") Ft</u></MudText>
+                                <MudText Typo="Typo.h5" Align="Align.Center" Color="Color.Dark" Style="font-size:30px"><u>Végösszeg: @State.sumprice.ToString("N0") Ft</u></MudText>
                             </MudItem>
                         </MudGrid>
                         <MudGrid Justify="Justify.Center" Style="width:100%;">
                             <MudItem xs="12" Style="display:flex; align-items:flex-end; justify-content:center; margin-top:10px">
-                                <MudButton Variant="Variant.Filled" EndIcon="@Icons.Material.Filled.ShoppingCart" Color="Color.Info" @onclick="Buy">Vásárlás</MudButton>
+                                <MudButton Disabled="State.ButtonDisabled" Variant="Variant.Filled" EndIcon="@Icons.Material.Filled.ShoppingCart" Color="Color.Info" @onclick="Buy">Vásárlás</MudButton>
                             </MudItem>
 
                         </MudGrid>
@@ -113,8 +114,6 @@
     public Array paymentmethods { get; set; } = Enum.GetValues(typeof(PaymentMethod));
     public Array shippingmethods { get; set; } = Enum.GetValues(typeof(ShippingMethod));
 
-    public int sumprice { get; set; } = 0;
-
     public string userId { get; set; }
 
     public string selectedPaymentMethod { get; set; } = PaymentMethod.Cash.ToString();
@@ -136,16 +135,20 @@
         paymentmethods = Enum.GetValues(typeof(PaymentMethod));
         shippingmethods = Enum.GetValues(typeof(ShippingMethod));
 
-        if (tickets != null)
-        {
-            State.Initialize(tickets);
+        var items = localStorage.GetItem<List<OrderItemDto>>("cart");
+        if (items == null) localStorage.RemoveItem("cart");
 
-            foreach (var o in State.OrderItems)
+        if (items != null && items.Count()!=0)
+        {
+            State.OrderItems = items;
+        }
+        else {
+            if (tickets != null)
             {
-                sumprice += o.Price;
+                State.Initialize(tickets);
             }
         }
-        else State.OrderItems = new List<OrderItemDto>();
+
 
     }
     protected override void OnInitialized()
@@ -173,16 +176,9 @@
             SnackbarMessage = "Sikertelen törlés.";
             Snackbar.Add(SnackbarMessage, Severity.Error);
         }
+        State.SumPrice();
     }
-    public void SumPrice()
-    {
 
-        sumprice = 0;
-        foreach (var o in State.OrderItems)
-        {
-            sumprice += o.Price * o.Amount;
-        }
-    }
     public async Task Buy()
     {
         PaymentMethod pmeth = (PaymentMethod)Enum.Parse(typeof(PaymentMethod), selectedPaymentMethod, true);
@@ -203,6 +199,7 @@
             await http.PostAsJsonAsync<OrderItemDto>($"api/orderitems", item);
         }
         await http.PostAsJsonAsync($"api/users/cart-to-bought", orderDto);
+        localStorage.RemoveItem("cart");
         uriHelper.NavigateTo(uriHelper.Uri, forceLoad: true);
     }
 }

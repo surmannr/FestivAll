@@ -44,7 +44,7 @@
 
                         <MudExpansionPanels Style="margin-top: 30px; margin-bottom: 30px; width:100%" Elevation="1" DisableBorders="true">
 
-                            <Virtualize Items="events" Context="e">
+                            <Virtualize Items="events" Context="e" OverscanCount="4">
                                 <EventComponent _event="e"></EventComponent>
                             </Virtualize>
 
@@ -54,7 +54,7 @@
                     }
                     else
                     {
-                    <MudText Typo="Typo.h6" Align="Align.Center" Style="margin-top:40px">Nincsen egyetlen egy esemény sem.</MudText>
+                    <MudText Typo="Typo.h6" Align="Align.Center" Style="margin-top:40px; color:aliceblue">Nincsen egyetlen egy esemény sem.</MudText>
                     }
                     }
 

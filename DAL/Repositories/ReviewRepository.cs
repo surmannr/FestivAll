@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SharedLayer.Exceptions;
 
 namespace DAL.Repositories
 {
@@ -20,8 +21,10 @@ namespace DAL.Repositories
 
         public async Task<Review> CreateReview(Review newReview)
         {
-            if(newReview == null) throw new NullReferenceException(ExceptionMessageConstants.NullObject);
-            if(ReviewRepositoryExtension.IsReviewParamsNull(newReview)) throw new ArgumentNullException(ExceptionMessageConstants.RequiredParams);
+            if(newReview == null)
+                throw new DbModelNullException(ExceptionMessageConstants.NullObject);
+            if(ReviewRepositoryExtension.IsReviewParamsNull(newReview))
+                throw new DbModelParamsNullException(ExceptionMessageConstants.RequiredParams);
             db.Reviews.Add(newReview);
             await db.SaveChangesAsync();
             return newReview;
@@ -35,7 +38,7 @@ namespace DAL.Repositories
                 db.Reviews.Remove(review);
                 await db.SaveChangesAsync();
             } 
-            else throw new NullReferenceException(ExceptionMessageConstants.NullObject);
+            else throw new DbModelNullException(ExceptionMessageConstants.NullObject);
         }
 
         public async Task<IReadOnlyCollection<Review>> GetAllReviews()
@@ -58,12 +61,13 @@ namespace DAL.Repositories
             var review = await db.Reviews.Where(r => r.Id == reviewId).FirstOrDefaultAsync();
             if (review != null)
             {
-                if (String.IsNullOrEmpty(newDescription)) throw new ArgumentNullException(ExceptionMessageConstants.RequiredParams);
+                if (String.IsNullOrEmpty(newDescription))
+                    throw new DbModelParamsNullException(ExceptionMessageConstants.RequiredParams);
                 review.Description = newDescription;
                 await db.SaveChangesAsync();
                 return review;
             }
-            else throw new NullReferenceException(ExceptionMessageConstants.NullObject);
+            else throw new DbModelNullException(ExceptionMessageConstants.NullObject);
         }
 
         public async Task<Review> ModifyStars(int reviewId, int newStars)
@@ -71,12 +75,13 @@ namespace DAL.Repositories
             var review = await db.Reviews.Where(r => r.Id == reviewId).FirstOrDefaultAsync();
             if (review != null)
             {
-                if (newStars <= 0 || newStars > 5) throw new ArgumentNullException(ExceptionMessageConstants.RequiredParams);
+                if (newStars <= 0 || newStars > 5)
+                    throw new DbModelParamsNullException(ExceptionMessageConstants.RequiredParams);
                 review.Stars = newStars;
                 await db.SaveChangesAsync();
                 return review;
             }
-            else throw new NullReferenceException(ExceptionMessageConstants.NullObject);
+            else throw new DbModelNullException(ExceptionMessageConstants.NullObject);
         }
     }
     internal static class ReviewRepositoryExtension

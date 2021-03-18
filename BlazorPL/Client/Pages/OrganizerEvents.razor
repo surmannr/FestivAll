@@ -1,10 +1,175 @@
 ﻿@page "/my-events"
+@inject HttpClient Http
+@inject IHttpClientFactory HttpClientFactory
+@inject AuthenticationStateProvider AuthState
+@inject IDialogService Dialog
+@inject ISnackbar Snackbar
+@using FluentValidation
 
 <AuthorizeView Roles="Organizer">
 
     <Authorized>
 
-        <h3>OrganizerEvents</h3>
+        <MudPaper Class="d-flex justify-center py-7 p-5" Style="margin-top:20px; background-color: rgba(0,0,0,0.5)" Square="false">
+            <MudText Typo="Typo.h2" Align="Align.Center" Style="margin-top: 10px; margin-bottom:20px; color: #ECEFF1"><b>Általam szervezett események</b></MudText>
+        </MudPaper>
+
+        <MudPaper Class="d-flex flex-column align-items-center p-5" Style="margin-top:15px; height:75%; background-color: rgba(0,0,0,0.5)" Square="false">
+
+            <MudPaper Class="d-flex justify-center p-5" Square="false" Style="width:100%; margin-bottom:15px">
+                <MudGrid Spacing="10" Justify="Justify.Center" Class="align-items-end pb-5">
+                    <MudItem xs="2" sm="2" Class="d-flex align-center justify-center mud-width-full py-8">
+                        <MudText Typo="Typo.body1" Align="Align.Right" Style="font-size:20px">Szűrés:</MudText>
+                    </MudItem>
+                    <MudItem xs="4" sm="4" Class="d-flex align-center justify-center mud-width-full py-8">
+                        <MudTextField T="string" Label="Szűrési feltétel..." Required="false" />
+                    </MudItem>
+                    <MudItem xs="4" sm="4" Class="d-flex align-center justify-center mud-width-full py-8">
+                        <MudSelect T="string" Label="Mi alapján szűrjön..." Required="true" RequiredError="Kérlek válaszd ki mi alapján szűrjön!">
+                            <MudSelectItem Value="@("Program neve")" />
+                            <MudSelectItem Value="@("Helyszín")" />
+                            <MudSelectItem Value="@("Dátum (yyyy-MM-dd)")" />
+                            <MudSelectItem Value="@("Szervező neve")" />
+                        </MudSelect>
+                    </MudItem>
+                    <MudItem xs="2" sm="2" Class="d-flex align-center justify-center mud-width-full py-8">
+                        <MudButton Variant="Variant.Outlined">Szűrés</MudButton>
+                    </MudItem>
+
+                </MudGrid>
+            </MudPaper>
+
+            @if (events != null)
+            {
+
+                if (events.Count() > 0)
+                {
+                    <div class="bastya" style="height:100%;overflow-y:scroll ;width:100%; padding:0 15px 0 15px">
+
+                        <MudExpansionPanels Style="margin-top: 30px; margin-bottom: 30px; width:100%" Elevation="1" DisableBorders="true">
+
+                            <Virtualize Items="events" Context="e" OverscanCount="4">
+                                <OrganizerEventComponent Event="e" UserId="@UserId" OnClick="()=>Remove(e)"></OrganizerEventComponent>
+                            </Virtualize>
+
+
+                        </MudExpansionPanels>
+                    </div>
+                }
+                else
+                {
+                    <MudText Typo="Typo.h6" Align="Align.Center" Style="margin-top:40px; color:aliceblue">Nincsen egyetlen egy esemény sem amit te szerveztél.</MudText>
+                }
+            }
+            <MudButton Color="Color.Info" Variant="Variant.Filled" DisableElevation="true" OnClick="OpenDialog" Style="margin-top:20px">Új esemény létrehozás</MudButton>
+
+        </MudPaper>
+
+        @if (newEvent != null && newFirstTicket != null && moreTickets != null)
+        {
+            <MudDialog @ref="@dialog">
+
+                <TitleContent>
+                    <MudText Typo="Typo.h6">
+                        <MudIcon Icon="@Icons.Material.Filled.Add" Class="mr-3" /> Új esemény létrehozása
+                    </MudText>
+                </TitleContent>
+
+                <DialogContent>
+
+                    <MudGrid Style="padding:20px">
+
+                        <MudItem xs="3" Class="d-flex w-100 justify-content-end align-content-end align-items-end">
+                            <MudText Typo="Typo.h6" Class="w-100 d-flex align-content-end justify-content-start" Align="Align.Left">Esemény neve:</MudText>
+                        </MudItem>
+                        <MudItem xs="9" Style="display:flex; align-items:center">
+                            <MudTextField T="string" @bind-Value="newEvent.Name" Validation="NotEmptyValidation" Label="Esemény neve..." Required="false" />
+                        </MudItem>
+                        <MudItem xs="3" Class="d-flex w-100 justify-content-end align-content-end align-items-end">
+                            <MudText Typo="Typo.h6" Class="w-100 d-flex align-content-end justify-content-start" Align="Align.Left">Helyszín:</MudText>
+                        </MudItem>
+                        <MudItem xs="9" Style="display:flex; align-items:center">
+                            <MudTextField T="string" @bind-Value="newEvent.Location" Validation="NotEmptyValidation" Label="Helyszín..." Required="false" />
+                        </MudItem>
+
+                    </MudGrid>
+                    <div class="bastya" style="max-height:40vh;overflow-y:scroll ;width:100%">
+                        <MudGrid Style="padding:20px">
+
+                            <MudItem xs="3" Class="d-flex w-100 justify-content-end align-content-end align-items-end">
+                                <MudText Typo="Typo.h6" Class="w-100 d-flex align-content-end justify-content-start" Align="Align.Left">Jegyek:</MudText>
+                            </MudItem>
+                            <MudItem xs="4" Style="display:flex; align-items:center">
+                                <MudTextField T="string" @bind-Value="newFirstTicket.Category"  Label="Kategória neve..." Required="false" />
+                            </MudItem>
+                            <MudItem xs="2" Style="display:flex; align-items:center">
+                                <MudTextField T="int" @bind-Value="newFirstTicket.Price"  Label="Ára..." Required="false" />
+                            </MudItem>
+                            <MudItem xs="2" Style="display:flex; align-items:center">
+                                <MudTextField T="int" @bind-Value="newFirstTicket.InStock"  Label="Készleten..." Required="false" />
+                            </MudItem>
+                            <MudItem xs="1" Style="display:flex; align-items:center">
+                                <MudIcon Icon="@Icons.Material.Filled.Add" @onclick="AddMoreTicketForm" Class="mr-3" />
+                            </MudItem>
+
+                        </MudGrid>
+
+
+                        <Virtualize Items="moreTickets" Context="t">
+
+                            <MudGrid Style="padding:20px">
+
+                                <MudItem xs="3" Class="d-flex w-100 justify-content-end align-content-end align-items-end"></MudItem>
+                                <MudItem xs="4" Style="display:flex; align-items:center">
+                                    <MudTextField T="string" @bind-Value="t.Category" Validation="NotEmptyValidation" Label="Kategória neve..." Required="false" />
+                                </MudItem>
+                                <MudItem xs="2" Style="display:flex; align-items:center">
+                                    <MudTextField T="int" @bind-Value="t.Price" Validation="NotBelowZeroValidation" Label="Ára..."  Required="false" />
+                                </MudItem>
+                                <MudItem xs="2" Style="display:flex; align-items:center">
+                                    <MudTextField T="int" @bind-Value="t.InStock" Validation="NotBelowZeroValidation" Label="Készleten..." Required="false" />
+                                </MudItem>
+                                <MudItem xs="1" Style="display:flex; align-items:center">
+                                    <MudIcon Icon="@Icons.Material.Filled.Delete" Class="mr-3" @onclick="() => moreTickets.Remove(t)" />
+                                </MudItem>
+
+                            </MudGrid>
+
+                        </Virtualize>
+                    </div>
+
+                    <MudGrid Style="padding:20px">
+
+                        <MudItem xs="3" Class="d-flex w-100 justify-content-end align-content-end align-items-end">
+                            <MudText Typo="Typo.h6" Class="w-100 d-flex align-content-end justify-content-start" Align="Align.Left">Dátum:</MudText>
+                        </MudItem>
+                        <MudItem xs="9" Style="display:flex; align-items:center">
+                            <MudTextField T="DateTime" @bind-Value="newEvent.StartDate" Label="Dátum..." Required="false" />
+                        </MudItem>
+
+                        <MudItem xs="3" Class="d-flex w-100 justify-content-end align-content-end align-items-end">
+                            <MudText Typo="Typo.h6" Class="w-100 d-flex align-content-end justify-content-start" Align="Align.Left">Leírás:</MudText>
+                        </MudItem>
+                        <MudItem xs="9" Style="display:flex; align-items:center">
+                            <MudTextField T="string" @bind-Value="newEvent.Description" HelperText="Itt adhatod meg az eseményed leírását." Required="false" Lines="5" />
+                        </MudItem>
+
+                    </MudGrid>
+
+                    <MudGrid>
+                        <MudItem xs="6" Style="display:flex; align-items:center; justify-content:center">
+                            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Create" Class="px-10">Létrehoz</MudButton>
+                        </MudItem>
+                        <MudItem xs="6" Style="display:flex; align-items:center; justify-content:center">
+                            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CloseDialog" Class="px-10">Mégse</MudButton>
+                        </MudItem>
+                    </MudGrid>
+
+                </DialogContent>
+            </MudDialog>
+        }
+
+
 
     </Authorized>
     <NotAuthorized>
@@ -17,4 +182,197 @@
 
 @code {
 
+    public List<EventDto> events;
+
+    public string UserId { get; set; }
+
+    MudBlazor.DialogOptions options { get; set; } = new MudBlazor.DialogOptions()
+    {
+        MaxWidth = MaxWidth.Medium,
+        FullWidth = true,
+        CloseButton = true
+    };
+    MudDialog dialog { get; set; } = new MudDialog();
+    HttpClient http = new HttpClient();
+
+    #region Létrehozás
+
+    public EventDto newEvent { get; set; } = new EventDto();
+    public TicketDto newFirstTicket { get; set; } = new TicketDto();
+    public LinkedList<TicketDto> moreTickets { get; set; } = new LinkedList<TicketDto>();
+
+    #endregion
+
+    public NotBelowZero NotBelowZeroValidation { get; set; } = new NotBelowZero();
+    public NotEmpty NotEmptyValidation { get; set; } = new NotEmpty();
+
+    protected override void OnInitialized()
+    {
+        newEvent.Location = "";
+        newEvent.Name = "";
+        newEvent.StartDate = DateTime.Now;
+
+        newFirstTicket.Category = "";
+        newFirstTicket.InStock = 0;
+        newFirstTicket.Price = 0;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var auth = await AuthState.GetAuthenticationStateAsync();
+        var claimsPrincipal = auth.User;
+        UserId = claimsPrincipal.FindFirst(x => x.Type.Equals("sub")).Value;
+
+        newEvent.CreatorUserId = UserId;
+
+        http = HttpClientFactory.CreateClient("BlazorPL.PublicServerAPI");
+        events = await http.GetFromJsonAsync<List<EventDto>>($"api/events/creator?userId={UserId}");
+    }
+    private void OpenDialog()
+    {
+        dialog.Show(null, options);
+    }
+    private void CloseDialog()
+    {
+        dialog.Close();
+    }
+
+    public void Remove(EventDto e)
+    {
+        events.Remove(e);
+    }
+
+    private async Task Create()
+    {
+        moreTickets.AddFirst(newFirstTicket);
+        if (CheckAll())
+        {
+            var result = await http.PostAsJsonAsync<EventDto>($"api/events", newEvent);
+            if (result.IsSuccessStatusCode)
+            {
+                newEvent = await result.Content.ReadFromJsonAsync<EventDto>();
+                events.Add(newEvent);
+                await CreateTickets(newEvent);
+                CloseDialog();
+                Snackbar.Add("Sikerült az esemény létrehozása a hozzátartozó jegyekkel!", MudBlazor.Severity.Success);
+                Clear();
+            }
+            else {
+                Snackbar.Add("Nem sikerült létrehozni az eseményt! Kérlek próbáld újra!", MudBlazor.Severity.Error);
+                moreTickets.RemoveFirst();
+            }
+
+        }
+        else
+        {
+            moreTickets.RemoveFirst();
+            return;
+        }
+
+
+    }
+
+    private void Clear()
+    {
+        newEvent = new EventDto();
+        newFirstTicket = new TicketDto();
+        moreTickets = new LinkedList<TicketDto>();
+
+        newEvent.Location = "";
+        newEvent.Name = "";
+        newEvent.StartDate = DateTime.Now;
+
+        newFirstTicket.Category = "";
+        newFirstTicket.InStock = 0;
+        newFirstTicket.Price = 0;
+    }
+
+    private bool CheckAll()
+    {
+        bool result = false;
+        if (EventCheck(newEvent))
+        {
+            result = true;
+        }
+        else
+        {
+            Snackbar.Add("<b>Figyelj a következőkre:</b>" +
+                         "<ul><li>Az esemény neve legyen 3 karakternél nagyobb!</li>" +
+                         "<li>A dátum a mai napnál későbbi legyen!</li>" +
+                         "<li>A helyszín legyen kitöltve!</li></ul>", MudBlazor.Severity.Error);
+            return false;
+        }
+
+        foreach (var t in moreTickets)
+        {
+            if (!TicketCheck(t))
+            {
+                Snackbar.Add("<b>Figyelj a következőkre:</b>" +
+                         "<ul><li>A készlet nagysága minimum 0 legyen!</li>" +
+                         "<li>Az ár minimum 0 legyen!</li>" +
+                         "<li>A kategória legyen kitöltve!</li></ul>", MudBlazor.Severity.Error);
+                return false;
+            }
+        }
+        return result;
+    }
+
+    private async Task CreateTickets(EventDto dbEvent)
+    {
+
+        foreach (var t in moreTickets)
+        {
+            t.EventId = newEvent.Id;
+            t.EventName = newEvent.Name;
+            var result = await http.PostAsJsonAsync<TicketDto>($"api/tickets", t);
+            if (!result.IsSuccessStatusCode) Snackbar.Add($"Nem sikerült létrehozni a {t.Category} jegyet! Kérlek próbáld újra ha kell a módosításnál!", MudBlazor.Severity.Error);
+        }
+    }
+
+    private void AddMoreTicketForm()
+    {
+        TicketDto ticket = new TicketDto();
+        ticket.Category = "";
+        ticket.InStock = 0;
+        ticket.Price = 0;
+        moreTickets.AddFirst(ticket);
+    }
+
+    #region Ellenőrző függvények
+    private bool TicketCheck(TicketDto tic)
+    {
+        if (tic != null)
+        {
+            if (!String.IsNullOrEmpty(tic.Category) && tic.InStock >= 0 && tic.Price >= 0) return true;
+            return false;
+        }
+        return false;
+    }
+    private bool EventCheck(EventDto ev)
+    {
+        if (ev != null)
+        {
+            if (ev.Name.Length >= 3 && ev.StartDate > DateTime.Now && !String.IsNullOrEmpty(ev.Location)) return true;
+            return false;
+        }
+        return false;
+    }
+    #endregion
+
+    #region Validátor osztályok
+    public class NotBelowZero : AbstractValidator<int>
+    {
+        public NotBelowZero()
+        {
+            RuleFor(x => x).GreaterThanOrEqualTo(0);
+        }
+    }
+    public class NotEmpty : AbstractValidator<string>
+    {
+        public NotEmpty()
+        {
+            RuleFor(x => x).NotEmpty().MaximumLength(100);
+        }
+    }
+    #endregion
 }

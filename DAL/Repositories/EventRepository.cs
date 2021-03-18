@@ -2,6 +2,7 @@
 using DAL.InterfacesForRepos;
 using DAL.Models;
 using Microsoft.EntityFrameworkCore;
+using SharedLayer.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,8 +22,8 @@ namespace DAL.Repositories
 
         public async Task<Event> CreateEvent(Event newEvent)
         {
-            if (newEvent == null) throw new NullReferenceException(ExceptionMessageConstants.NullObject);
-            if(EventRepositoryExtension.IsEventParamsNull(newEvent)) throw new ArgumentNullException(ExceptionMessageConstants.RequiredParams);
+            if (newEvent == null) throw new DbModelNullException(ExceptionMessageConstants.NullObject);
+            if(EventRepositoryExtension.IsEventParamsNull(newEvent)) throw new DbModelParamsNullException(ExceptionMessageConstants.RequiredParams);
             db.Events.Add(newEvent);
             await db.SaveChangesAsync();
             return newEvent;
@@ -36,13 +37,17 @@ namespace DAL.Repositories
                 db.Events.Remove(dEvent);
                 await db.SaveChangesAsync();
             }
-            else throw new NullReferenceException(ExceptionMessageConstants.NullObject);
+            else throw new DbModelNullException(ExceptionMessageConstants.NullObject);
         }
         public async Task DeleteUserFollowedEvent(string userid, int eventid)
         {
             var followedevent = await db.UserFollowedEvents.Include(u => u.Event).ThenInclude(r => r.Reviews).Where(u => u.UserId == userid && u.EventId==eventid).FirstOrDefaultAsync();
-            db.UserFollowedEvents.Remove(followedevent);
-            await db.SaveChangesAsync();
+            if(followedevent != null)
+            {
+                db.UserFollowedEvents.Remove(followedevent);
+                await db.SaveChangesAsync();
+            }
+            else throw new DbModelNullException(ExceptionMessageConstants.NullObject);
         }
         public async Task<IReadOnlyCollection<Event>> GetAllEvents()
         {
@@ -87,8 +92,8 @@ namespace DAL.Repositories
         public async Task<Event> ModifyEventLocation(int eventId, string newLocation)
         {
             var mevent = await db.Events.Where(e => e.Id == eventId).FirstOrDefaultAsync();
-            if (mevent == null) throw new NullReferenceException(ExceptionMessageConstants.NullObject);
-            mevent.Location = newLocation ?? throw new ArgumentNullException(ExceptionMessageConstants.RequiredParams);
+            if (mevent == null) throw new DbModelNullException(ExceptionMessageConstants.NullObject);
+            mevent.Location = newLocation ?? throw new DbModelParamsNullException(ExceptionMessageConstants.RequiredParams);
             await db.SaveChangesAsync();
             return mevent;
         }
@@ -96,8 +101,8 @@ namespace DAL.Repositories
         public async Task<Event> ModifyEventName(int eventId, string newName)
         {
             var mevent = await db.Events.Where(e => e.Id == eventId).FirstOrDefaultAsync();
-            if (mevent == null) throw new NullReferenceException(ExceptionMessageConstants.NullObject);
-            mevent.Name = newName ?? throw new ArgumentNullException(ExceptionMessageConstants.RequiredParams);
+            if (mevent == null) throw new DbModelNullException(ExceptionMessageConstants.NullObject);
+            mevent.Name = newName ?? throw new DbModelParamsNullException(ExceptionMessageConstants.RequiredParams);
             await db.SaveChangesAsync();
             return mevent;
         }
@@ -105,7 +110,7 @@ namespace DAL.Repositories
         public async Task<Event> ModifyEventStartDate(int eventId, DateTime newStartDate)
         {
             var mevent = await db.Events.Where(e => e.Id == eventId).FirstOrDefaultAsync();
-            if (mevent == null) throw new NullReferenceException(ExceptionMessageConstants.NullObject);
+            if (mevent == null) throw new DbModelNullException(ExceptionMessageConstants.NullObject);
             mevent.StartDate = newStartDate;
             await db.SaveChangesAsync();
             return mevent;

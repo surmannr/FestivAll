@@ -13,7 +13,7 @@
             <MudText Typo="Typo.h2" Align="Align.Center" Style="margin-top: 10px; margin-bottom:20px; color: #ECEFF1"><b>Követett események</b></MudText>
         </MudPaper>
 
-        <MudPaper Class="d-flex flex-column align-items-center py-7 p-5" Style="margin-top:15px; height:75%; background-color: rgba(0,0,0,0.5)" Square="false">
+        <MudPaper Class="d-flex flex-column align-items-center p-5" Style="margin-top:15px; height:75%; background-color: rgba(0,0,0,0.5)" Square="false">
             <MudPaper Class="d-flex justify-center p-5" Square="false" Style="width:100%; margin-bottom:15px">
                 <MudGrid Spacing="10" Justify="Justify.Center" Class="align-items-end pb-5">
                     <MudItem xs="2" sm="2" Class="d-flex align-center justify-center mud-width-full py-8">
@@ -25,9 +25,9 @@
                     <MudItem xs="4" sm="4" Class="d-flex align-center justify-center mud-width-full py-8">
                         <MudSelect T="string" Label="Mi alapján szűrjön..." Required="true" RequiredError="Kérlek válaszd ki mi alapján szűrjön!">
                             <MudSelectItem Value="@("Program neve")" />
-                            <MudSelectItem Value="@("Ár")" />
+                            <MudSelectItem Value="@("Helyszín")" />
                             <MudSelectItem Value="@("Dátum (yyyy-MM-dd)")" />
-                            <MudSelectItem Value="@("Kategória")" />
+                            <MudSelectItem Value="@("Szervező neve")" />
                         </MudSelect>
                     </MudItem>
                     <MudItem xs="2" sm="2" Class="d-flex align-center justify-center mud-width-full py-8">

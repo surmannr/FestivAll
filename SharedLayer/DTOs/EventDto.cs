@@ -7,6 +7,8 @@ namespace SharedLayer.DTOs
 {
     public class EventDto
     {
+        [JsonPropertyName("id")]
+        public int Id { get; set; }
         [JsonPropertyName("name")]
         public string Name { get; set; }
         [JsonPropertyName("location")]
@@ -17,6 +19,8 @@ namespace SharedLayer.DTOs
         public string Description { get; set; }
         [JsonPropertyName("creatoruserid")]
         public string CreatorUserId { get; set; }
+        [JsonPropertyName("reviews")]
+        public List<ReviewDto> Reviews { get; set; } = new List<ReviewDto>();
 
         public EventDto() { }
         public EventDto(string name, string location, string description, DateTime startDate, string creatorUserId)

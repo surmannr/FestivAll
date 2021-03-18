@@ -9,6 +9,7 @@ using System.Linq;
 using System.Net.Mail;
 using System.Text;
 using System.Threading.Tasks;
+using SharedLayer.Exceptions;
 
 namespace DAL.Repositories
 {
@@ -29,7 +30,8 @@ namespace DAL.Repositories
             if (user != null)
             {
                 var _event = await db.Events.Where(e => e.Id == eventId).FirstOrDefaultAsync();
-                if(_event == null) throw new NullReferenceException(ExceptionMessageConstants.NullObject);
+                if(_event == null)
+                    throw new DbModelNullException(ExceptionMessageConstants.NullObject);
                 UserFollowedEvent ufe = new UserFollowedEvent()
                 {
                     Event = _event,
@@ -41,7 +43,7 @@ namespace DAL.Repositories
                 await db.SaveChangesAsync();
                 return ufe;
             }
-            else throw new NullReferenceException(ExceptionMessageConstants.NullObject);
+            else throw new DbModelNullException(ExceptionMessageConstants.NullObject);
         }
 
         public async Task AddTicketsFromCartToBoughtItems(Order order)
@@ -50,7 +52,8 @@ namespace DAL.Repositories
             if (user != null)
             {
 
-                if (order == null) throw new NullReferenceException(ExceptionMessageConstants.NullObject);
+                if (order == null)
+                    throw new DbModelNullException(ExceptionMessageConstants.NullObject);
                 var boughts = await db.BoughtTickets.Where(o => o.UserId == user.Id).ToListAsync();
                 foreach(var o in order.OrderItems)
                 {
@@ -82,11 +85,13 @@ namespace DAL.Repositories
                 }
                 await db.SaveChangesAsync();
             }
-            else throw new NullReferenceException(ExceptionMessageConstants.NullObject);
+            else throw new DbModelNullException(ExceptionMessageConstants.NullObject);
         }
         public async Task DeleteFromCart(string userid, int ticketid)
         {
             var cart = await db.Carts.Where(c => c.TicketId == ticketid && c.UserId == userid).FirstOrDefaultAsync();
+            if (cart == null)
+                throw new DbModelNullException(ExceptionMessageConstants.NullObject);
             db.Carts.Remove(cart);
             await db.SaveChangesAsync();
         }
@@ -96,7 +101,8 @@ namespace DAL.Repositories
             if (user != null)
             {
                 var ticket = await db.Tickets.Where(e => e.Id == ticketId).FirstOrDefaultAsync();
-                if (ticket == null) throw new NullReferenceException(ExceptionMessageConstants.NullObject);
+                if (ticket == null)
+                    throw new DbModelNullException(ExceptionMessageConstants.NullObject);
                 Cart cart = new Cart()
                 {
                     Ticket = ticket,
@@ -105,23 +111,23 @@ namespace DAL.Repositories
                     UserId = userId
                 };
                 db.Carts.Add(cart);
-                user.TicketsInCart.ToList().Add(cart);
-                ticket.AddToCartByUsers.ToList().Add(cart);
                 await db.SaveChangesAsync();
                 return cart;
             }
-            else throw new NullReferenceException(ExceptionMessageConstants.NullObject);
+            else throw new DbModelNullException(ExceptionMessageConstants.NullObject);
         }
 
         public async Task<IdentityResult> CreateUser(User newUser, string password)
         {
-            if(newUser==null) throw new NullReferenceException(ExceptionMessageConstants.NullObject);
+            if(newUser==null)
+                throw new DbModelNullException(ExceptionMessageConstants.NullObject);
             var role = await roleManager.FindByNameAsync(newUser.Role);
             if (role == null) await roleManager.CreateAsync(new IdentityRole { Name = newUser.Role });
             var result = await userManager.CreateAsync(newUser, password);
+            if (!result.Succeeded)
+                throw new DbUserCreationFailedException("A felhasználó létrehozása nem sikerült.");
             await userManager.AddToRoleAsync(newUser, newUser.Role);
             return result;
-            //throw new ApplicationException("Nem sikerült létrehozni a felhasználót.");
         }
 
         public async Task DeleteUser(string userId)
@@ -132,7 +138,7 @@ namespace DAL.Repositories
                 db.Users.Remove(user);
                 await db.SaveChangesAsync();
             }
-            else throw new NullReferenceException(ExceptionMessageConstants.NullObject);
+            else throw new DbModelNullException(ExceptionMessageConstants.NullObject);
         }
 
         public async Task<IReadOnlyCollection<User>> GetAllUsers()
@@ -143,14 +149,14 @@ namespace DAL.Repositories
         public async Task<User> GetUserById(string userId)
         {
             var user = await userManager.FindByIdAsync(userId);
-            if(user==null) throw new NullReferenceException(ExceptionMessageConstants.NullObject);
+            if(user==null) throw new DbModelNullException(ExceptionMessageConstants.NullObject);
             return user;
         }
 
         public async Task<User> GetUserByUsername(string userName)
         {
             var user = await userManager.FindByNameAsync(userName);
-            if (user == null) throw new NullReferenceException(ExceptionMessageConstants.NullObject);
+            if (user == null) throw new DbModelNullException(ExceptionMessageConstants.NullObject);
             return user;
 
         }
@@ -158,33 +164,36 @@ namespace DAL.Repositories
         public async Task<User> ModifyEmail(string userId, string newEmail)
         {
             var user = await userManager.FindByIdAsync(userId);
-            if (user == null) throw new NullReferenceException(ExceptionMessageConstants.NullObject);
+            if (user == null)
+                throw new DbModelNullException(ExceptionMessageConstants.NullObject);
             if(UserRepositoryExtension.ValidateEmail(newEmail))
             {
                 user.Email = newEmail;
                 await db.SaveChangesAsync();
                 return user;
             }
-            throw new FormatException("Nem megfelelő formátumú email.");
+            throw new DbModelParamFormatException("Nem megfelelő formátumú email.");
         }
 
         public async Task<User> ModifyNickName(string userId, string newNickName)
         {
             var user = await userManager.FindByIdAsync(userId);
-            if (user == null) throw new NullReferenceException(ExceptionMessageConstants.NullObject);
+            if (user == null)
+                throw new DbModelNullException(ExceptionMessageConstants.NullObject);
             if (!String.IsNullOrEmpty(newNickName))
             {
                 user.NickName = newNickName;
                 await db.SaveChangesAsync();
                 return user;
             }
-            else throw new ArgumentNullException(ExceptionMessageConstants.NullObject);
+            else throw new DbModelParamsNullException(ExceptionMessageConstants.NullObject);
         }
 
         public async Task<User> ModifyPassword(string userId, string newPassword)
         {
             var user = await userManager.FindByIdAsync(userId);
-            if (user == null) throw new NullReferenceException(ExceptionMessageConstants.NullObject);
+            if (user == null)
+                throw new DbModelNullException(ExceptionMessageConstants.NullObject);
             bool valid = await UserRepositoryExtension.ValidatePassword(newPassword, userManager, user);
             if (valid)
             {
@@ -192,14 +201,16 @@ namespace DAL.Repositories
                 await db.SaveChangesAsync();
                 return user;
             }
-            throw new FormatException("Nem megfelelő a jelszó.");
+            throw new DbModelParamFormatException("Nem megfelelő a jelszó.");
         }
 
         public async Task<User> ModifyUserName(string userId, string newUserName)
         {
             var user = await userManager.FindByIdAsync(userId);
-            if (user == null) throw new NullReferenceException(ExceptionMessageConstants.NullObject);
-            if(String.IsNullOrEmpty(newUserName)) throw new ArgumentNullException(ExceptionMessageConstants.NullObject);
+            if (user == null)
+                throw new DbModelNullException(ExceptionMessageConstants.NullObject);
+            if(String.IsNullOrEmpty(newUserName))
+                throw new DbModelParamsNullException(ExceptionMessageConstants.NullObject);
             await userManager.SetUserNameAsync(user, newUserName);
             await db.SaveChangesAsync();
             return user;

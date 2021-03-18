@@ -24,6 +24,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using System;
 using System.Linq;
+using SharedLayer.Exceptions;
 
 namespace BlazorPL.Server
 {
@@ -195,14 +196,14 @@ namespace BlazorPL.Server
 
         private void ConfigureProblemDetails(ProblemDetailsOptions options)
         {
-            // NullReferenceException -> NotFound : Ha nem találja meg az adott entitást, akkor NotFound-dal tér vissza.
-            options.MapToStatusCode<NullReferenceException>(StatusCodes.Status404NotFound);
-            // ArgumentNullException -> BadRequest : Ha a kötelezõ paraméterek nincsenek kitöltve (azaz null), akkor BadRequest-tel tér vissza.
-            options.MapToStatusCode<ArgumentNullException>(StatusCodes.Status400BadRequest);
+            // DbModelNullException -> NotFound : Ha nem találja meg az adott entitást, akkor NotFound-dal tér vissza.
+            options.MapToStatusCode<DbModelNullException>(StatusCodes.Status404NotFound);
+            // DbModelParamsNullException -> BadRequest : Ha a kötelezõ paraméterek nincsenek kitöltve (azaz null), akkor BadRequest-tel tér vissza.
+            options.MapToStatusCode<DbModelParamsNullException>(StatusCodes.Status400BadRequest);
             // ApplicationException -> InternalServerError : Ha nem sikerült létrehozni az entitást.
-            options.MapToStatusCode<ApplicationException>(StatusCodes.Status500InternalServerError);
-            // FormatException -> PreconditionFailed : Az adott validáció nem sikerül, a felhasználó által beírt adat nem megfelelõ.
-            options.MapToStatusCode<FormatException>(StatusCodes.Status412PreconditionFailed);
+            options.MapToStatusCode<DbUserCreationFailedException>(StatusCodes.Status500InternalServerError);
+            // DbModelParamFormatException -> PreconditionFailed : Az adott validáció nem sikerül, a felhasználó által beírt adat nem megfelelõ.
+            options.MapToStatusCode<DbModelParamFormatException>(StatusCodes.Status412PreconditionFailed);
         }
     }
 }

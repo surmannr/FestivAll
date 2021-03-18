@@ -1,0 +1,81 @@
+﻿@inject HttpClient Http
+@inject IHttpClientFactory HttpClientFactory
+@inject ISnackbar Snackbar
+
+<MudCard Style="width:100%; margin-top:10px; height:fit-content()" Outlined="true" Square="false">
+    <MudCardContent>
+        @if (Event != null)
+        {
+            <MudGrid>
+                <MudItem xs="3">
+                    <a href="/event/@Event.Id"><MudText>@Event.Name</MudText></a>
+                </MudItem>
+                <MudItem xs="3">
+                    <MudText>@Event.Location</MudText>
+                </MudItem>
+                <MudItem xs="2">
+                    <MudText>@Event.StartDate.ToShortDateString()</MudText>
+                </MudItem>
+
+                <MudItem xs="2">
+                    <MudRating SelectedValue="@AverageReview" ReadOnly="true" />
+                </MudItem>
+                <MudItem xs="2" Style="display: flex; justify-content:space-evenly">
+                    <MudIcon Icon="@Icons.Material.Filled.Delete" Color="Color.Dark" @onclick="RemoveEvent" />
+                    <MudIcon Icon="@Icons.Material.Filled.Settings" Color="Color.Dark" />
+                    <MudIcon Icon="@Icons.Material.Filled.ContentCopy" Color="Color.Dark" />
+                </MudItem>
+            </MudGrid>
+        }
+
+    </MudCardContent>
+</MudCard>
+
+@code {
+    [Parameter]
+    public EventDto Event { get; set; }
+
+    [Parameter]
+    public string UserId { get; set; }
+
+    [Parameter]
+    public EventCallback<EventDto> OnClick { get; set; }
+
+    public int AverageReview { get; set; } = 0;
+
+    protected override void OnInitialized()
+    {
+
+        DateTime now = DateTime.Now;
+        CountAverageReview();
+
+    }
+    public void CountAverageReview()
+    {
+        if (Event != null)
+        {
+            AverageReview = 0;
+            foreach (ReviewDto r in Event.Reviews)
+            {
+                AverageReview += r.Stars;
+            }
+            if (Event.Reviews.Count() == 0) AverageReview = 0;
+            else AverageReview = AverageReview / Event.Reviews.Count();
+
+        }
+    }
+
+    public async Task RemoveEvent()
+    {
+        var result = await Http.DeleteAsync($"api/events/{Event.Id}");
+        if (result.IsSuccessStatusCode)
+        {
+            Snackbar.Add($"Sikeresen törölted a(z) {Event.Name} nevű eseményt!", Severity.Success);
+        }
+        else
+        {
+            Snackbar.Add($"Nem sikerült törölni a(z) {Event.Name} nevű eseményt!", Severity.Error);
+        }
+        await OnClick.InvokeAsync(Event);
+    }
+}

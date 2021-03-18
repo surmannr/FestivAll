@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SharedLayer.Exceptions;
 
 namespace DAL.Repositories
 {
@@ -19,8 +20,10 @@ namespace DAL.Repositories
         }
         public async Task<Ticket> CreateTicket(Ticket newTicket)
         {
-            if(newTicket==null) throw new NullReferenceException(ExceptionMessageConstants.NullObject);
-            if(TicketRepositoryExtension.IsTicketParamsNull(newTicket)) throw new ArgumentNullException(ExceptionMessageConstants.RequiredParams);
+            if(newTicket==null)
+                throw new DbModelNullException(ExceptionMessageConstants.NullObject);
+            if(TicketRepositoryExtension.IsTicketParamsNull(newTicket))
+                throw new DbModelParamsNullException(ExceptionMessageConstants.RequiredParams);
             db.Tickets.Add(newTicket);
             await db.SaveChangesAsync();
             return newTicket;
@@ -29,7 +32,8 @@ namespace DAL.Repositories
         public async Task<Ticket> DecreaseInStockByOne(int ticketId)
         {
             var ticket = await db.Tickets.Where(t => t.Id == ticketId).FirstOrDefaultAsync();
-            if(ticket == null) throw new NullReferenceException(ExceptionMessageConstants.NullObject);
+            if(ticket == null)
+                throw new DbModelNullException(ExceptionMessageConstants.NullObject);
             ticket.InStock -= 1;
             await db.SaveChangesAsync();
             return ticket;
@@ -38,7 +42,8 @@ namespace DAL.Repositories
         public async Task DeleteTicket(int ticketId)
         {
             var ticket = await db.Tickets.Where(t => t.Id == ticketId).FirstOrDefaultAsync();
-            if (ticket == null) throw new NullReferenceException(ExceptionMessageConstants.NullObject);
+            if (ticket == null)
+                throw new DbModelNullException(ExceptionMessageConstants.NullObject);
             db.Tickets.Remove(ticket);
             await db.SaveChangesAsync();
         }
@@ -78,8 +83,10 @@ namespace DAL.Repositories
         public async Task<Ticket> ModifyCategory(int ticketId, string newCategory)
         {
             var ticket = await db.Tickets.Where(t => t.Id == ticketId).FirstOrDefaultAsync();
-            if (ticket == null) throw new NullReferenceException(ExceptionMessageConstants.NullObject);
-            if (String.IsNullOrEmpty(newCategory)) throw new ArgumentNullException(ExceptionMessageConstants.RequiredParams);
+            if (ticket == null)
+                throw new DbModelNullException(ExceptionMessageConstants.NullObject);
+            if (String.IsNullOrEmpty(newCategory))
+                throw new DbModelParamsNullException(ExceptionMessageConstants.RequiredParams);
             ticket.Category = newCategory;
             await db.SaveChangesAsync();
             return ticket;
@@ -88,8 +95,10 @@ namespace DAL.Repositories
         public async Task<Ticket> ModifyInStock(int ticketId, int newInStock)
         {
             var ticket = await db.Tickets.Where(t => t.Id == ticketId).FirstOrDefaultAsync();
-            if (ticket == null) throw new NullReferenceException(ExceptionMessageConstants.NullObject);
-            if (newInStock < 0) throw new ArgumentNullException(ExceptionMessageConstants.RequiredParams);
+            if (ticket == null)
+                throw new DbModelNullException(ExceptionMessageConstants.NullObject);
+            if (newInStock < 0)
+                throw new DbModelParamsNullException(ExceptionMessageConstants.RequiredParams);
             ticket.InStock = newInStock;
             await db.SaveChangesAsync();
             return ticket;
@@ -98,8 +107,10 @@ namespace DAL.Repositories
         public async Task<Ticket> ModifyPrice(int ticketId, int newPrice)
         {
             var ticket = await db.Tickets.Where(t => t.Id == ticketId).FirstOrDefaultAsync();
-            if (ticket == null) throw new NullReferenceException(ExceptionMessageConstants.NullObject);
-            if(newPrice < 0) throw new ArgumentNullException(ExceptionMessageConstants.RequiredParams);
+            if (ticket == null)
+                throw new DbModelNullException(ExceptionMessageConstants.NullObject);
+            if(newPrice < 0)
+                throw new DbModelParamsNullException(ExceptionMessageConstants.RequiredParams);
             ticket.Price = newPrice;
             await db.SaveChangesAsync();
             return ticket;
@@ -109,7 +120,7 @@ namespace DAL.Repositories
     {
         public static bool IsTicketParamsNull(Ticket ticketDto)
         {
-            return ticketDto.EventId == 0 || String.IsNullOrEmpty(ticketDto.Category) || ticketDto.InStock <= 0;
+            return ticketDto.EventId == 0 || String.IsNullOrEmpty(ticketDto.Category) || ticketDto.InStock < 0 || ticketDto.Price < 0;
         }
 
         public static async Task<IReadOnlyCollection<Ticket>> GetTicketsList(this IQueryable<Ticket> tickets)

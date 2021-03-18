@@ -16,7 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DAL\DAL.csproj" />
-    <ProjectReference Include="..\Shared\SharedLayer.csproj" />
+    <ProjectReference Include="..\SharedLayer\SharedLayer.csproj" />
   </ItemGroup>
 
 </Project>

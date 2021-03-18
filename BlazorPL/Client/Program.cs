@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using MudBlazor.Services;
 using MudBlazor;
 using BlazorPL.Client.States;
+using Blazored.LocalStorage;
 
 namespace BlazorPL.Client
 {
@@ -32,6 +33,7 @@ namespace BlazorPL.Client
             //builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
             //builder.Services.AddOptions();
             builder.Services.AddApiAuthorization();
+            builder.Services.AddBlazoredLocalStorage(config => config.JsonSerializerOptions.WriteIndented = true);
 
             builder.Services.AddScoped<Radzen.DialogService>();
             builder.Services.AddScoped<NotificationService>();

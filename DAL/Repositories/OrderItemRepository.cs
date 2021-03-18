@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SharedLayer.Exceptions;
 
 namespace DAL.Repositories
 {
@@ -20,8 +21,10 @@ namespace DAL.Repositories
         }
         public async Task<OrderItem> CreateOrderItem(OrderItem newOrderItem)
         {
-            if (newOrderItem == null) throw new NullReferenceException(ExceptionMessageConstants.NullObject);
-            if (OrderItemRepositoryExtension.IsOrderItemParamsNull(newOrderItem)) throw new ArgumentNullException(ExceptionMessageConstants.RequiredParams);
+            if (newOrderItem == null)
+                throw new DbModelNullException(ExceptionMessageConstants.NullObject);
+            if (OrderItemRepositoryExtension.IsOrderItemParamsNull(newOrderItem))
+                throw new DbModelParamsNullException(ExceptionMessageConstants.RequiredParams);
             db.OrderItems.Add(newOrderItem);
             await db.SaveChangesAsync();
             return newOrderItem;
@@ -35,7 +38,7 @@ namespace DAL.Repositories
                 db.OrderItems.Remove(orderItem);
                 await db.SaveChangesAsync();
             }
-            else throw new NullReferenceException(ExceptionMessageConstants.NullObject);
+            else throw new DbModelNullException(ExceptionMessageConstants.NullObject);
         }
 
         public async Task<IReadOnlyCollection<OrderItem>> GetAllOrderItems()
@@ -62,7 +65,7 @@ namespace DAL.Repositories
                 await db.SaveChangesAsync();
                 return orderItem;
             }
-            else throw new NullReferenceException(ExceptionMessageConstants.NullObject);
+            else throw new DbModelNullException(ExceptionMessageConstants.NullObject);
         }
 
         public async Task<OrderItem> SetOrder(int orderItemId, int orderId)
@@ -78,9 +81,9 @@ namespace DAL.Repositories
                     await db.SaveChangesAsync();
                     return orderItem;
                 }
-                else throw new NullReferenceException(ExceptionMessageConstants.NullObject);
+                else throw new DbModelNullException(ExceptionMessageConstants.NullObject);
             }
-            else throw new NullReferenceException(ExceptionMessageConstants.NullObject);
+            else throw new DbModelNullException(ExceptionMessageConstants.NullObject);
         }
     }
     internal static class OrderItemRepositoryExtension
