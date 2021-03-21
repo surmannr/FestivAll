@@ -9,60 +9,115 @@
 <MudPaper Class="d-flex justify-center py-7 p-5" Style="margin-top:20px; background-color: rgba(0,0,0,0.5)" Square="false">
     <MudText Typo="Typo.h2" Align="Align.Center" Style="margin-top: 10px; margin-bottom:20px; color: #ECEFF1"><b>Jegyek</b></MudText>
 </MudPaper>
-    <MudPaper Class="d-flex flex-column align-items-center p-4" Style="margin-top:15px; height:75%; background-color: rgba(0,0,0,0.5)" Square="false">
-        <MudGrid>
-
-            <MudItem xs="12">
-                <MudPaper Class="d-flex justify-center mud-width-full py-7 p-5" Square="false">
-                    <MudGrid Spacing="10" Justify="Justify.Center" Class="align-items-end pb-5">
-                        <MudItem xs="2" sm="2" Class="d-flex align-center justify-center mud-width-full py-8">
-                            <MudText Typo="Typo.body1" Align="Align.Right" Style="font-size:20px">Szűrés:</MudText>
-                        </MudItem>
-                        <MudItem xs="4" sm="4" Class="d-flex align-center justify-center mud-width-full py-8">
-                            <MudTextField T="string" Label="Szűrési feltétel..." Required="false" />
-                        </MudItem>
-                        <MudItem xs="4" sm="4" Class="d-flex align-center justify-center mud-width-full py-8">
-                            <MudSelect T="string" Label="Mi alapján szűrjön..." Required="true" RequiredError="Kérlek válaszd ki mi alapján szűrjön!">
-                                <MudSelectItem Value="@("Program neve")" />
-                                <MudSelectItem Value="@("Ár")" />
-                                <MudSelectItem Value="@("Dátum (yyyy-MM-dd)")" />
-                                <MudSelectItem Value="@("Kategória")" />
-                            </MudSelect>
-                        </MudItem>
-                        <MudItem xs="2" sm="2" Class="d-flex align-center justify-center mud-width-full py-8">
-                            <MudButton Variant="Variant.Outlined">Szűrés</MudButton>
-                        </MudItem>
-
-                    </MudGrid>
-                </MudPaper>
-            </MudItem>
-        </MudGrid>
-                <div class="bastya" style="height: 60vh; overflow-y: scroll; width: 100%; display:flex; flex-wrap:wrap; flex-shrink:4; margin-top:20px">
-
-
-                    @if (tickets != null)
-                    {
-
-                        if (tickets.Count() > 0)
+<MudPaper Class="d-flex flex-column align-items-center py-7 p-5" Style="margin-top:15px; height:100%; background-color: rgba(0,0,0,0.5)" Square="false">
+    <MudGrid Style="margin-top:10px; margin-bottom: 10px; width:100%">
+        <MudItem xs="12">
+            <MudPaper Class="d-flex justify-center py-7 p-5" Square="false">
+                <MudGrid Spacing="10" Justify="Justify.Center" Class="align-items-end pb-5">
+                    <MudItem xs="2" sm="2" Class="d-flex align-center justify-center mud-width-full py-8">
+                        <MudText Typo="Typo.body1" Align="Align.Right" Style="font-size:20px">Szűrés:</MudText>
+                    </MudItem>
+                    <MudItem xs="4" sm="4" Class="d-flex align-center justify-center mud-width-full py-8">
+                        <MudTextField T="string" @bind-Value="Filter" Label="Szűrési feltétel..." Required="false" />
+                    </MudItem>
+                    <MudItem xs="4" sm="4" Class="d-flex align-center justify-center mud-width-full py-8">
+                        <MudSelect T="string" Label="Mi alapján szűrjön..." @bind-Value="FilterType" Required="true" RequiredError="Kérlek válaszd ki mi alapján szűrjön!">
+                            <MudSelectItem Value="@("Program neve")" />
+                            <MudSelectItem Value="@("Ár")" />
+                            <MudSelectItem Value="@("Dátum (yyyy.MM.dd.)")" />
+                            <MudSelectItem Value="@("Kategória")" />
+                        </MudSelect>
+                    </MudItem>
+                    <MudItem xs="2" sm="2" Class="d-flex align-center justify-around mud-width-full py-8">
+                        <MudButton Variant="Variant.Outlined" OnClick="FilterBy" Style="margin-right:10px">Szűrés</MudButton>
+                        @if (tickets.Count() != AllTickets.Count())
                         {
-                            <Virtualize Items="tickets" Context="t">
-                                <TicketComponent Category="@t.Category" EventId="@t.EventId" Id="@t.Id" InStock="@t.InStock" Price="@t.Price" EventName="@t.EventName"></TicketComponent>
-                            </Virtualize>
+                            <MudIcon Color="Color.Error" Icon="@Icons.Material.Filled.RemoveCircle" @onclick="RemoveFilter"></MudIcon>
                         }
-                        else
-                        {
-                            <MudText Typo="Typo.h6" Align="Align.Center" Style="margin-top:40px">Nincsen egyetlen egy jegy sem.</MudText>
-                        }
-                    }
+
+                    </MudItem>
+
+                </MudGrid>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+    <div class="bastya" style="height: 100vh; overflow-y: scroll; width: 100%; display:flex; flex-wrap:wrap; margin-top:20px;">
+
+
+        @if (tickets != null)
+        {
+
+            if (tickets.Count() > 0)
+            {
+                <Virtualize Items="tickets" Context="t" OverscanCount="4">
+                    <TicketComponent ticket="t"></TicketComponent>
+                </Virtualize>
+            }
+            else
+            {
+                <div style="width:100%; height:fit-content()">
+                    <MudText Typo="Typo.h6" Align="Align.Center" Style="margin-top:40px; color:aliceblue">Nincsen egyetlen egy jegy sem.</MudText>
                 </div>
-    </MudPaper>
+                
+            }
+        }
+    </div>
+</MudPaper>
 
 @code {
-    private TicketDto[] tickets;
+    private List<TicketDto> tickets = new List<TicketDto>();
 
     protected override async Task OnInitializedAsync()
     {
         var http = HttpClientFactory.CreateClient("BlazorPL.PublicServerAPI");
-        tickets = await http.GetFromJsonAsync<TicketDto[]>("api/tickets");
+        tickets = await http.GetFromJsonAsync<List<TicketDto>>("api/tickets");
+        AllTickets = tickets;
     }
+
+    #region Szűrés
+
+    public List<TicketDto> AllTickets = new List<TicketDto>();
+    public string Filter { get; set; } = "";
+    public string FilterType { get; set; }
+
+    public async Task FilterBy()
+    {
+        if (String.IsNullOrEmpty(Filter)) tickets = AllTickets;
+        else
+        {
+            switch (FilterType)
+            {
+                case ("Program neve"):
+                    tickets = AllTickets.Where(f => f.EventName.ToUpper().Contains(Filter.ToUpper())).ToList();
+                    break;
+                case ("Ár"):
+                    tickets = AllTickets.Where(f => f.Price == int.Parse(Filter)).ToList();
+                    break;
+                case ("Dátum (yyyy.MM.dd.)"):
+                    string[] args = Filter.Split('.');
+                    var http = HttpClientFactory.CreateClient("BlazorPL.PublicServerAPI");
+                    var _events = await http.GetFromJsonAsync<List<EventDto>>($"api/events/startdate?date={int.Parse(args[0])}{int.Parse(args[1]).ToString("D2")}{int.Parse(args[2])}");
+                    tickets = new List<TicketDto>();
+                    foreach(var e in _events)
+                    {
+                        Console.WriteLine(e.Id);
+                        tickets.AddRange(AllTickets.Where(f => f.EventId == e.Id).ToList());
+                    }
+                    break;
+                case ("Kategória"):
+                    tickets = AllTickets.Where(f => f.Category.ToUpper().Contains(Filter.ToUpper())).ToList();
+                    break;
+                default:
+                    tickets = AllTickets;
+                    break;
+            }
+        }
+    }
+
+    public void RemoveFilter()
+    {
+        Filter = "";
+        tickets = AllTickets;
+    }
+    #endregion
 }

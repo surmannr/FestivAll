@@ -4,9 +4,10 @@
 @inject NavigationManager uriHelper
 @inject ISnackbar Snackbar
 @inject FollowedEventState State
+@inject IDialogService DialogService
 
 
-<MudExpansionPanel IsExpanded="@Expand" Dense="true" DisableGutters="true">
+<MudExpansionPanel @bind-IsExpanded="@Expand" Dense="true" DisableGutters="true" >
     <TitleContent>
         @if (_event != null)
         {
@@ -68,7 +69,7 @@
                     <MudText Align="Align.Center" Class="mt-1">Értékelés:</MudText>
                 </MudItem>
                 <MudItem xs="2">
-                    <MudRating @bind-value=newReviewStars @bind-SelectedValue="newReviewStars" @bind-value:event="onchange" @onclick="ExpandFalse" />
+                    <MudRating @bind-value=newReviewStars @bind-SelectedValue="newReviewStars" @bind-value:event="onchange" @onclick="() =>Expand=true" />
                 </MudItem>
             </MudGrid>
         </div>
@@ -105,7 +106,6 @@
 
     protected override void OnInitialized()
     {
-
         if (_event != null)
         {
             foreach (ReviewDto r in _event.Reviews)
@@ -115,12 +115,26 @@
             if (_event.Reviews.Count() == 0) AverageReview = 0;
             else AverageReview = AverageReview / _event.Reviews.Count();
         }
-        
+
 
     }
     public void ExpandFalse()
     {
-        Expand = true;
+        Expand = false;
+    }
+    public void CountAverageReview()
+    {
+        if (_event != null)
+        {
+            AverageReview = 0;
+            foreach (ReviewDto r in _event.Reviews)
+            {
+                AverageReview += r.Stars;
+            }
+            if (_event.Reviews.Count() == 0) AverageReview = 0;
+            else AverageReview = AverageReview / _event.Reviews.Count();
+
+        }
     }
     public async Task AddReviewToEvent()
     {
@@ -143,6 +157,8 @@
             var result = await Http.PostAsJsonAsync("api/reviews", newReview);
             if (result.IsSuccessStatusCode)
             {
+                _event.Reviews.Add(newReview);
+                CountAverageReview();
                 Snackbar.Add(SnackbarMessage, Severity.Success);
             }
             else
@@ -150,31 +166,40 @@
                 SnackbarMessage = "Az értékelésnél hiba történt. Kérlek próbáld meg újból.";
                 Snackbar.Add(SnackbarMessage, Severity.Error);
             }
-            StateHasChanged();
+            if (Snackbar.ShownSnackbars.Count() == 0) uriHelper.NavigateTo(uriHelper.Uri, forceLoad: true);
         }
         ExpandFalse();
     }
 
     public async Task RemoveFollowedEvent()
     {
-        var auth = await AuthState.GetAuthenticationStateAsync();
-        var claimsPrincipal = auth.User;
-        userId = claimsPrincipal.FindFirst(x => x.Type.Equals("sub")).Value;
-        var result = await Http.DeleteAsync($"api/events/user-followed?eventid={_event.Id}&userid={userId}");
-        if (result.IsSuccessStatusCode)
+        Expand = true;
+        bool? dialogresult = await DialogService.ShowMessageBox(
+            "Figyelmeztetés",
+            "Biztosan törölni szeretnéd az eseményt?",
+            yesText: "Igen", cancelText: "Mégse");
+        if (dialogresult != null)
         {
-            SnackbarMessage = $"Sikeresen törölted a kedvenceid közül a(z) {_event.Name} eseményt!";
-            Snackbar.Add(SnackbarMessage, Severity.Success);
-            State.Remove(_event);
-            StateHasChanged();
+            var auth = await AuthState.GetAuthenticationStateAsync();
+            var claimsPrincipal = auth.User;
+            userId = claimsPrincipal.FindFirst(x => x.Type.Equals("sub")).Value;
+            var result = await Http.DeleteAsync($"api/events/user-followed?eventid={_event.Id}&userid={userId}");
+            if (result.IsSuccessStatusCode)
+            {
+                SnackbarMessage = $"Sikeresen törölted a kedvenceid közül a(z) {_event.Name} eseményt!";
+                Snackbar.Add(SnackbarMessage, Severity.Success);
+                State.Remove(_event);
+                StateHasChanged();
+            }
+            else
+            {
+                SnackbarMessage = "Sikertelen törlés.";
+                Snackbar.Add(SnackbarMessage, Severity.Error);
+            }
         }
-        else
-        {
-            SnackbarMessage = "Sikertelen törlés.";
-            Snackbar.Add(SnackbarMessage, Severity.Error);
-        }
-        ExpandFalse();
+
+        Expand = false;
     }
 
-    
+
 }

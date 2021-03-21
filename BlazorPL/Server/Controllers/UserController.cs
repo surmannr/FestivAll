@@ -30,12 +30,17 @@ namespace BlazorPL.Server.Controllers
         }
 
         [HttpGet("name")]
-        public async Task<ActionResult<UserDto>> GetByName([FromQuery]string name)
+        public async Task<ActionResult<IReadOnlyCollection<UserDto>>> GetByName([FromQuery]string name)
         {
             var result = await userManager.GetUserByNameAsync(name);
             return Ok(result);
         }
-
+        [HttpGet("carts")]
+        public async Task<ActionResult<IReadOnlyCollection<CartDto>>> GetCartsByUser([FromQuery] string userid)
+        {
+            var result = await userManager.GetCartsByUser(userid);
+            return Ok(result);
+        }
         [HttpGet]
         public async Task<ActionResult<IReadOnlyCollection<UserDto>>> GetAll()
         {

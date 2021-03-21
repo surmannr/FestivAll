@@ -23,6 +23,8 @@ namespace DAL.Models
         public string CreatorUserId { get; set; }
         public User CreatorUser { get; set; }
 
+        public string ImageName { get; set; }
+
         public IReadOnlyCollection<UserFollowedEvent> FollowedByUsers { get; set; } = new List<UserFollowedEvent>();
 
         public IReadOnlyCollection<Review> Reviews { get; set; } = new List<Review>();

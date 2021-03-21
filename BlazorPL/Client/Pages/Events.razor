@@ -18,18 +18,23 @@
                         <MudText Typo="Typo.body1" Align="Align.Right" Style="font-size:20px">Szűrés:</MudText>
                     </MudItem>
                     <MudItem xs="4" sm="4" Class="d-flex align-center justify-center mud-width-full py-8">
-                        <MudTextField T="string" Label="Szűrési feltétel..." Required="false" />
+                        <MudTextField T="string"@bind-Value="Filter" Label="Szűrési feltétel..." Required="false" />
                     </MudItem>
                     <MudItem xs="4" sm="4" Class="d-flex align-center justify-center mud-width-full py-8">
-                        <MudSelect T="string" Label="Mi alapján szűrjön..." Required="true" RequiredError="Kérlek válaszd ki mi alapján szűrjön!">
+                        <MudSelect T="string" Label="Mi alapján szűrjön..." @bind-Value="FilterType"  Required="true" RequiredError="Kérlek válaszd ki mi alapján szűrjön!">
                             <MudSelectItem Value="@("Program neve")" />
                             <MudSelectItem Value="@("Helyszín")" />
-                            <MudSelectItem Value="@("Dátum (yyyy-MM-dd)")" />
+                            <MudSelectItem Value="@("Dátum (yyyy.MM.dd.)")" />
                             <MudSelectItem Value="@("Szervező neve")" />
                         </MudSelect>
                     </MudItem>
-                    <MudItem xs="2" sm="2" Class="d-flex align-center justify-center mud-width-full py-8">
-                        <MudButton Variant="Variant.Outlined">Szűrés</MudButton>
+                    <MudItem xs="2" sm="2" Class="d-flex align-center justify-around mud-width-full py-8">
+                        <MudButton Variant="Variant.Outlined" OnClick="FilterBy" Style="margin-right:10px">Szűrés</MudButton>
+                        @if (events.Count() != AllEvents.Count())
+                        {
+                            <MudIcon Color="Color.Error" Icon="@Icons.Material.Filled.RemoveCircle" @onclick="RemoveFilter"></MudIcon>
+                        }
+
                     </MudItem>
 
                 </MudGrid>
@@ -54,7 +59,9 @@
                     }
                     else
                     {
-                    <MudText Typo="Typo.h6" Align="Align.Center" Style="margin-top:40px; color:aliceblue">Nincsen egyetlen egy esemény sem.</MudText>
+                        <div style="width:100%">
+                            <MudText Typo="Typo.h6" Align="Align.Center" Style="margin-top:40px; color:aliceblue">Nincsen egyetlen egy esemény sem.</MudText>
+                        </div>
                     }
                     }
 
@@ -65,12 +72,61 @@
    
 
 @code {
-    public List<EventDto> events;
+    public List<EventDto> events = new List<EventDto>();
+
 
     protected override async Task OnInitializedAsync()
     {
         var http = HttpClientFactory.CreateClient("BlazorPL.PublicServerAPI");
         events = await http.GetFromJsonAsync<List<EventDto>>("api/events");
+        AllEvents = events;
     }
+
+    #region Szűrés
+
+    public List<EventDto> AllEvents = new List<EventDto>();
+    public string Filter { get; set; } = "";
+    public string FilterType { get; set; }
+
+    public async Task FilterBy()
+    {
+        if (String.IsNullOrEmpty(Filter)) events = AllEvents;
+        else
+        {
+            switch (FilterType)
+            {
+                case("Program neve"):
+                    events = AllEvents.Where(f => f.Name.ToUpper().Contains(Filter.ToUpper())).ToList();
+                    break;
+                case ("Helyszín"):
+                    events = AllEvents.Where(f => f.Location.ToUpper().Contains(Filter.ToUpper())).ToList();
+                    break;
+                case ("Dátum (yyyy.MM.dd.)"):
+                    string[] args = Filter.Split('.');
+                    DateTime date = new DateTime(int.Parse(args[0]), int.Parse(args[1]), int.Parse(args[2]));
+                    events = AllEvents.Where(f => f.StartDate == date).ToList();
+                    break;
+                case ("Szervező neve"):
+                    var http = HttpClientFactory.CreateClient("BlazorPL.PublicServerAPI");
+                    var users = await http.GetFromJsonAsync<List<UserDto>>($"api/users/name?name={Filter}");
+                    events = new List<EventDto>();
+                    foreach(var u in users)
+                    {
+                        events.AddRange(AllEvents.Where(e => e.CreatorUserId == u.Id).ToList());
+                    }
+                    break;
+                default:
+                    events = AllEvents;
+                    break;
+            }
+        }
+    }
+
+    public void RemoveFilter()
+    {
+        Filter = "";
+        events = AllEvents;
+    }
+    #endregion
 
 }

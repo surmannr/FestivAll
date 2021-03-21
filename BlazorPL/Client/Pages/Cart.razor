@@ -16,11 +16,11 @@
         </MudPaper>
         <MudPaper Class="d-flex flex-column align-items-center py-7 p-5" Style="margin-top:15px; height:80%; background-color: rgba(0,0,0,0.5)" Square="false">
 
-            @if (State.OrderItems != null)
+            @if (State.Carts != null)
             {
-                @if (State.OrderItems.Count() > 0)
+                @if (State.Carts.Count() > 0)
                 {
-                    <MudTable Items="State.OrderItems" Context="o" FixedHeader="true" Style="width:100%" Height="400px">
+                    <MudTable Items="State.Carts" Context="o" FixedHeader="true" Style="width:100%" Height="400px">
                         <ColGroup>
                             <col style="width:35%;" />
                             <col style="width: 35%;" />
@@ -41,9 +41,9 @@
                             <MudTd DataLabel="Mennyiség">
                                 <MudTextField T="int" @bind-Value="o.Amount" @onfocusin="() => State.ButtonDisabled = true" @onfocusout="State.SumPrice" @oninput="State.SumPrice" Placeholder="Mennyiség" Variant="Variant.Text" InputType="InputType.Number"></MudTextField>
                             </MudTd>
-                            <MudTd Style="text-align: right" DataLabel="Ár">@o.Price Ft</MudTd>
+                            <MudTd Style="text-align: right" DataLabel="Ár">@o.TicketPrice Ft</MudTd>
                             <MudTd Style="text-align: center">
-                                <MudIcon Icon="@Icons.Material.Filled.Delete" @onclick="() => RemoveOrderItem(o)" />
+                                <MudIcon Icon="@Icons.Material.Filled.Delete" @onclick="() => RemoveCart(o)" />
                             </MudTd>
                         </RowTemplate>
                         <PagerContent>
@@ -94,7 +94,7 @@
                 }
                 else
                 {
-                    <MudText Typo="Typo.h6" Align="Align.Center" Style="margin-top: 10px; margin-bottom:20px">A kosár üres.</MudText>
+                    <MudText Typo="Typo.h6" Align="Align.Center" Style="margin-top: 10px; margin-bottom:20px; color:aliceblue">A kosár üres.</MudText>
                 }
             }
 
@@ -109,7 +109,7 @@
 
 @code {
 
-    public TicketDto[] tickets { get; set; }
+    public CartDto[] carts { get; set; }
 
     public Array paymentmethods { get; set; } = Enum.GetValues(typeof(PaymentMethod));
     public Array shippingmethods { get; set; } = Enum.GetValues(typeof(ShippingMethod));
@@ -130,23 +130,23 @@
         userId = claimsPrincipal.FindFirst(x => x.Type.Equals("sub")).Value;
 
         http = HttpClientFactory.CreateClient("BlazorPL.PublicServerAPI");
-        tickets = await http.GetFromJsonAsync<TicketDto[]>($"api/tickets/cart?userid={userId}");
+        carts = await http.GetFromJsonAsync<CartDto[]>($"api/users/carts?userid={userId}");
 
         paymentmethods = Enum.GetValues(typeof(PaymentMethod));
         shippingmethods = Enum.GetValues(typeof(ShippingMethod));
 
-        var items = localStorage.GetItem<List<OrderItemDto>>("cart");
+        var items = localStorage.GetItem<List<CartDto>>("cart");
         if (items == null) localStorage.RemoveItem("cart");
 
-        if (items != null && items.Count()!=0)
+        if(items==null || items.Count() == 0)
         {
-            State.OrderItems = items;
-        }
-        else {
-            if (tickets != null)
+            if (carts != null)
             {
-                State.Initialize(tickets);
+                State.Initialize(carts, null);
             }
+        } else
+        {
+            State.Initialize(carts,items);
         }
 
 
@@ -161,7 +161,7 @@
         State.OnChange -= StateHasChanged;
     }
 
-    public async Task RemoveOrderItem(OrderItemDto o)
+    public async Task RemoveCart(CartDto o)
     {
         var result = await Http.DeleteAsync($"api/users/delete-cart?ticketid={o.TicketId}&userid={userId}");
         if (result.IsSuccessStatusCode)
@@ -183,23 +183,34 @@
     {
         PaymentMethod pmeth = (PaymentMethod)Enum.Parse(typeof(PaymentMethod), selectedPaymentMethod, true);
         ShippingMethod smeth = (ShippingMethod)Enum.Parse(typeof(ShippingMethod), selectedShippingMethod, true);
+        List<OrderItemDto> orderitems = new List<OrderItemDto>();
+        foreach(var c in State.Carts)
+        {
+            orderitems.Add(new OrderItemDto() {
+                Amount = c.Amount,
+                EventName = c.EventName,
+                Price = c.TicketPrice,
+                TicketCategory = c.TicketCategory,
+                TicketId = c.TicketId,
+                Status = Status.New
+            });
+        }
         OrderDto orderDto = new OrderDto()
         {
             Status = Status.New,
             UserId = userId,
-            OrderItems = State.OrderItems,
+            OrderItems = orderitems,
             PaymentMethod = pmeth,
             ShippingMethod = smeth
         };
         var temp = await http.PostAsJsonAsync<OrderDto>($"api/orders", orderDto);
         var order = await temp.Content.ReadFromJsonAsync<OrderDto>();
-        foreach (var item in State.OrderItems)
+        foreach (var item in orderitems)
         {
             item.OrderId = order.Id;
             await http.PostAsJsonAsync<OrderItemDto>($"api/orderitems", item);
         }
         await http.PostAsJsonAsync($"api/users/cart-to-bought", orderDto);
-        localStorage.RemoveItem("cart");
         uriHelper.NavigateTo(uriHelper.Uri, forceLoad: true);
     }
 }

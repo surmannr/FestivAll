@@ -17,6 +17,8 @@ namespace SharedLayer.DTOs
         public DateTime StartDate { get; set; }
         [JsonPropertyName("description")]
         public string Description { get; set; }
+        [JsonPropertyName("imagename")]
+        public string ImageName { get; set; }
         [JsonPropertyName("creatoruserid")]
         public string CreatorUserId { get; set; }
         [JsonPropertyName("reviews")]

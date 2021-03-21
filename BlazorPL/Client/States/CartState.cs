@@ -14,66 +14,56 @@ namespace BlazorPL.Client.States
     public class CartState
     {
         public event Action OnChange;
-
         private ISyncLocalStorageService localStorage { get; set; }
 
         public CartState(ISyncLocalStorageService _localStorage)
         {
             localStorage = _localStorage;
         }
-
-        private List<OrderItemDto> orderItems = new List<OrderItemDto>();
-        public List<OrderItemDto> OrderItems {
-            get
-            {
-                return orderItems;
-            }
-            set
-            {
-                orderItems = value;
-                SumPrice();
-                NotifyStateChanged();
-            } 
-        }
+        public List<CartDto> Carts { get; set; } = new List<CartDto>();
 
         public bool ButtonDisabled { get; set; } = false;
         public int sumprice { get; set; } = 0;
 
-        public void Initialize(TicketDto[] tickets)
+        public void Initialize(CartDto[] carts, List<CartDto> local)
         {
-            OrderItems.Clear();
-            foreach (TicketDto t in tickets)
+            Carts.Clear();
+            if(local == null)
             {
-                OrderItems.Add(new OrderItemDto()
-                {
-                    TicketId = t.Id,
-                    Amount = 1,
-                    Price = t.Price,
-                    TicketCategory = t.Category,
-                    Status = Status.New,
-                    EventName = t.EventName
-                });
+                Carts = carts.ToList();
             }
+            else
+            {
+                Carts = carts.ToList();
+                foreach (var a in carts)
+                {
+                    var temp = local.Where(c => c.TicketId == a.TicketId).FirstOrDefault();
+                    if(temp != null)
+                    {
+                        a.Amount = temp.Amount;
+                    }
+                }
+            }
+            
             SumPrice();
         }
 
-        public void Remove(OrderItemDto orderItem)
+        public void Remove(CartDto cart)
         {
-            OrderItems.Remove(orderItem);
+            Carts.Remove(cart);
             SumPrice();
             NotifyStateChanged();
         }
         public void SumPrice()
         {
             sumprice = 0;
-            //var orderitem = State.OrderItems.FirstOrDefault(e => e == oi);
-            //orderitem.Amount = int.Parse( e.Value.ToString());
-            foreach (var o in OrderItems)
+            
+            foreach (var o in Carts)
             {
-                sumprice += o.Price * o.Amount;
+                sumprice += o.TicketPrice * o.Amount;
             }
             ButtonDisabled = false;
-            localStorage.SetItem("cart", orderItems);
+            localStorage.SetItem("cart", Carts);
             NotifyStateChanged();
 
         }

@@ -117,6 +117,11 @@ namespace DAL.Repositories
             else throw new DbModelNullException(ExceptionMessageConstants.NullObject);
         }
 
+        public async Task<IReadOnlyCollection<Cart>> GetCartsByUser(string userid)
+        {
+            return await db.Carts.Where(c => c.UserId == userid).Include(c => c.Ticket).ToListAsync();
+        }
+
         public async Task<IdentityResult> CreateUser(User newUser, string password)
         {
             if(newUser==null)
@@ -153,9 +158,9 @@ namespace DAL.Repositories
             return user;
         }
 
-        public async Task<User> GetUserByUsername(string userName)
+        public async Task<IReadOnlyCollection<User>> GetUserByUsername(string userName)
         {
-            var user = await userManager.FindByNameAsync(userName);
+            var user = await db.Users.Where(u => u.UserName.ToUpper().Contains(userName.ToUpper()) || u.NickName.ToUpper().Contains( userName.ToUpper())).ToListAsync();
             if (user == null) throw new DbModelNullException(ExceptionMessageConstants.NullObject);
             return user;
 

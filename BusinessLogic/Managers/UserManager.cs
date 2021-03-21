@@ -37,12 +37,25 @@ namespace BL.Managers
             return mapper.Map<List<UserDto>>(users);
         }
 
-        public async Task<UserDto> GetUserByNameAsync(string name)
+        public async Task<IReadOnlyCollection<UserDto>> GetUserByNameAsync(string name)
         {
             var user = await userRepository.GetUserByUsername(name);
-            return mapper.Map<UserDto>(user);
+            return mapper.Map<List<UserDto>>(user);
         }
 
+        public async Task<IReadOnlyCollection<CartDto>> GetCartsByUser(string userid)
+        {
+            var carts = await userRepository.GetCartsByUser(userid);
+            var mappedcarts = mapper.Map<List<CartDto>>(carts);
+            var zip = carts.Zip(mappedcarts, (t, dt) => new { Cart = t, CartDto = dt });
+            foreach (var z in zip)
+            {
+                z.CartDto.EventName = z.Cart.Ticket.EventName;
+                z.CartDto.TicketPrice = z.Cart.Ticket.Price;
+                z.CartDto.TicketCategory = z.Cart.Ticket.Category;
+            }
+            return mappedcarts;
+        }
         // Létrehozás
         public async Task AddFollowedEventToUser(int eventid, string userid)
         {

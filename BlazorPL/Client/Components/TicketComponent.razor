@@ -4,10 +4,10 @@
 @inject AuthenticationStateProvider AuthState
 @inject NavigationManager uriHelper;
 
-<MudCard Style="width:22.5%; margin-left:15px; margin-right:15px; margin-bottom:10px; padding:0px">
+<MudCard Style="width:22.5%; margin-left:15px; margin-right:15px; margin-bottom:10px; padding:0px; height:30vh">
     <MudCardHeader Style="background-color:#f1f2f6">
         <CardHeaderContent>
-            <a href="/event/@Id"><MudText Class="mt-1" Style="font-size:20px" Align="Align.Center">@EventName</MudText></a>
+            <a href="/event/@ticket.EventId"><MudText Class="mt-1" Style="font-size:20px" Align="Align.Center">@ticket.EventName</MudText></a>
             <MudText Class="mt-1" Style="font-size:16px" Align="Align.Center">@_event.StartDate.ToShortDateString()</MudText>
         </CardHeaderContent>
     </MudCardHeader>
@@ -18,7 +18,7 @@
                 <MudText Class="mt-1" Align="Align.Justify"><b>Kategória:</b></MudText>
             </MudItem>
             <MudItem xs="9">
-                <MudText Class="mt-1" Align="Align.Right">@Category</MudText>
+                <MudText Class="mt-1" Align="Align.Right">@ticket.Category</MudText>
             </MudItem>
         </MudGrid>
         <MudGrid>
@@ -26,7 +26,7 @@
                 <MudText Class="mt-1" Align="Align.Justify"><b>Ár:</b></MudText>
             </MudItem>
             <MudItem xs="6">
-                <MudText Class="mt-1" Align="Align.Right">@Price</MudText>
+                <MudText Class="mt-1" Align="Align.Right">@ticket.Price</MudText>
             </MudItem>
         </MudGrid>
         <MudGrid>
@@ -34,7 +34,7 @@
                 <MudText Class="mt-1" Align="Align.Justify"><b>Készleten:</b></MudText>
             </MudItem>
             <MudItem xs="6">
-                <MudText Class="mt-1" Align="Align.Right">@InStock</MudText>
+                <MudText Class="mt-1" Align="Align.Right">@ticket.InStock</MudText>
             </MudItem>
         </MudGrid>
     </MudCardContent>
@@ -47,17 +47,7 @@
     #region Paraméterek
 
     [Parameter]
-    public int Id { get; set; }
-    [Parameter]
-    public string Category { get; set; }
-    [Parameter]
-    public string EventName { get; set; }
-    [Parameter]
-    public int Price { get; set; }
-    [Parameter]
-    public int InStock { get; set; }
-    [Parameter]
-    public int EventId { get; set; }
+    public TicketDto ticket { get; set; } = new TicketDto();
 
     EventDto _event = new EventDto();
 
@@ -68,7 +58,12 @@
     protected override async Task OnInitializedAsync()
     {
         http = HttpClientFactory.CreateClient("BlazorPL.PublicServerAPI");
-        _event = await http.GetFromJsonAsync<EventDto>($"api/events/{EventId}");
+        _event = await http.GetFromJsonAsync<EventDto>($"api/events/{ticket.EventId}");
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _event = await http.GetFromJsonAsync<EventDto>($"api/events/{ticket.EventId}");
     }
 
     public async Task ToCart()
@@ -76,6 +71,6 @@
         var auth = await AuthState.GetAuthenticationStateAsync();
         var claimsPrincipal = auth.User;
         var userId = claimsPrincipal.FindFirst(x => x.Type.Equals("sub")).Value;
-        await http.PostAsJsonAsync($"api/users/ticket-to-cart?ticketid={Id}&&userid={userId}", _event);
+        await http.PostAsJsonAsync($"api/users/ticket-to-cart?ticketid={ticket.Id}&&userid={userId}", _event);
     }
 }

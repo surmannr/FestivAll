@@ -15,6 +15,7 @@ namespace DAL.Models
         [Required]
         public ShippingMethod ShippingMethod { get; set; }
         public Status Status { get; set; }
+        public DateTime OrderDate { get; set; }
 
         public IReadOnlyCollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
 

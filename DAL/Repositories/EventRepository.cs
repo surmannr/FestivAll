@@ -125,21 +125,21 @@ namespace DAL.Repositories
         }
 
         public static async Task<Event> GetByIdOrNull(this IQueryable<Event> events, int eventId)
-            => await events.Include(r => r.Reviews).Where(e => e.Id == eventId).FirstOrDefaultAsync();
+            => await events.Include(r => r.Reviews).Include(r => r.Tickets).Where(e => e.Id == eventId).FirstOrDefaultAsync();
 
         public static async Task<IReadOnlyCollection<Event>> GetEventsList(this IQueryable<Event> events)
-            => await events.Include(r => r.Reviews).ToListAsync();
+            => await events.Include(r => r.Reviews).Include(r => r.Tickets).ToListAsync();
 
         public static async Task<IReadOnlyCollection<Event>> GetEventsListByCreatorId(this IQueryable<Event> events, string creatorUserId)
-            => await events.Include(r => r.Reviews).Where(e => e.CreatorUserId == creatorUserId).ToListAsync();
+            => await events.Include(r => r.Reviews).Include(r => r.Tickets).Where(e => e.CreatorUserId == creatorUserId).ToListAsync();
 
         public static async Task<IReadOnlyCollection<Event>> GetEventsListByLocation(this IQueryable<Event> events, string location)
-            => await events.Include(r => r.Reviews).Where(e => e.Location == location).ToListAsync();
+            => await events.Include(r => r.Reviews).Include(r => r.Tickets).Where(e => e.Location == location).ToListAsync();
 
         public static async Task<IReadOnlyCollection<Event>> GetEventsListByName(this IQueryable<Event> events, string name)
-            => await events.Include(r => r.Reviews).Where(e => e.Name == name).ToListAsync();
+            => await events.Include(r => r.Reviews).Include(r => r.Tickets).Where(e => e.Name == name).ToListAsync();
 
         public static async Task<IReadOnlyCollection<Event>> GetEventsListByStartDate(this IQueryable<Event> events, DateTime startDate)
-            => await events.Include(r => r.Reviews).Where(e => e.StartDate == startDate).ToListAsync();
+            => await events.Include(r => r.Reviews).Include(r => r.Tickets).Where(e => e.StartDate == startDate).ToListAsync();
     }
 }

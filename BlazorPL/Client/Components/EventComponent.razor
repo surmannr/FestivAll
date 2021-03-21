@@ -5,7 +5,7 @@
 @inject NavigationManager uriHelper
 @inject ISnackbar Snackbar
 
-<MudExpansionPanel IsExpanded="@Expand" Dense="true" DisableGutters="true">
+<MudExpansionPanel Dense="true" DisableGutters="true" HideIcon="true" @onclick:preventDefault="true">
     <TitleContent>
         @if (_event != null)
         {
@@ -26,22 +26,27 @@
 
                     <AuthorizeView>
                         <Authorized>
-                            <MudIcon Icon="@Icons.Material.Filled.Favorite" Color="Color.Error" @onclick="AddFollowedEvent" />
-                            <a href="/tickets">
-                                <MudIcon Icon="@Icons.Material.Filled.ShoppingCart" Color="Color.Dark" />
-                            </a>
-                            <MudIcon Icon="@Icons.Material.Filled.RateReview" Color="Color.Dark" @onclick="AddReviewToEvent" />
+                            <div class="w-100" @onclick:stopPropagation="true">
+                                <MudIcon Icon="@Icons.Material.Filled.Favorite" Color="Color.Error" @onclick="AddFollowedEvent" />
+                                <a href="/tickets">
+                                    <MudIcon Icon="@Icons.Material.Filled.ShoppingCart" Color="Color.Dark" />
+                                </a>
+                                <MudIcon Icon="@Icons.Material.Filled.RateReview" Color="Color.Dark" @onclick="AddReviewToEvent" />
+                            </div>
+                            
                         </Authorized>
                         <NotAuthorized>
-                            <a href="/login">
-                                <MudIcon Icon="@Icons.Material.Filled.Favorite" Color="Color.Error" />
-                            </a>
-                            <a href="/login">
-                                <MudIcon Icon="@Icons.Material.Filled.ShoppingCart" Color="Color.Dark" />
-                            </a>
-                            <a href="/login">
-                                <MudIcon Icon="@Icons.Material.Filled.RateReview" Color="Color.Dark" />
-                            </a>
+                            <div class="w-100" @onclick:stopPropagation="true">
+                                <a href="/login">
+                                    <MudIcon Icon="@Icons.Material.Filled.Favorite" Color="Color.Error" />
+                                </a>
+                                <a href="/login">
+                                    <MudIcon Icon="@Icons.Material.Filled.ShoppingCart" Color="Color.Dark" />
+                                </a>
+                                <a href="/login">
+                                    <MudIcon Icon="@Icons.Material.Filled.RateReview" Color="Color.Dark" />
+                                </a>
+                            </div>
                         </NotAuthorized>
                     </AuthorizeView>
 
@@ -67,7 +72,7 @@
                     <MudText Align="Align.Center" Class="mt-1">Értékelés:</MudText>
                 </MudItem>
                 <MudItem xs="2">
-                    <MudRating @bind-value=newReviewStars @bind-SelectedValue="newReviewStars" @bind-value:event="onchange" @onclick="ExpandFalse" />
+                    <MudRating @bind-value=newReviewStars @bind-SelectedValue="newReviewStars" @bind-value:event="onchange" />
                 </MudItem>
             </MudGrid>
         </div>
@@ -96,8 +101,6 @@
 
     public ReviewDto newReview { get; set; } = new ReviewDto();
 
-    public bool Expand { get; set; }
-
     public string SnackbarMessage { get; set; } = "Az értékeléshez minden értéket ki kell tölteni!";
 
     #endregion
@@ -110,6 +113,7 @@
         CountAverageReview();
 
     }
+    public void Click() { }
     public void CountAverageReview()
     {
         if (_event != null)
@@ -123,10 +127,6 @@
             else AverageReview = AverageReview / _event.Reviews.Count();
 
         }
-    }
-    public void ExpandFalse()
-    {
-        Expand = true;
     }
     public async Task AddReviewToEvent()
     {
@@ -159,7 +159,6 @@
             }
             if (Snackbar.ShownSnackbars.Count() == 0) uriHelper.NavigateTo(uriHelper.Uri, forceLoad: true);
         }
-        ExpandFalse();
     }
 
     public async Task AddFollowedEvent()
@@ -178,6 +177,5 @@
                     $"Lehet már ott van a kedvenceid között.";
             Snackbar.Add(SnackbarMessage, Severity.Error);
         }
-        ExpandFalse();
     }
 }

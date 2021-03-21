@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace DAL.Migrations
 {
-    public partial class Initial : Migration
+    public partial class InitialMigration : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -203,7 +203,8 @@ namespace DAL.Migrations
                     Location = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: true),
-                    CreatorUserId = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                    CreatorUserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    ImageName = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -225,6 +226,7 @@ namespace DAL.Migrations
                     PaymentMethod = table.Column<int>(type: "int", nullable: false),
                     ShippingMethod = table.Column<int>(type: "int", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
+                    OrderDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: true)
                 },
                 constraints: table =>
@@ -371,7 +373,8 @@ namespace DAL.Migrations
                 columns: table => new
                 {
                     TicketId = table.Column<int>(type: "int", nullable: false),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Amount = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -424,12 +427,12 @@ namespace DAL.Migrations
             migrationBuilder.InsertData(
                 table: "AspNetRoles",
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
-                values: new object[] { "admin", "d1ade9e9-5322-4989-b1e0-ea0bf551e88c", "Admin", "ADMIN" });
+                values: new object[] { "admin", "c6800d24-1f35-4eee-b425-f98d1e8061a8", "Admin", "ADMIN" });
 
             migrationBuilder.InsertData(
                 table: "AspNetUsers",
                 columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "Email", "EmailConfirmed", "LockoutEnabled", "LockoutEnd", "NickName", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "Role", "SecurityStamp", "TwoFactorEnabled", "UserName" },
-                values: new object[] { "admin", 0, "183572cb-673a-49d0-9e74-6433e3dd2024", "admin@admin.hu", true, false, null, "Admin", "ADMIN@ADMIN.HU", "ADMIN", "AQAAAAEAACcQAAAAEKjtfa+ttw1fx0BspzJS8ALtnMwyTLfOLZ8vPdVu5uYcE+zMQWyK6kmRSmDLKiONPQ==", null, false, "Admin", "1af53005-998f-4cc0-b44a-8b6fd63be43a", false, "admin" });
+                values: new object[] { "admin", 0, "01d35d68-641e-4105-ba18-d6f89ff2440d", "admin@admin.hu", true, false, null, "Admin", "ADMIN@ADMIN.HU", "ADMIN", "AQAAAAEAACcQAAAAEN6vJn+BXzI4saav8Lu3csOBS3QTC6ARu6EmxgkEwXnmOTPz2ika1TinDtYl3Yn6vg==", null, false, "Admin", "e4045175-f7a3-45bf-8907-30abcf8b8990", false, "admin" });
 
             migrationBuilder.InsertData(
                 table: "AspNetUserRoles",

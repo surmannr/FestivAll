@@ -13,7 +13,8 @@ namespace BL.InterfacesForManagers
     {
         Task<UserDto> GetUserByIdAsync(string userId);
         Task<IReadOnlyCollection<UserDto>> GetUsersAsync();
-        Task<UserDto> GetUserByNameAsync(string name);
+        Task<IReadOnlyCollection<UserDto>> GetUserByNameAsync(string name);
+        Task<IReadOnlyCollection<CartDto>> GetCartsByUser(string userid);
         Task<IdentityResult> CreateUserAsync(User newUserDto, string password);
         Task<IdentityResult> CreateAdminAsync(UserDto newUserDto, string password);
         Task<IdentityResult> CreateOrganizerAsync(User newUserDto, string password);

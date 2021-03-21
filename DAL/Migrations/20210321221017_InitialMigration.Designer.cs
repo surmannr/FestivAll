@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DAL.Migrations
 {
     [DbContext(typeof(FestivallDb))]
-    [Migration("20210314181852_Initial")]
-    partial class Initial
+    [Migration("20210321221017_InitialMigration")]
+    partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -47,6 +47,9 @@ namespace DAL.Migrations
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<int>("Amount")
+                        .HasColumnType("int");
+
                     b.HasKey("TicketId", "UserId");
 
                     b.HasIndex("UserId");
@@ -67,6 +70,9 @@ namespace DAL.Migrations
                     b.Property<string>("Description")
                         .HasMaxLength(2000)
                         .HasColumnType("nvarchar(2000)");
+
+                    b.Property<string>("ImageName")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Location")
                         .IsRequired()
@@ -94,6 +100,9 @@ namespace DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime>("OrderDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<int>("PaymentMethod")
                         .HasColumnType("int");
@@ -316,17 +325,17 @@ namespace DAL.Migrations
                         {
                             Id = "admin",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "183572cb-673a-49d0-9e74-6433e3dd2024",
+                            ConcurrencyStamp = "01d35d68-641e-4105-ba18-d6f89ff2440d",
                             Email = "admin@admin.hu",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
                             NickName = "Admin",
                             NormalizedEmail = "ADMIN@ADMIN.HU",
                             NormalizedUserName = "ADMIN",
-                            PasswordHash = "AQAAAAEAACcQAAAAEKjtfa+ttw1fx0BspzJS8ALtnMwyTLfOLZ8vPdVu5uYcE+zMQWyK6kmRSmDLKiONPQ==",
+                            PasswordHash = "AQAAAAEAACcQAAAAEN6vJn+BXzI4saav8Lu3csOBS3QTC6ARu6EmxgkEwXnmOTPz2ika1TinDtYl3Yn6vg==",
                             PhoneNumberConfirmed = false,
                             Role = "Admin",
-                            SecurityStamp = "1af53005-998f-4cc0-b44a-8b6fd63be43a",
+                            SecurityStamp = "e4045175-f7a3-45bf-8907-30abcf8b8990",
                             TwoFactorEnabled = false,
                             UserName = "admin"
                         });
@@ -480,7 +489,7 @@ namespace DAL.Migrations
                         new
                         {
                             Id = "admin",
-                            ConcurrencyStamp = "d1ade9e9-5322-4989-b1e0-ea0bf551e88c",
+                            ConcurrencyStamp = "c6800d24-1f35-4eee-b425-f98d1e8061a8",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         });

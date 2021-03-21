@@ -18,6 +18,8 @@ namespace SharedLayer.DTOs
         public Status Status { get; set; }
         [JsonPropertyName("userid")]
         public string UserId { get; set; }
+        [JsonPropertyName("orderdate")]
+        public DateTime OrderDate { get; set; }
         [JsonPropertyName("orderitems")]
         public ICollection<OrderItemDto> OrderItems { get; set; }
 

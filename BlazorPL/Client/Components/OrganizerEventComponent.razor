@@ -1,6 +1,7 @@
 ﻿@inject HttpClient Http
 @inject IHttpClientFactory HttpClientFactory
 @inject ISnackbar Snackbar
+@inject IDialogService DialogService
 
 <MudCard Style="width:100%; margin-top:10px; height:fit-content()" Outlined="true" Square="false">
     <MudCardContent>
@@ -67,15 +68,23 @@
 
     public async Task RemoveEvent()
     {
-        var result = await Http.DeleteAsync($"api/events/{Event.Id}");
-        if (result.IsSuccessStatusCode)
+        bool? dialogresult = await DialogService.ShowMessageBox(
+            "Figyelmeztetés",
+            "Biztosan törölni szeretnéd az eseményt?",
+            yesText: "Igen", cancelText: "Mégse");
+        if (dialogresult != null)
         {
-            Snackbar.Add($"Sikeresen törölted a(z) {Event.Name} nevű eseményt!", Severity.Success);
+            var result = await Http.DeleteAsync($"api/events/{Event.Id}");
+            if (result.IsSuccessStatusCode)
+            {
+                Snackbar.Add($"Sikeresen törölted a(z) {Event.Name} nevű eseményt!", Severity.Success);
+            }
+            else
+            {
+                Snackbar.Add($"Nem sikerült törölni a(z) {Event.Name} nevű eseményt!", Severity.Error);
+            }
+            await OnClick.InvokeAsync(Event);
         }
-        else
-        {
-            Snackbar.Add($"Nem sikerült törölni a(z) {Event.Name} nevű eseményt!", Severity.Error);
-        }
-        await OnClick.InvokeAsync(Event);
+
     }
 }

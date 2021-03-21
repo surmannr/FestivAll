@@ -12,8 +12,9 @@ namespace DAL.InterfacesForRepos
     {
         // Lekérdezések
         Task<User> GetUserById(string userId);
-        Task<User> GetUserByUsername(string userName);
+        Task<IReadOnlyCollection<User>> GetUserByUsername(string userName);
         Task<IReadOnlyCollection<User>> GetAllUsers();
+        Task<IReadOnlyCollection<Cart>> GetCartsByUser(string userid);
         // Létrehozás
         Task<IdentityResult> CreateUser(User newUser, string password);
         // Módosítások
