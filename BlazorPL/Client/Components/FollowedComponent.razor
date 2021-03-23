@@ -28,22 +28,26 @@
 
                     <AuthorizeView>
                         <Authorized>
-                            <MudIcon Icon="@Icons.Material.Filled.Clear" Color="Color.Error" @onclick="RemoveFollowedEvent" />
-                            <a href="/tickets">
-                                <MudIcon Icon="@Icons.Material.Filled.ShoppingCart" Color="Color.Dark" />
-                            </a>
-                            <MudIcon Icon="@Icons.Material.Filled.RateReview" Color="Color.Dark" @onclick="AddReviewToEvent" />
+                            <div class="w-100" @onclick:stopPropagation="true">
+                                <MudIcon Icon="@Icons.Material.Filled.Clear" Color="Color.Error" @onclick="RemoveFollowedEvent" />
+                                <a href="/tickets">
+                                    <MudIcon Icon="@Icons.Material.Filled.ShoppingCart" Color="Color.Dark" />
+                                </a>
+                                <MudIcon Icon="@Icons.Material.Filled.RateReview" Color="Color.Dark" @onclick="AddReviewToEvent" />
+                            </div>
                         </Authorized>
                         <NotAuthorized>
-                            <a href="/login">
-                                <MudIcon Icon="@Icons.Material.Filled.Clear" Color="Color.Error" />
-                            </a>
-                            <a href="/login">
-                                <MudIcon Icon="@Icons.Material.Filled.ShoppingCart" Color="Color.Dark" />
-                            </a>
-                            <a href="/login">
-                                <MudIcon Icon="@Icons.Material.Filled.RateReview" Color="Color.Dark" />
-                            </a>
+                            <div class="w-100" @onclick:stopPropagation="true">
+                                <a href="/login">
+                                    <MudIcon Icon="@Icons.Material.Filled.Clear" Color="Color.Error" />
+                                </a>
+                                <a href="/login">
+                                    <MudIcon Icon="@Icons.Material.Filled.ShoppingCart" Color="Color.Dark" />
+                                </a>
+                                <a href="/login">
+                                    <MudIcon Icon="@Icons.Material.Filled.RateReview" Color="Color.Dark" />
+                                </a>
+                            </div>
                         </NotAuthorized>
                     </AuthorizeView>
 
@@ -63,7 +67,7 @@
                     <MudText Class="mt-1">Vélemény írása:</MudText>
                 </MudItem>
                 <MudItem xs="4">
-                    <MudTextField T="string" Label="Vélemény írása..." @bind-value=newReviewDescription />
+                    <MudTextField T="string" Label="Vélemény írása..." @bind-Value="newReviewDescription" />
                 </MudItem>
                 <MudItem xs="3">
                     <MudText Align="Align.Center" Class="mt-1">Értékelés:</MudText>
@@ -118,10 +122,6 @@
 
 
     }
-    public void ExpandFalse()
-    {
-        Expand = false;
-    }
     public void CountAverageReview()
     {
         if (_event != null)
@@ -167,8 +167,8 @@
                 Snackbar.Add(SnackbarMessage, Severity.Error);
             }
             if (Snackbar.ShownSnackbars.Count() == 0) uriHelper.NavigateTo(uriHelper.Uri, forceLoad: true);
+            newReviewDescription = "";
         }
-        ExpandFalse();
     }
 
     public async Task RemoveFollowedEvent()
@@ -197,8 +197,6 @@
                 Snackbar.Add(SnackbarMessage, Severity.Error);
             }
         }
-
-        Expand = false;
     }
 
 

@@ -12,9 +12,9 @@ namespace BlazorPL.Client.States
 
         public List<EventDto> Events { get; set; } = new List<EventDto>();
 
-        public void Initialize(EventDto[] events)
+        public void Initialize(List<EventDto> events)
         {
-            Events = events.ToList();
+            Events = events;
         }
 
         public void Remove(EventDto eventDto)

@@ -10,40 +10,49 @@
     <Authorized>
 
         <MudPaper Class="d-flex justify-center py-7 p-5" Style="margin-top:20px; background-color: rgba(0,0,0,0.5)" Square="false">
-            <MudText Typo="Typo.h2" Align="Align.Center" Style="margin-top: 10px; margin-bottom:20px; color: #ECEFF1"><b>Követett események</b></MudText>
+            <MudText Typo="Typo.h2" Align="Align.Center" Style="margin-top: 10px; margin-bottom:20px; color: #ECEFF1"><b>Kedvencek</b></MudText>
         </MudPaper>
 
-        <MudPaper Class="d-flex flex-column align-items-center p-5" Style="margin-top:15px; height:75%; background-color: rgba(0,0,0,0.5)" Square="false">
-            <MudPaper Class="d-flex justify-center p-5" Square="false" Style="width:100%; margin-bottom:15px">
-                <MudGrid Spacing="10" Justify="Justify.Center" Class="align-items-end pb-5">
-                    <MudItem xs="2" sm="2" Class="d-flex align-center justify-center mud-width-full py-8">
-                        <MudText Typo="Typo.body1" Align="Align.Right" Style="font-size:20px">Szűrés:</MudText>
-                    </MudItem>
-                    <MudItem xs="4" sm="4" Class="d-flex align-center justify-center mud-width-full py-8">
-                        <MudTextField T="string" Label="Szűrési feltétel..." Required="false" />
-                    </MudItem>
-                    <MudItem xs="4" sm="4" Class="d-flex align-center justify-center mud-width-full py-8">
-                        <MudSelect T="string" Label="Mi alapján szűrjön..." Required="true" RequiredError="Kérlek válaszd ki mi alapján szűrjön!">
-                            <MudSelectItem Value="@("Program neve")" />
-                            <MudSelectItem Value="@("Helyszín")" />
-                            <MudSelectItem Value="@("Dátum (yyyy-MM-dd)")" />
-                            <MudSelectItem Value="@("Szervező neve")" />
-                        </MudSelect>
-                    </MudItem>
-                    <MudItem xs="2" sm="2" Class="d-flex align-center justify-center mud-width-full py-8">
-                        <MudButton Variant="Variant.Outlined">Szűrés</MudButton>
-                    </MudItem>
+        <MudPaper Class="d-flex flex-column align-items-center py-7 p-5" Style="margin-top:15px; height:75%; background-color: rgba(0,0,0,0.5)" Square="false">
+            <MudGrid Style="margin-top:10px; margin-bottom: 10px; width:100%">
+                <MudItem xs="12">
+                    <MudPaper Class="d-flex justify-center py-7 p-5" Square="false">
+                        <MudGrid Spacing="10" Justify="Justify.Center" Class="align-items-end pb-5">
+                            <MudItem xs="2" sm="2" Class="d-flex align-center justify-center mud-width-full py-8">
+                                <MudText Typo="Typo.body1" Align="Align.Right" Style="font-size:20px">Szűrés:</MudText>
+                            </MudItem>
+                            <MudItem xs="4" sm="4" Class="d-flex align-center justify-center mud-width-full py-8">
+                                <MudTextField T="string" @bind-Value="Filter" Label="Szűrési feltétel..." Required="false" />
+                            </MudItem>
+                            <MudItem xs="4" sm="4" Class="d-flex align-center justify-center mud-width-full py-8">
+                                <MudSelect T="string" Label="Mi alapján szűrjön..." @bind-Value="FilterType" Required="true" RequiredError="Kérlek válaszd ki mi alapján szűrjön!">
+                                    <MudSelectItem Value="@("Program neve")" />
+                                    <MudSelectItem Value="@("Helyszín")" />
+                                    <MudSelectItem Value="@("Dátum (yyyy.MM.dd.)")" />
+                                    <MudSelectItem Value="@("Szervező neve")" />
+                                </MudSelect>
+                            </MudItem>
+                            <MudItem xs="2" sm="2" Class="d-flex align-center justify-around mud-width-full py-8">
+                                <MudButton Variant="Variant.Outlined" OnClick="FilterBy" Style="margin-right:10px">Szűrés</MudButton>
+                                @if (events.Count() != AllEvents.Count())
+                                {
+                                    <MudIcon Color="Color.Error" Icon="@Icons.Material.Filled.RemoveCircle" @onclick="RemoveFilter"></MudIcon>
+                                }
 
-                </MudGrid>
-            </MudPaper>
-            @if (State.Events != null)
-            {
-                <div class="bastya" style="height:100%;overflow-y:scroll ;width:100%;">
-                    <Virtualize Items="State.Events" Context="e" OverscanCount="4">
-                        <FollowedComponent _event="e"></FollowedComponent>
-                    </Virtualize>
-                </div>
-            }
+                            </MudItem>
+
+                        </MudGrid>
+                    </MudPaper>
+                </MudItem>
+            </MudGrid>
+                @if (State.Events != null)
+                {
+                    <div class="bastya" style="height:100%;overflow-y:scroll ;width:100%; padding:0 15px 0 15px">
+                        <Virtualize Items="State.Events" Context="e" OverscanCount="4">
+                            <FollowedComponent _event="e"></FollowedComponent>
+                        </Virtualize>
+                    </div>
+                }
 
         </MudPaper>
 
@@ -57,7 +66,7 @@
 
 @code {
 
-    public EventDto[] events { get; set; }
+    public List<EventDto> events { get; set; } = new List<EventDto>();
     public string UserId { get; set; }
 
     protected async override Task OnInitializedAsync()
@@ -67,10 +76,10 @@
         UserId = claimsPrincipal.FindFirst(x => x.Type.Equals("sub")).Value;
 
         var http = HttpClientFactory.CreateClient("BlazorPL.PublicServerAPI");
-        events = await http.GetFromJsonAsync<EventDto[]>($"api/events/followed-event/{UserId}");
+        events = await http.GetFromJsonAsync<List<EventDto>>($"api/events/followed-event/{UserId}");
 
         State.Initialize(events);
-
+        AllEvents = events;
     }
 
     protected override void OnInitialized()
@@ -82,4 +91,51 @@
     {
         State.OnChange -= StateHasChanged;
     }
+
+    #region Szűrés
+
+    public List<EventDto> AllEvents = new List<EventDto>();
+    public string Filter { get; set; } = "";
+    public string FilterType { get; set; }
+
+    public async Task FilterBy()
+    {
+        if (String.IsNullOrEmpty(Filter)) events = AllEvents;
+        else
+        {
+            switch (FilterType)
+            {
+                case ("Program neve"):
+                    events = AllEvents.Where(f => f.Name.ToUpper().Contains(Filter.ToUpper())).ToList();
+                    break;
+                case ("Helyszín"):
+                    events = AllEvents.Where(f => f.Location.ToUpper().Contains(Filter.ToUpper())).ToList();
+                    break;
+                case ("Dátum (yyyy.MM.dd.)"):
+                    string[] args = Filter.Split('.');
+                    DateTime date = new DateTime(int.Parse(args[0]), int.Parse(args[1]), int.Parse(args[2]));
+                    events = AllEvents.Where(f => f.StartDate == date).ToList();
+                    break;
+                case ("Szervező neve"):
+                    var http = HttpClientFactory.CreateClient("BlazorPL.PublicServerAPI");
+                    var users = await http.GetFromJsonAsync<List<UserDto>>($"api/users/name?name={Filter}");
+                    events = new List<EventDto>();
+                    foreach (var u in users)
+                    {
+                        events.AddRange(AllEvents.Where(e => e.CreatorUserId == u.Id).ToList());
+                    }
+                    break;
+                default:
+                    events = AllEvents;
+                    break;
+            }
+        }
+    }
+
+    public void RemoveFilter()
+    {
+        Filter = "";
+        events = AllEvents;
+    }
+    #endregion
 }

@@ -231,7 +231,7 @@
             var result = await Http.DeleteAsync($"api/users/delete-cart?ticketid={o.TicketId}&userid={userId}");
             if (result.IsSuccessStatusCode)
             {
-                SnackbarMessage = $"Sikeresen törölted a kedvenceid közül a jegyet!";
+                SnackbarMessage = $"Sikeresen törölted a tételt!";
                 Snackbar.Add(SnackbarMessage, Severity.Success);
                 State.Remove(o);
                 StateHasChanged();
@@ -275,7 +275,8 @@
                 UserId = userId,
                 OrderItems = orderitems,
                 PaymentMethod = pmeth,
-                ShippingMethod = smeth
+                ShippingMethod = smeth,
+                OrderDate = DateTime.Now
             };
             var temp = await http.PostAsJsonAsync<OrderDto>($"api/orders", orderDto);
             var order = await temp.Content.ReadFromJsonAsync<OrderDto>();
