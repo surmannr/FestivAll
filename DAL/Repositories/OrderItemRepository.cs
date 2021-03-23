@@ -51,7 +51,7 @@ namespace DAL.Repositories
             return await db.OrderItems.GetOrderItemById(orderItemId);
         }
 
-        public async Task<IReadOnlyCollection<OrderItem>> GetOrderItemsByOrderId(int orderId)
+        public async Task<IReadOnlyCollection<OrderItem>> GetOrderItemsByOrderId(string orderId)
         {
             return await db.OrderItems.GetOrderItemsByOrderId(orderId);
         }
@@ -68,7 +68,7 @@ namespace DAL.Repositories
             else throw new DbModelNullException(ExceptionMessageConstants.NullObject);
         }
 
-        public async Task<OrderItem> SetOrder(int orderItemId, int orderId)
+        public async Task<OrderItem> SetOrder(int orderItemId, string orderId)
         {
             var order = await db.Orders.Where(o => o.Id == orderId).Include(o => o.OrderItems).FirstOrDefaultAsync();
             if (order != null)
@@ -99,7 +99,7 @@ namespace DAL.Repositories
         public static async Task<OrderItem> GetOrderItemById(this IQueryable<OrderItem> orderItems, int orderItemId)
             => await orderItems.Where(o => o.Id == orderItemId).FirstOrDefaultAsync();
 
-        public static async Task<IReadOnlyCollection<OrderItem>> GetOrderItemsByOrderId(this IQueryable<OrderItem> orderItems, int orderId)
+        public static async Task<IReadOnlyCollection<OrderItem>> GetOrderItemsByOrderId(this IQueryable<OrderItem> orderItems, string orderId)
             => await orderItems.Where(o => o.OrderId == orderId).ToListAsync();
     }
 }

@@ -153,7 +153,6 @@
     protected override void OnParametersSet()
     {
         if (newEvent != null) StartDate = newEvent.StartDate;
-        if (ModifyButton == "Létrehozás") newEvent = new EventDto();
     }
     private async Task CancelDialog()
     {
@@ -181,7 +180,6 @@
     private async Task Modify()
     {
         newEvent.StartDate = (DateTime)StartDate;
-        Console.WriteLine(newEvent.Name + newEvent.Location + newEvent.StartDate + newEvent.Id + newEvent.Description);
         moreTickets.AddFirst(newFirstTicket);
         if (CheckAll())
         {
@@ -226,7 +224,7 @@
     {
         moreTickets.AddFirst(newFirstTicket);
         newEvent.StartDate = (DateTime)StartDate;
-        Console.WriteLine(newEvent.Name + newEvent.Location + newEvent.StartDate);
+        if(newEvent!=null)
         if (CheckAll())
         {
             if (ModifyButton == "Létrehozás" || ModifyButton == "Másolat létrehozása")

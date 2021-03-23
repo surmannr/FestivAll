@@ -23,7 +23,7 @@ namespace BlazorPL.Server.Controllers
         #region Get
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<OrderDto>> Get(int id)
+        public async Task<ActionResult<OrderDto>> Get(string id)
         {
             var result = await orderManager.GetOrderByIdAsync(id);
             return Ok(result);
@@ -65,7 +65,7 @@ namespace BlazorPL.Server.Controllers
         #region Delete
 
         [HttpDelete("{id}")]
-        public async Task<ActionResult> Create(int id)
+        public async Task<ActionResult> Create(string id)
         {
             await orderManager.DeleteOrderAsync(id);
             return Ok();
@@ -76,14 +76,14 @@ namespace BlazorPL.Server.Controllers
         #region Modify
 
         [HttpPatch("edit/{id}/addorderitem")]
-        public async Task<ActionResult<OrderDto>> AddOrderItemToOrder(int id, [FromQuery]int orderitemid)
+        public async Task<ActionResult<OrderDto>> AddOrderItemToOrder(string id, [FromQuery]int orderitemid)
         {
             var result = await orderManager.AddOrderitemToOrder(id,orderitemid);
             return Ok(result);
         }
 
         [HttpPatch("edit/{id}/status")]
-        public async Task<ActionResult<OrderDto>> AddOrderItemToOrder(int id, [FromQuery] Status status)
+        public async Task<ActionResult<OrderDto>> AddOrderItemToOrder(string id, [FromQuery] Status status)
         {
             var result = await orderManager.ModifyStatusAsync(id, status);
             return Ok(result);

@@ -19,7 +19,7 @@ namespace SharedLayer.DTOs
         [JsonPropertyName("ticketid")]
         public int TicketId { get; set; }
         [JsonPropertyName("orderid")]
-        public int OrderId { get; set; }
+        public string OrderId { get; set; }
         [JsonPropertyName("ticketcategory")]
         public string TicketCategory { get; set; }
         [JsonPropertyName("eventname")]
@@ -27,7 +27,7 @@ namespace SharedLayer.DTOs
 
         public OrderItemDto() { }
 
-        public OrderItemDto(int amount, int price, Status status, int ticketId, int orderId)
+        public OrderItemDto(int amount, int price, Status status, int ticketId, string orderId)
         {
             Amount = amount;
             Price = price;

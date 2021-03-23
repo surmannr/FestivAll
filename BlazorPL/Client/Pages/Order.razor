@@ -1,0 +1,55 @@
+﻿@page "/bought-tickets"
+@inject AuthenticationStateProvider AuthState
+@inject HttpClient Http
+@inject IHttpClientFactory HttpClientFactory
+
+<AuthorizeView>
+    <Authorized>
+        <MudPaper Class="d-flex justify-center py-7 p-5" Style="margin-top:20px; background-color: rgba(0,0,0,0.5)" Square="false">
+            <MudText Typo="Typo.h2" Align="Align.Center" Style="margin-top: 10px; margin-bottom:20px; color: #ECEFF1"><b>Megrendeléseim</b></MudText>
+        </MudPaper>
+        <MudPaper Class="d-flex flex-column align-items-center py-7 p-5" Style="margin-top:15px; height:100%; background-color: rgba(0,0,0,0.5)" Square="false">
+            @if (orders != null && orders.Count()!=0)
+            {
+                <div class="bastya" style="height:100%;overflow-y:scroll ;width:100%">
+                    <MudExpansionPanels>
+                        <Virtualize Items="orders" Context="t" OverscanCount="4">
+                            <ItemContent>
+                                <OrderComponent></OrderComponent>
+                            </ItemContent>
+                        </Virtualize>
+                    </MudExpansionPanels>
+                </div>
+            }
+            else
+            {
+                <MudText Typo="Typo.h6" Align="Align.Center" Style="margin-top: 10px; margin-bottom:20px">Még nem rendeltél semmit.<a href="/events"> Nézz körül programjaink közül.</a></MudText>
+            }
+        </MudPaper>
+    </Authorized>
+    <NotAuthorized>
+        <RedirectToLogin></RedirectToLogin>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+
+    public List<Order> orders { get; set; } = new List<Order>();
+
+    public string userId { get; set; }
+
+    public HttpClient http { get; set; }
+
+    protected async override Task OnInitializedAsync()
+    {
+        var auth = await AuthState.GetAuthenticationStateAsync();
+        var claimsPrincipal = auth.User;
+        userId = claimsPrincipal.FindFirst(x => x.Type.Equals("sub")).Value;
+
+        http = HttpClientFactory.CreateClient("BlazorPL.PublicServerAPI");
+        orders = await http.GetFromJsonAsync<List<Order>>($"api/orders/user?userId={userId}");
+    }
+
+}
+
+}

@@ -27,7 +27,7 @@ namespace BL.Managers
 
         // Lekérdezések
 
-        public async Task<OrderDto> GetOrderByIdAsync(int orderId)
+        public async Task<OrderDto> GetOrderByIdAsync(string orderId)
         {
             var order = await orderRepository.GetOrderById(orderId);
             return mapper.Map<OrderDto>(order);
@@ -60,19 +60,19 @@ namespace BL.Managers
 
         // Törlés
 
-        public async Task DeleteOrderAsync(int orderId)
+        public async Task DeleteOrderAsync(string orderId)
             => await orderRepository.DeleteOrder(orderId);
 
         // Módosítás
 
-        public async Task<OrderDto> AddOrderitemToOrder(int orderId, int orderItemId)
+        public async Task<OrderDto> AddOrderitemToOrder(string orderId, int orderItemId)
         {
             await orderRepository.AddItemToOrder(orderId, orderItemId);
             var result = await orderItemRepository.SetOrder(orderItemId, orderId);
             return mapper.Map<OrderDto>(result);
         }
 
-        public async Task<OrderDto> ModifyStatusAsync(int orderId, Status status)
+        public async Task<OrderDto> ModifyStatusAsync(string orderId, Status status)
         {
             var result = await orderRepository.ModifyStatus(orderId, status);
             return mapper.Map<OrderDto>(result);

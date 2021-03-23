@@ -20,7 +20,7 @@ namespace DAL.Models
         public Ticket Ticket { get; set; }
         public string TicketCategory { get; set; }
 
-        public int OrderId { get; set; }
+        public string OrderId { get; set; }
         public Order Order { get; set; }
 
         public string EventName { get; set; }

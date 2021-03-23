@@ -30,7 +30,7 @@ namespace BlazorPL.Server.Controllers
         }
 
         [HttpGet("order")]
-        public async Task<ActionResult<IReadOnlyCollection<OrderItemDto>>> GetByOrderId([FromQuery]int orderId)
+        public async Task<ActionResult<IReadOnlyCollection<OrderItemDto>>> GetByOrderId([FromQuery]string orderId)
         {
             var result = await orderItemManager.GetOrderItemsByOrderIdAsync(orderId);
             return Ok(result);
@@ -77,7 +77,7 @@ namespace BlazorPL.Server.Controllers
         }
 
         [HttpPatch("edit/{id}/order")]
-        public async Task<ActionResult<OrderItemDto>> ModifyStatus(int id, [FromQuery] int orderId)
+        public async Task<ActionResult<OrderItemDto>> ModifyStatus(int id, [FromQuery] string orderId)
         {
             var result = await orderItemManager.SetOrderAsync(id, orderId);
             return Ok(result);

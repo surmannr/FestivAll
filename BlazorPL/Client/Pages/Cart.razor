@@ -86,6 +86,14 @@
                                 <MudText Typo="Typo.h5" Align="Align.Center" Color="Color.Dark" Style="font-size:30px"><u>Végösszeg: @State.sumprice.ToString("N0") Ft</u></MudText>
                             </MudItem>
                         </MudGrid>
+                        <MudGrid Justify="Justify.SpaceAround" Style="width:100%; margin-top:10px">
+                            <MudItem  xs="3" Style="display:flex; align-items:flex-end">
+                                <MudText Typo="Typo.body1" Align="Align.Left" Style="font-size:20px"><b>Átvétel helye:</b></MudText>
+                            </MudItem>
+                            <MudItem xs="9" Class="d-flex align-items-baseline justify-center mud-width-full">
+                                <MudTextField T="string" @bind-Value="ShippingLocation"></MudTextField>
+                            </MudItem>
+                        </MudGrid>
                         <MudGrid Justify="Justify.Center" Style="width:100%;">
                             <MudItem xs="12" Style="display:flex; align-items:flex-end; justify-content:center; margin-top:10px">
                                 <MudButton Disabled="State.ButtonDisabled" Variant="Variant.Filled" EndIcon="@Icons.Material.Filled.ShoppingCart" Color="Color.Info" @onclick="Buy">Vásárlás</MudButton>
@@ -121,6 +129,8 @@
 
     public string selectedPaymentMethod { get; set; }
     public string selectedShippingMethod { get; set; }
+
+    public string ShippingLocation { get; set; } = "";
 
     public HttpClient http { get; set; }
 
@@ -276,17 +286,27 @@
                 OrderItems = orderitems,
                 PaymentMethod = pmeth,
                 ShippingMethod = smeth,
+                ShippingLocation = ShippingLocation,
                 OrderDate = DateTime.Now
             };
-            var temp = await http.PostAsJsonAsync<OrderDto>($"api/orders", orderDto);
-            var order = await temp.Content.ReadFromJsonAsync<OrderDto>();
-            foreach (var item in orderitems)
+            if (string.IsNullOrEmpty(ShippingLocation))
             {
-                item.OrderId = order.Id;
-                await http.PostAsJsonAsync<OrderItemDto>($"api/orderitems", item);
+                Snackbar.Add("Az átvétel helye nincsen kitöltve!", Severity.Error);
             }
-            await http.PostAsJsonAsync($"api/users/cart-to-bought", orderDto);
-            uriHelper.NavigateTo(uriHelper.Uri, forceLoad: true);
+            var temp = await http.PostAsJsonAsync<OrderDto>($"api/orders", orderDto);
+            if (temp.IsSuccessStatusCode)
+            {
+                /*var order = await temp.Content.ReadFromJsonAsync<OrderDto>();
+                foreach (var item in orderitems)
+                {
+                    item.OrderId = order.Id;
+                    await http.PostAsJsonAsync<OrderItemDto>($"api/orderitems", item);
+                }*/
+                await http.PostAsJsonAsync($"api/users/cart-to-bought", orderDto);
+                uriHelper.NavigateTo(uriHelper.Uri, forceLoad: true);
+            }
+            else Snackbar.Add("Nem sikerült a megrendelés, kérlek ellenőrizd az adataidat.", Severity.Error);
+
         }
 
     }

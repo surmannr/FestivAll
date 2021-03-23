@@ -37,7 +37,7 @@ namespace BL.Managers
             return mapper.Map<List<OrderItemDto>>(orders);
         }
 
-        public async Task<IReadOnlyCollection<OrderItemDto>> GetOrderItemsByOrderIdAsync(int orderId)
+        public async Task<IReadOnlyCollection<OrderItemDto>> GetOrderItemsByOrderIdAsync(string orderId)
         {
             var orders = await orderItemRepository.GetOrderItemsByOrderId(orderId);
             return mapper.Map<List<OrderItemDto>>(orders);
@@ -65,7 +65,7 @@ namespace BL.Managers
             return mapper.Map<OrderItemDto>(result);
         }
 
-        public async Task<OrderItemDto> SetOrderAsync(int orderItemId,int orderId)
+        public async Task<OrderItemDto> SetOrderAsync(int orderItemId,string orderId)
         {
             var result = await orderItemRepository.SetOrder(orderItemId, orderId);
             return mapper.Map<OrderItemDto>(result);

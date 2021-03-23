@@ -9,11 +9,13 @@ namespace SharedLayer.DTOs
     public class OrderDto
     {
         [JsonPropertyName("id")]
-        public int Id { get; set; }
+        public string Id { get; set; }
         [JsonPropertyName("paymentmethod")]
         public PaymentMethod PaymentMethod { get; set; }
         [JsonPropertyName("shippingmethod")]
         public ShippingMethod ShippingMethod { get; set; }
+        [JsonPropertyName("shippinglocation")]
+        public string ShippingLocation { get; set; }
         [JsonPropertyName("status")]
         public Status Status { get; set; }
         [JsonPropertyName("userid")]
@@ -23,7 +25,11 @@ namespace SharedLayer.DTOs
         [JsonPropertyName("orderitems")]
         public ICollection<OrderItemDto> OrderItems { get; set; }
 
-        public OrderDto() { }
+        public OrderDto() {
+            long ticks = DateTime.Now.Ticks;
+            byte[] bytes = BitConverter.GetBytes(ticks);
+            Id = Convert.ToBase64String(bytes).Replace('+', '_').Replace('/', '-').TrimEnd('=') + "_" + Guid.NewGuid().ToString();
+        }
 
         public OrderDto(PaymentMethod paymentMethod, ShippingMethod shippingMethod,
             Status status, string userId, ICollection<OrderItemDto> orderItems)

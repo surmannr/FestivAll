@@ -19,7 +19,7 @@ namespace DAL.Repositories
         {
             db = _db;
         }
-        public async Task<Order> AddItemToOrder(int orderId, int orderItemId)
+        public async Task<Order> AddItemToOrder(string orderId, int orderItemId)
         {
             var orderItem = await db.OrderItems.Where(e => e.Id == orderItemId).FirstOrDefaultAsync();
             if (orderItem != null)
@@ -47,7 +47,7 @@ namespace DAL.Repositories
             return newOrder;
         }
 
-        public async Task DeleteOrder(int orderId)
+        public async Task DeleteOrder(string orderId)
         {
             var order = await db.Orders.Where(o => o.Id == orderId).FirstOrDefaultAsync();
             if (order != null)
@@ -63,7 +63,7 @@ namespace DAL.Repositories
             return await db.Orders.GetOrdersList();
         }
 
-        public async Task<Order> GetOrderById(int orderId)
+        public async Task<Order> GetOrderById(string orderId)
         {
             return await db.Orders.GetOrderById(orderId);
         }
@@ -77,7 +77,7 @@ namespace DAL.Repositories
             return await db.Orders.GetOrdersByUserId(userId);
         }
 
-        public async Task<Order> ModifyStatus(int orderId, Status status)
+        public async Task<Order> ModifyStatus(string orderId, Status status)
         {
             var order = await db.Orders.Where(o => o.Id == orderId).FirstOrDefaultAsync();
             if (order != null)
@@ -99,7 +99,7 @@ namespace DAL.Repositories
         public static async Task<IReadOnlyCollection<Order>> GetOrdersList(this IQueryable<Order> orders)
             => await orders.Include(o => o.OrderItems).ToListAsync();
 
-        public static async Task<Order> GetOrderById(this IQueryable<Order> orders, int orderId)
+        public static async Task<Order> GetOrderById(this IQueryable<Order> orders, string orderId)
             => await orders.Include(o => o.OrderItems).Where(o => o.Id == orderId).FirstOrDefaultAsync();
 
         public static async Task<IReadOnlyCollection<Order>> GetOrdersByUserId(this IQueryable<Order> orders, string userId)

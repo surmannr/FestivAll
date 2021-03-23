@@ -9,11 +9,14 @@ namespace DAL.Models
     public class Order
     {
         [Key]
-        public int Id { get; set; }
+        public string Id { get; set; }
         [Required]
         public PaymentMethod PaymentMethod { get; set; }
         [Required]
         public ShippingMethod ShippingMethod { get; set; }
+        [Required]
+        [MaxLength(200,ErrorMessage = "Az átvétel helyének címe túl hosszú.")]
+        public string ShippingLocation { get; set; }
         public Status Status { get; set; }
         public DateTime OrderDate { get; set; }
 
@@ -25,6 +28,9 @@ namespace DAL.Models
         public Order()
         {
             OrderItems = new List<OrderItem>();
+            long ticks = DateTime.Now.Ticks;
+            byte[] bytes = BitConverter.GetBytes(ticks);
+            Id = Convert.ToBase64String(bytes).Replace('+', '_').Replace('/', '-').TrimEnd('=') + "_" + Guid.NewGuid().ToString();
         }
     }
 }

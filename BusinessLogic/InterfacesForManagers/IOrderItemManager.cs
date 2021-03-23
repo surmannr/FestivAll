@@ -12,10 +12,10 @@ namespace BL.InterfacesForManagers
     {
         Task<OrderItemDto> GetOrderItemByIdAsync(int orderItemId);
         Task<IReadOnlyCollection<OrderItemDto>> GetOrderItemsAsync();
-        Task<IReadOnlyCollection<OrderItemDto>> GetOrderItemsByOrderIdAsync(int orderId);
+        Task<IReadOnlyCollection<OrderItemDto>> GetOrderItemsByOrderIdAsync(string orderId);
         Task<OrderItemDto> CreateOrderItemAsync(OrderItemDto orderItemDto);
         Task DeleteOrderItemAsync(int orderItemId);
         Task<OrderItemDto> ModifyStatusAsync(int orderItemId, Status status);
-        Task<OrderItemDto> SetOrderAsync(int orderItemId, int orderId);
+        Task<OrderItemDto> SetOrderAsync(int orderItemId, string orderId);
     }
 }

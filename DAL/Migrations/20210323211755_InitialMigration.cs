@@ -221,10 +221,10 @@ namespace DAL.Migrations
                 name: "Orders",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     PaymentMethod = table.Column<int>(type: "int", nullable: false),
                     ShippingMethod = table.Column<int>(type: "int", nullable: false),
+                    ShippingLocation = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
                     OrderDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: true)
@@ -404,7 +404,7 @@ namespace DAL.Migrations
                     Status = table.Column<int>(type: "int", nullable: false),
                     TicketId = table.Column<int>(type: "int", nullable: false),
                     TicketCategory = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    OrderId = table.Column<int>(type: "int", nullable: false),
+                    OrderId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     EventName = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
@@ -415,7 +415,7 @@ namespace DAL.Migrations
                         column: x => x.OrderId,
                         principalTable: "Orders",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_OrderItems_Tickets_TicketId",
                         column: x => x.TicketId,
@@ -427,12 +427,12 @@ namespace DAL.Migrations
             migrationBuilder.InsertData(
                 table: "AspNetRoles",
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
-                values: new object[] { "admin", "c6800d24-1f35-4eee-b425-f98d1e8061a8", "Admin", "ADMIN" });
+                values: new object[] { "admin", "820def92-4df9-4d07-b393-a4c3cbc03cb6", "Admin", "ADMIN" });
 
             migrationBuilder.InsertData(
                 table: "AspNetUsers",
                 columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "Email", "EmailConfirmed", "LockoutEnabled", "LockoutEnd", "NickName", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "Role", "SecurityStamp", "TwoFactorEnabled", "UserName" },
-                values: new object[] { "admin", 0, "01d35d68-641e-4105-ba18-d6f89ff2440d", "admin@admin.hu", true, false, null, "Admin", "ADMIN@ADMIN.HU", "ADMIN", "AQAAAAEAACcQAAAAEN6vJn+BXzI4saav8Lu3csOBS3QTC6ARu6EmxgkEwXnmOTPz2ika1TinDtYl3Yn6vg==", null, false, "Admin", "e4045175-f7a3-45bf-8907-30abcf8b8990", false, "admin" });
+                values: new object[] { "admin", 0, "88b97e08-d242-4c76-8fbc-a9f653f89e53", "admin@admin.hu", true, false, null, "Admin", "ADMIN@ADMIN.HU", "ADMIN", "AQAAAAEAACcQAAAAEDJrweaOEIK/otdSwBeO4BHb7ngF0F5uGskptuGzbHI+5sAozYYvr9w4XrvAcTpR8g==", null, false, "Admin", "244ad76b-9aad-4f69-afb0-d9ed9d38aa10", false, "admin" });
 
             migrationBuilder.InsertData(
                 table: "AspNetUserRoles",

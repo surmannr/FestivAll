@@ -11,16 +11,16 @@ namespace DAL.InterfacesForRepos
     public interface IOrderRepository
     {
         // Lekérdezések
-        Task<Order> GetOrderById(int orderId);
+        Task<Order> GetOrderById(string orderId);
         Task<IReadOnlyCollection<Order>> GetOrdersByUserId(string userId);
         Task<IReadOnlyCollection<Order>> GetAllOrders();
         Task<Order> GetLastOrderByUser(string userId);
         // Létrehozás
         Task<Order> CreateOrder(Order newOrder);
         // Módosítások
-        Task<Order> ModifyStatus(int orderId, Status status);
-        Task<Order> AddItemToOrder(int orderId, int orderItemId);
+        Task<Order> ModifyStatus(string orderId, Status status);
+        Task<Order> AddItemToOrder(string orderId, int orderItemId);
         // Törlés
-        Task DeleteOrder(int orderId);
+        Task DeleteOrder(string orderId);
     }
 }

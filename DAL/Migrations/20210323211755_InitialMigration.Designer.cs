@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DAL.Migrations
 {
     [DbContext(typeof(FestivallDb))]
-    [Migration("20210321221017_InitialMigration")]
+    [Migration("20210323211755_InitialMigration")]
     partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -96,16 +96,19 @@ namespace DAL.Migrations
 
             modelBuilder.Entity("DAL.Models.Order", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("OrderDate")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("PaymentMethod")
                         .HasColumnType("int");
+
+                    b.Property<string>("ShippingLocation")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<int>("ShippingMethod")
                         .HasColumnType("int");
@@ -136,8 +139,8 @@ namespace DAL.Migrations
                     b.Property<string>("EventName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("OrderId")
-                        .HasColumnType("int");
+                    b.Property<string>("OrderId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("Price")
                         .HasColumnType("int");
@@ -325,17 +328,17 @@ namespace DAL.Migrations
                         {
                             Id = "admin",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "01d35d68-641e-4105-ba18-d6f89ff2440d",
+                            ConcurrencyStamp = "88b97e08-d242-4c76-8fbc-a9f653f89e53",
                             Email = "admin@admin.hu",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
                             NickName = "Admin",
                             NormalizedEmail = "ADMIN@ADMIN.HU",
                             NormalizedUserName = "ADMIN",
-                            PasswordHash = "AQAAAAEAACcQAAAAEN6vJn+BXzI4saav8Lu3csOBS3QTC6ARu6EmxgkEwXnmOTPz2ika1TinDtYl3Yn6vg==",
+                            PasswordHash = "AQAAAAEAACcQAAAAEDJrweaOEIK/otdSwBeO4BHb7ngF0F5uGskptuGzbHI+5sAozYYvr9w4XrvAcTpR8g==",
                             PhoneNumberConfirmed = false,
                             Role = "Admin",
-                            SecurityStamp = "e4045175-f7a3-45bf-8907-30abcf8b8990",
+                            SecurityStamp = "244ad76b-9aad-4f69-afb0-d9ed9d38aa10",
                             TwoFactorEnabled = false,
                             UserName = "admin"
                         });
@@ -489,7 +492,7 @@ namespace DAL.Migrations
                         new
                         {
                             Id = "admin",
-                            ConcurrencyStamp = "c6800d24-1f35-4eee-b425-f98d1e8061a8",
+                            ConcurrencyStamp = "820def92-4df9-4d07-b393-a4c3cbc03cb6",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         });
@@ -670,9 +673,7 @@ namespace DAL.Migrations
                 {
                     b.HasOne("DAL.Models.Order", "Order")
                         .WithMany("OrderItems")
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("OrderId");
 
                     b.HasOne("DAL.Models.Ticket", "Ticket")
                         .WithMany()
