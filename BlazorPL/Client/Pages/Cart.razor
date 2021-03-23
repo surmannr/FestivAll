@@ -3,18 +3,21 @@
 @inject HttpClient Http
 @inject IHttpClientFactory HttpClientFactory
 @inject NavigationManager uriHelper
-@using SharedLayer.Enums
 @inject CartState State
 @implements IDisposable
 @inject ISnackbar Snackbar
 @inject Blazored.LocalStorage.ISyncLocalStorageService localStorage
+@inject NavigationManager nav
+@inject IDialogService DialogService
+
+@using SharedLayer.Enums
 
 <AuthorizeView>
     <Authorized>
         <MudPaper Class="d-flex justify-center py-7 p-5" Style="margin-top:20px; background-color: rgba(0,0,0,0.5)" Square="false">
             <MudText Typo="Typo.h2" Align="Align.Center" Style="margin-top: 10px; margin-bottom:20px; color: #ECEFF1"><b>Kosár</b></MudText>
         </MudPaper>
-        <MudPaper Class="d-flex flex-column align-items-center py-7 p-5" Style="margin-top:15px; height:80%; background-color: rgba(0,0,0,0.5)" Square="false">
+        <MudPaper Class="d-flex flex-column align-items-center py-7 p-5" Style="margin-top:15px; height:100%; background-color: rgba(0,0,0,0.5)" Square="false">
 
             @if (State.Carts != null)
             {
@@ -39,7 +42,7 @@
                             <MudTd DataLabel="Program neve">@o.EventName</MudTd>
                             <MudTd Style="text-align: left" DataLabel="Jegy kategória">@o.TicketCategory</MudTd>
                             <MudTd DataLabel="Mennyiség">
-                                <MudTextField T="int" @bind-Value="o.Amount" @onfocusin="() => State.ButtonDisabled = true" @onfocusout="State.SumPrice" @oninput="State.SumPrice" Placeholder="Mennyiség" Variant="Variant.Text" InputType="InputType.Number"></MudTextField>
+                                <MudTextField T="int" Value="o.Amount" ValueChanged="(v) => State.SumPriceWithParams(o,v)" Immediate="true" Placeholder="Mennyiség" Variant="Variant.Text" InputType="InputType.Number"></MudTextField>
                             </MudTd>
                             <MudTd Style="text-align: right" DataLabel="Ár">@o.TicketPrice Ft</MudTd>
                             <MudTd Style="text-align: center">
@@ -50,7 +53,7 @@
                             <MudTablePager RowsPerPageString="Találatok száma" PageSizeOptions="new int[]{5,10}" DisableRowsPerPage="true" />
                         </PagerContent>
                     </MudTable>
-                    <MudPaper Width="100" Style="width:100%; margin-top:10px; padding:20px; height:50%">
+                    <MudPaper Width="100" Style="width:100%; margin-top:10px; padding:20px; height:50%; display:flex; flex-direction:column; justify-content:space-around">
                         <MudGrid Justify="Justify.SpaceAround" Style="width:100%;">
                             <MudItem xs="3" Style="display:flex; align-items:flex-end">
                                 <MudText Typo="Typo.body1" Align="Align.Left" Style="font-size:20px"><b>Fizetési mód:</b></MudText>
@@ -59,7 +62,7 @@
                                 <MudSelect T="string" Label="Fizetési mód" @bind-Value="selectedPaymentMethod">
                                     @foreach (var a in paymentmethods)
                                     {
-                                        <MudSelectItem Value="@a.ToString()" />
+                                        <MudSelectItem Value="@ReturnPaymentmethod((PaymentMethod)a)"/>
                                     }
                                 </MudSelect>
                             </MudItem>
@@ -75,7 +78,7 @@
                                 <MudSelect T="string" Label="Szállítási mód" @bind-Value="selectedShippingMethod">
                                     @foreach (var a in shippingmethods)
                                     {
-                                        <MudSelectItem Value="@a.ToString()" />
+                                        <MudSelectItem Value="@ReturnShippingMethod((ShippingMethod)a)" />
                                     }
                                 </MudSelect>
                             </MudItem>
@@ -116,8 +119,8 @@
 
     public string userId { get; set; }
 
-    public string selectedPaymentMethod { get; set; } = PaymentMethod.Cash.ToString();
-    public string selectedShippingMethod { get; set; } = ShippingMethod.DeliverByPost.ToString();
+    public string selectedPaymentMethod { get; set; }
+    public string selectedShippingMethod { get; set; }
 
     public HttpClient http { get; set; }
 
@@ -135,18 +138,12 @@
         paymentmethods = Enum.GetValues(typeof(PaymentMethod));
         shippingmethods = Enum.GetValues(typeof(ShippingMethod));
 
-        var items = localStorage.GetItem<List<CartDto>>("cart");
-        if (items == null) localStorage.RemoveItem("cart");
+        selectedPaymentMethod = ReturnPaymentmethod(PaymentMethod.Cash);
+        selectedShippingMethod = ReturnShippingMethod(ShippingMethod.DeliverByPost);
 
-        if(items==null || items.Count() == 0)
+        if (carts != null)
         {
-            if (carts != null)
-            {
-                State.Initialize(carts, null);
-            }
-        } else
-        {
-            State.Initialize(carts,items);
+            State.Initialize(carts);
         }
 
 
@@ -154,63 +151,147 @@
     protected override void OnInitialized()
     {
         State.OnChange += StateHasChanged;
+        nav.LocationChanged += BeforeUnloadHandler;
     }
 
     public void Dispose()
     {
         State.OnChange -= StateHasChanged;
+        nav.LocationChanged -= BeforeUnloadHandler;
+    }
+
+    public string ReturnPaymentmethod(PaymentMethod payment)
+    {
+        switch (payment.ToString())
+        {
+            case ("Cash"):
+                return "Utánvétel";
+            case ("CreditCard"):
+                return "Bankkártya";
+            case ("BankTransfer"):
+                return "Banki átutalás";
+            default:
+                return "Utánvétel";
+        }
+    }
+
+    public PaymentMethod GetPayment(string payment)
+    {
+        switch (payment)
+        {
+            case ("Utánvétel"):
+                return PaymentMethod.Cash;
+            case ("Bankkártya"):
+                return PaymentMethod.CreditCard;
+            case ("Banki átutalás"):
+                return PaymentMethod.BankTransfer;
+            default:
+                return PaymentMethod.Cash;
+        }
+    }
+
+    public string ReturnShippingMethod(ShippingMethod shipping)
+    {
+        switch (shipping.ToString())
+        {
+            case ("DeliverByPost"):
+                return "Postai átvétel";
+            case ("DeliverByUps"):
+                return "UPS futár";
+            case ("DeliverByAmazoneDrone"):
+                return "Amazon drón";
+            default:
+                return "Postai átvétel";
+        }
+    }
+
+    public ShippingMethod GetShipping(string shipping)
+    {
+        switch (shipping)
+        {
+            case ("Postai átvétel"):
+                return ShippingMethod.DeliverByPost;
+            case ("UPS futár"):
+                return ShippingMethod.DeliverByUps;
+            case ("Amazon drón"):
+                return ShippingMethod.DeliverByAmazoneDrone;
+            default:
+                return ShippingMethod.DeliverByPost;
+        }
     }
 
     public async Task RemoveCart(CartDto o)
     {
-        var result = await Http.DeleteAsync($"api/users/delete-cart?ticketid={o.TicketId}&userid={userId}");
-        if (result.IsSuccessStatusCode)
+        bool? dialogresult = await DialogService.ShowMessageBox(
+           "Figyelmeztetés",
+           "Biztosan ki szeretnéd törölni ezt a tételt?",
+           yesText: "Igen", cancelText: "Mégse");
+        if(dialogresult != null)
         {
-            SnackbarMessage = $"Sikeresen törölted a kedvenceid közül a jegyet!";
-            Snackbar.Add(SnackbarMessage, Severity.Success);
-            State.Remove(o);
-            StateHasChanged();
+            var result = await Http.DeleteAsync($"api/users/delete-cart?ticketid={o.TicketId}&userid={userId}");
+            if (result.IsSuccessStatusCode)
+            {
+                SnackbarMessage = $"Sikeresen törölted a kedvenceid közül a jegyet!";
+                Snackbar.Add(SnackbarMessage, Severity.Success);
+                State.Remove(o);
+                StateHasChanged();
+            }
+            else
+            {
+                SnackbarMessage = "Sikertelen törlés.";
+                Snackbar.Add(SnackbarMessage, Severity.Error);
+            }
+            State.SumPrice();
         }
-        else
-        {
-            SnackbarMessage = "Sikertelen törlés.";
-            Snackbar.Add(SnackbarMessage, Severity.Error);
-        }
-        State.SumPrice();
+
     }
 
     public async Task Buy()
     {
-        PaymentMethod pmeth = (PaymentMethod)Enum.Parse(typeof(PaymentMethod), selectedPaymentMethod, true);
-        ShippingMethod smeth = (ShippingMethod)Enum.Parse(typeof(ShippingMethod), selectedShippingMethod, true);
-        List<OrderItemDto> orderitems = new List<OrderItemDto>();
-        foreach(var c in State.Carts)
+        bool? dialogresult = await DialogService.ShowMessageBox(
+            "Vásárlás",
+            "Biztosan meg szeretnéd venni?",
+            yesText: "Igen", cancelText: "Mégse");
+        if(dialogresult != null)
         {
-            orderitems.Add(new OrderItemDto() {
-                Amount = c.Amount,
-                EventName = c.EventName,
-                Price = c.TicketPrice,
-                TicketCategory = c.TicketCategory,
-                TicketId = c.TicketId,
-                Status = Status.New
-            });
+            PaymentMethod pmeth = GetPayment(selectedPaymentMethod);
+            ShippingMethod smeth = GetShipping(selectedShippingMethod);
+            List<OrderItemDto> orderitems = new List<OrderItemDto>();
+            foreach (var c in State.Carts)
+            {
+                orderitems.Add(new OrderItemDto()
+                {
+                    Amount = c.Amount,
+                    EventName = c.EventName,
+                    Price = c.TicketPrice,
+                    TicketCategory = c.TicketCategory,
+                    TicketId = c.TicketId,
+                    Status = Status.New
+                });
+            }
+            OrderDto orderDto = new OrderDto()
+            {
+                Status = Status.New,
+                UserId = userId,
+                OrderItems = orderitems,
+                PaymentMethod = pmeth,
+                ShippingMethod = smeth
+            };
+            var temp = await http.PostAsJsonAsync<OrderDto>($"api/orders", orderDto);
+            var order = await temp.Content.ReadFromJsonAsync<OrderDto>();
+            foreach (var item in orderitems)
+            {
+                item.OrderId = order.Id;
+                await http.PostAsJsonAsync<OrderItemDto>($"api/orderitems", item);
+            }
+            await http.PostAsJsonAsync($"api/users/cart-to-bought", orderDto);
+            uriHelper.NavigateTo(uriHelper.Uri, forceLoad: true);
         }
-        OrderDto orderDto = new OrderDto()
-        {
-            Status = Status.New,
-            UserId = userId,
-            OrderItems = orderitems,
-            PaymentMethod = pmeth,
-            ShippingMethod = smeth
-        };
-        var temp = await http.PostAsJsonAsync<OrderDto>($"api/orders", orderDto);
-        var order = await temp.Content.ReadFromJsonAsync<OrderDto>();
-        foreach (var item in orderitems)
-        {
-            item.OrderId = order.Id;
-            await http.PostAsJsonAsync<OrderItemDto>($"api/orderitems", item);
-        }
-        await http.PostAsJsonAsync($"api/users/cart-to-bought", orderDto);
-        uriHelper.NavigateTo(uriHelper.Uri, forceLoad: true);
+
+    }
+
+    public async void BeforeUnloadHandler(object sender, LocationChangedEventArgs args)
+    {
+        await http.PutAsJsonAsync($"api/users/carts", State.Carts);
     }
 }

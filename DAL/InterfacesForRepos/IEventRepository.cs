@@ -23,6 +23,7 @@ namespace DAL.InterfacesForRepos
         Task<Event> ModifyEventName(int eventId, string newName);
         Task<Event> ModifyEventLocation(int eventId, string newLocation);
         Task<Event> ModifyEventStartDate(int eventId, DateTime newStartDate);
+        Task<Event> ModifyEvent(int eventid, Event e);
         // Törlés
         Task DeleteEvent(int eventId);
         Task DeleteUserFollowedEvent(string userid, int eventid);

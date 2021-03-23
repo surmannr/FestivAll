@@ -55,8 +55,6 @@ namespace BlazorPL.Client
 
             }); ;
 
-            // Stzatatasststssdû
-
             builder.Services.AddScoped<FollowedEventState>();
             builder.Services.AddScoped<CartState>();
 

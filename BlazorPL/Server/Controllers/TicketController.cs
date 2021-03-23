@@ -110,6 +110,12 @@ namespace BlazorPL.Server.Controllers
             return Ok(result);
         }
 
+        [HttpPut("ticketlist")]
+        public async Task<ActionResult<IReadOnlyCollection<TicketDto>>> UpdateList([FromBody]TicketDto ticket, [FromQuery] int eventid)
+        {
+            await ticketManager.UpdateListAsync(ticket, eventid);
+            return Ok();
+        }
         #endregion
     }
 }

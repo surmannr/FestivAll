@@ -104,5 +104,12 @@ namespace BL.Managers
             var result = await eventRepository.ModifyEventStartDate(eventId, startDate);
             return mapper.Map<EventDto>(result);
         }
+
+        public async Task<EventDto> ModifyEventAsync(int eventid, EventDto e)
+        {
+            var _event = mapper.Map<Event>(e);
+            var result = await eventRepository.ModifyEvent(eventid,_event);
+            return mapper.Map<EventDto>(result);
+        }
     }
 }

@@ -103,14 +103,22 @@ namespace DAL.Repositories
                 var ticket = await db.Tickets.Where(e => e.Id == ticketId).FirstOrDefaultAsync();
                 if (ticket == null)
                     throw new DbModelNullException(ExceptionMessageConstants.NullObject);
-                Cart cart = new Cart()
+
+                var existcart = await db.Carts.Where(c => c.TicketId == ticketId && c.UserId == userId).FirstOrDefaultAsync();
+                Cart cart = new Cart();
+                if (existcart == null)
                 {
-                    Ticket = ticket,
-                    TicketId = ticketId,
-                    User = user,
-                    UserId = userId
-                };
-                db.Carts.Add(cart);
+                    cart = new Cart()
+                    {
+                        Ticket = ticket,
+                        TicketId = ticketId,
+                        User = user,
+                        UserId = userId,
+                        Amount = 1
+                    };
+                    db.Carts.Add(cart);
+                }
+                else existcart.Amount++;
                 await db.SaveChangesAsync();
                 return cart;
             }
@@ -219,6 +227,18 @@ namespace DAL.Repositories
             await userManager.SetUserNameAsync(user, newUserName);
             await db.SaveChangesAsync();
             return user;
+        }
+        public async Task ModifyUserCart(IList<Cart> carts)
+        {
+            foreach(var c in carts)
+            {
+                var editcart = db.Carts.Where(ca => ca.TicketId == c.TicketId && ca.UserId == c.UserId).FirstOrDefault();
+                if(editcart != null)
+                {
+                    editcart.Amount = c.Amount;
+                }
+            }
+            await db.SaveChangesAsync();
         }
     }
     internal static class UserRepositoryExtension

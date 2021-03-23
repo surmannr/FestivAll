@@ -27,5 +27,6 @@ namespace BL.InterfacesForManagers
         Task<UserDto> ModifyPasswordAsync(string userId, string password);
         Task<UserDto> ModifyNickNameAsync(string userId, string nickName);
         Task<UserDto> ModifyEmailAsync(string userId, string email);
+        Task ModifyCartByListAsync(IList<CartDto> carts);
     }
 }

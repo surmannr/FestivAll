@@ -22,6 +22,8 @@ namespace DAL.InterfacesForRepos
         Task<Ticket> ModifyPrice(int ticketId, int newPrice);
         Task<Ticket> ModifyInStock(int ticketId, int newInStock);
         Task<Ticket> DecreaseInStockByOne(int ticketId);
+
+        Task UpdateTicket(Ticket ticketForUpdate, int eventid);
         // Törlés
         Task DeleteTicket(int ticketId);
     }

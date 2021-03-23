@@ -139,5 +139,10 @@ namespace BL.Managers
             return mapper.Map<UserDto>(result);
         }
 
+        public async Task ModifyCartByListAsync(IList<CartDto> carts)
+        {
+            var modelcarts = mapper.Map<List<Cart>>(carts);
+            await userRepository.ModifyUserCart(modelcarts);
+        }
     }
 }

@@ -14,37 +14,16 @@ namespace BlazorPL.Client.States
     public class CartState
     {
         public event Action OnChange;
-        private ISyncLocalStorageService localStorage { get; set; }
 
-        public CartState(ISyncLocalStorageService _localStorage)
-        {
-            localStorage = _localStorage;
-        }
         public List<CartDto> Carts { get; set; } = new List<CartDto>();
 
         public bool ButtonDisabled { get; set; } = false;
         public int sumprice { get; set; } = 0;
 
-        public void Initialize(CartDto[] carts, List<CartDto> local)
+        public void Initialize(CartDto[] carts)
         {
             Carts.Clear();
-            if(local == null)
-            {
-                Carts = carts.ToList();
-            }
-            else
-            {
-                Carts = carts.ToList();
-                foreach (var a in carts)
-                {
-                    var temp = local.Where(c => c.TicketId == a.TicketId).FirstOrDefault();
-                    if(temp != null)
-                    {
-                        a.Amount = temp.Amount;
-                    }
-                }
-            }
-            
+            Carts = carts.ToList();
             SumPrice();
         }
 
@@ -63,9 +42,15 @@ namespace BlazorPL.Client.States
                 sumprice += o.TicketPrice * o.Amount;
             }
             ButtonDisabled = false;
-            localStorage.SetItem("cart", Carts);
             NotifyStateChanged();
 
+        }
+
+        public void SumPriceWithParams(CartDto cart, int amount)
+        {
+            var temp = Carts.Where(c => c.TicketId == cart.TicketId && c.UserId == cart.UserId).FirstOrDefault();
+            if (temp != null) temp.Amount = amount;
+            SumPrice();
         }
         private void NotifyStateChanged() => OnChange?.Invoke();
 

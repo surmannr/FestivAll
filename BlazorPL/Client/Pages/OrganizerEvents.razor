@@ -14,30 +14,38 @@
             <MudText Typo="Typo.h2" Align="Align.Center" Style="margin-top: 10px; margin-bottom:20px; color: #ECEFF1"><b>Általam szervezett események</b></MudText>
         </MudPaper>
 
-        <MudPaper Class="d-flex flex-column align-items-center p-5" Style="margin-top:15px; height:75%; background-color: rgba(0,0,0,0.5)" Square="false">
+        <MudPaper Class="d-flex flex-column align-items-center py-7 p-5" Style="margin-top:15px; height:75%; background-color: rgba(0,0,0,0.5)" Square="false">
+            <MudGrid Style="margin-top:10px; margin-bottom: 10px; width:100%">
+                <MudItem xs="12">
+                    <MudPaper Class="d-flex justify-center py-7 p-5" Square="false">
+                        <MudGrid Spacing="10" Justify="Justify.Center" Class="align-items-end pb-5">
+                            <MudItem xs="2" sm="2" Class="d-flex align-center justify-center mud-width-full py-8">
+                                <MudText Typo="Typo.body1" Align="Align.Right" Style="font-size:20px">Szűrés:</MudText>
+                            </MudItem>
+                            <MudItem xs="4" sm="4" Class="d-flex align-center justify-center mud-width-full py-8">
+                                <MudTextField T="string" @bind-Value="Filter" Label="Szűrési feltétel..." Required="false" />
+                            </MudItem>
+                            <MudItem xs="4" sm="4" Class="d-flex align-center justify-center mud-width-full py-8">
+                                <MudSelect T="string" Label="Mi alapján szűrjön..." @bind-Value="FilterType" Required="true" RequiredError="Kérlek válaszd ki mi alapján szűrjön!">
+                                    <MudSelectItem Value="@("Program neve")" />
+                                    <MudSelectItem Value="@("Helyszín")" />
+                                    <MudSelectItem Value="@("Dátum (yyyy.MM.dd.)")" />
+                                    <MudSelectItem Value="@("Szervező neve")" />
+                                </MudSelect>
+                            </MudItem>
+                            <MudItem xs="2" sm="2" Class="d-flex align-center justify-around mud-width-full py-8">
+                                <MudButton Variant="Variant.Outlined" OnClick="FilterBy" Style="margin-right:10px">Szűrés</MudButton>
+                                @if (events.Count() != AllEvents.Count())
+                                {
+                                    <MudIcon Color="Color.Error" Icon="@Icons.Material.Filled.RemoveCircle" @onclick="RemoveFilter"></MudIcon>
+                                }
 
-            <MudPaper Class="d-flex justify-center p-5" Square="false" Style="width:100%; margin-bottom:15px">
-                <MudGrid Spacing="10" Justify="Justify.Center" Class="align-items-end pb-5">
-                    <MudItem xs="2" sm="2" Class="d-flex align-center justify-center mud-width-full py-8">
-                        <MudText Typo="Typo.body1" Align="Align.Right" Style="font-size:20px">Szűrés:</MudText>
-                    </MudItem>
-                    <MudItem xs="4" sm="4" Class="d-flex align-center justify-center mud-width-full py-8">
-                        <MudTextField T="string" Label="Szűrési feltétel..." Required="false" />
-                    </MudItem>
-                    <MudItem xs="4" sm="4" Class="d-flex align-center justify-center mud-width-full py-8">
-                        <MudSelect T="string" Label="Mi alapján szűrjön..." Required="true" RequiredError="Kérlek válaszd ki mi alapján szűrjön!">
-                            <MudSelectItem Value="@("Program neve")" />
-                            <MudSelectItem Value="@("Helyszín")" />
-                            <MudSelectItem Value="@("Dátum (yyyy-MM-dd)")" />
-                            <MudSelectItem Value="@("Szervező neve")" />
-                        </MudSelect>
-                    </MudItem>
-                    <MudItem xs="2" sm="2" Class="d-flex align-center justify-center mud-width-full py-8">
-                        <MudButton Variant="Variant.Outlined">Szűrés</MudButton>
-                    </MudItem>
+                            </MudItem>
 
-                </MudGrid>
-            </MudPaper>
+                        </MudGrid>
+                    </MudPaper>
+                </MudItem>
+            </MudGrid>
 
             @if (events != null)
             {
@@ -49,7 +57,7 @@
                         <MudExpansionPanels Style="margin-top: 30px; margin-bottom: 30px; width:100%" Elevation="1" DisableBorders="true">
 
                             <Virtualize Items="events" Context="e" OverscanCount="4">
-                                <OrganizerEventComponent Event="e" UserId="@UserId" OnClick="()=>Remove(e)"></OrganizerEventComponent>
+                                <OrganizerEventComponent Event="e" UserId="@UserId" OnClick="()=>Remove(e)" OnClickModify="() => Modify(e)" OnClickDuplicate="() => Duplicate(e)"></OrganizerEventComponent>
                             </Virtualize>
 
 
@@ -64,12 +72,8 @@
             <MudButton Color="Color.Info" Variant="Variant.Filled" DisableElevation="true" OnClick="OpenDialog" Style="margin-top:20px">Új esemény létrehozás</MudButton>
 
         </MudPaper>
-
-        @if (newEvent != null && newFirstTicket != null && moreTickets != null)
-        {
-            <EventCreationDialog OnClick="()=>Add()" visible="visible" dialog="dialog" events="events" moreTickets="moreTickets" newEvent="newEvent" newFirstTicket="newFirstTicket"></EventCreationDialog>
-        }
-
+  
+            <EventCreationDialog newEvent="newEvent" OnClick="(e) => Add(e)" OnModifyClick="(e) => ModifyClick(e)" ModifyButton="@ModifyButton" newFirstTicket="ticketfirst" moreTickets="tickets" events="events" visible="visible"></EventCreationDialog>
 
 
     </Authorized>
@@ -83,7 +87,7 @@
 
 @code {
 
-    public List<EventDto> events;
+    public List<EventDto> events = new List<EventDto>();
 
     public string UserId { get; set; }
 
@@ -100,16 +104,16 @@
 
     HttpClient http = new HttpClient();
 
-    #region Létrehozás
+    #region Létrehozás / Módosítás / Duplikálás
 
     public EventDto newEvent { get; set; } = new EventDto();
-    public TicketDto newFirstTicket { get; set; } = new TicketDto();
-    public LinkedList<TicketDto> moreTickets { get; set; } = new LinkedList<TicketDto>();
-    public DateTime? StartDate = DateTime.Today;
+    public LinkedList<TicketDto> tickets { get; set; } = new LinkedList<TicketDto>();
+    public TicketDto ticketfirst { get; set; } = new TicketDto();
+    public bool choice = false;
+
     #endregion
 
-    public NotBelowZero NotBelowZeroValidation { get; set; } = new NotBelowZero();
-    public NotEmpty NotEmptyValidation { get; set; } = new NotEmpty();
+    public string ModifyButton = "Létrehozás";
 
     protected override void OnInitialized()
     {
@@ -117,9 +121,6 @@
         newEvent.Name = "";
         newEvent.StartDate = DateTime.Now;
 
-        newFirstTicket.Category = "";
-        newFirstTicket.InStock = 0;
-        newFirstTicket.Price = 0;
     }
 
     protected override async Task OnInitializedAsync()
@@ -132,9 +133,17 @@
 
         http = HttpClientFactory.CreateClient("BlazorPL.PublicServerAPI");
         events = await http.GetFromJsonAsync<List<EventDto>>($"api/events/creator?userId={UserId}");
+        AllEvents = events;
     }
     private void OpenDialog()
     {
+        ModifyButton = "Létrehozás";
+        newEvent = new EventDto();
+        newEvent.StartDate = DateTime.Now;
+        newEvent.CreatorUserId = UserId;
+        ticketfirst = new TicketDto();
+        tickets = new LinkedList<TicketDto>();
+        choice = false;
         visible = true;
     }
 
@@ -145,25 +154,122 @@
         visible = false;
     }
 
-    public void Add()
+    public async Task Duplicate(EventDto e)
     {
-        visible = false;
+        newEvent = new EventDto()
+        {
+            CreatorUserId = e.CreatorUserId,
+            Description = e.Description,
+            Location = e.Location,
+            Name = e.Name,
+            StartDate = e.StartDate,
+            ImageName = e.ImageName
+        };
+        newEvent.Id = 0;
+        ModifyButton = "Másolat létrehozása";
+        tickets = await http.GetFromJsonAsync<LinkedList<TicketDto>>($"api/tickets/event?eventid={e.Id}");
+        if (tickets != null && tickets.Count() != 0)
+        {
+            ticketfirst = tickets.First();
+            tickets.RemoveFirst();
+        }
+        choice = true;
+        visible = true;
     }
 
-    #region Validátor osztályok
-    public class NotBelowZero : AbstractValidator<int>
+    public async Task Modify(EventDto e)
     {
-        public NotBelowZero()
+
+        newEvent = new EventDto()
         {
-            RuleFor(x => x).GreaterThanOrEqualTo(0);
+            Id = e.Id,
+            CreatorUserId = e.CreatorUserId,
+            Description = e.Description,
+            Location = e.Location,
+            Name = e.Name,
+            StartDate = e.StartDate,
+            ImageName = e.ImageName
+        };
+        ModifyButton = "Módosít";
+        tickets = await http.GetFromJsonAsync<LinkedList<TicketDto>>($"api/tickets/event?eventid={e.Id}");
+        if (tickets != null && tickets.Count()!=0)
+        {
+            ticketfirst = tickets.First();
+            tickets.RemoveFirst();
+        }
+        choice = true;
+        visible = true;
+    }
+
+    public void Add(EventDto e)
+    {
+        var ev = events.Where(sh => sh.Id == e.Id).FirstOrDefault();
+        if (ev != null)
+        {
+            events.Add(e);
         }
     }
-    public class NotEmpty : AbstractValidator<string>
+
+    public void ModifyClick(EventDto e)
     {
-        public NotEmpty()
+        var ev = events.Where(s => s.Id == e.Id).FirstOrDefault();
+        if (ev != null)
         {
-            RuleFor(x => x).NotEmpty().MaximumLength(100);
+            ev.CreatorUserId = UserId;
+            ev.Name = e.Name;
+            ev.StartDate = e.StartDate;
+            ev.Location = e.Location;
+            ev.ImageName = e.ImageName;
+            ev.Description = e.Description;
+        } 
+    }
+
+
+
+    #region Szűrés
+
+    public List<EventDto> AllEvents = new List<EventDto>();
+    public string Filter { get; set; } = "";
+    public string FilterType { get; set; }
+
+    public async Task FilterBy()
+    {
+        if (String.IsNullOrEmpty(Filter)) events = AllEvents;
+        else
+        {
+            switch (FilterType)
+            {
+                case ("Program neve"):
+                    events = AllEvents.Where(f => f.Name.ToUpper().Contains(Filter.ToUpper())).ToList();
+                    break;
+                case ("Helyszín"):
+                    events = AllEvents.Where(f => f.Location.ToUpper().Contains(Filter.ToUpper())).ToList();
+                    break;
+                case ("Dátum (yyyy.MM.dd.)"):
+                    string[] args = Filter.Split('.');
+                    DateTime date = new DateTime(int.Parse(args[0]), int.Parse(args[1]), int.Parse(args[2]));
+                    events = AllEvents.Where(f => f.StartDate == date).ToList();
+                    break;
+                case ("Szervező neve"):
+                    var http = HttpClientFactory.CreateClient("BlazorPL.PublicServerAPI");
+                    var users = await http.GetFromJsonAsync<List<UserDto>>($"api/users/name?name={Filter}");
+                    events = new List<EventDto>();
+                    foreach (var u in users)
+                    {
+                        events.AddRange(AllEvents.Where(e => e.CreatorUserId == u.Id).ToList());
+                    }
+                    break;
+                default:
+                    events = AllEvents;
+                    break;
+            }
         }
+    }
+
+    public void RemoveFilter()
+    {
+        Filter = "";
+        events = AllEvents;
     }
     #endregion
 }

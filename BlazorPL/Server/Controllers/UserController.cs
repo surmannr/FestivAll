@@ -129,6 +129,13 @@ namespace BlazorPL.Server.Controllers
             var result = await userManager.ModifyEmailAsync(id, email);
             return Ok(result);
         }
+
+        [HttpPut("carts")]
+        public async Task<ActionResult> ModifyUserCart([FromBody] List<CartDto> carts)
+        {
+            await userManager.ModifyCartByListAsync(carts);
+            return Ok();
+        }
         #endregion
     }
 }

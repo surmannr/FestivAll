@@ -22,5 +22,6 @@ namespace BL.InterfacesForManagers
         Task<EventDto> ModifyLocationAsync(int eventId, string location);
         Task<EventDto> ModifyNameAsync(int eventId, string name);
         Task<EventDto> ModifyStartDateAsync(int eventId, DateTime startDate);
+        Task<EventDto> ModifyEventAsync(int eventid, EventDto e);
     }
 }

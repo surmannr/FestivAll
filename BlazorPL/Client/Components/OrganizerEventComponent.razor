@@ -23,8 +23,8 @@
                 </MudItem>
                 <MudItem xs="2" Style="display: flex; justify-content:space-evenly">
                     <MudIcon Icon="@Icons.Material.Filled.Delete" Color="Color.Dark" @onclick="RemoveEvent" />
-                    <MudIcon Icon="@Icons.Material.Filled.Settings" Color="Color.Dark" />
-                    <MudIcon Icon="@Icons.Material.Filled.ContentCopy" Color="Color.Dark" />
+                    <MudIcon Icon="@Icons.Material.Filled.Settings" Color="Color.Dark" @onclick="() => OnClickModify.InvokeAsync(Event)" />
+                    <MudIcon Icon="@Icons.Material.Filled.ContentCopy" Color="Color.Dark" @onclick="() => OnClickDuplicate.InvokeAsync(Event)" />
                 </MudItem>
             </MudGrid>
         }
@@ -41,6 +41,12 @@
 
     [Parameter]
     public EventCallback<EventDto> OnClick { get; set; }
+
+    [Parameter]
+    public EventCallback<EventDto> OnClickDuplicate { get; set; }
+
+    [Parameter]
+    public EventCallback<EventDto> OnClickModify { get; set; }
 
     public int AverageReview { get; set; } = 0;
 

@@ -20,6 +20,6 @@ namespace BL.InterfacesForManagers
         Task<TicketDto> ModifyInStockAsync(int ticketId, int inStock);
         Task<TicketDto> ModifyPriceAsync(int ticketId, int price);
         Task<TicketDto> DecreaseInStockByOneAsync(int ticketId);
-
+        Task UpdateListAsync(TicketDto ticket, int eventid);
     }
 }

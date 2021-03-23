@@ -25,6 +25,7 @@ namespace DAL.InterfacesForRepos
         Task<UserFollowedEvent> AddFollowedEvent(string userId, int eventId);
         Task<Cart> AddTicketToCart(string userId, int ticketId);
         Task AddTicketsFromCartToBoughtItems(Order order);
+        Task ModifyUserCart(IList<Cart> carts);
         // Törlés
         Task DeleteUser(string userId);
         Task DeleteFromCart(string userid, int ticketid);

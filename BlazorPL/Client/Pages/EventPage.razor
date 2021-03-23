@@ -1,0 +1,21 @@
+﻿@page "/event/{Id:int}"
+@inject ISnackbar Snackbar
+
+<MudPaper>
+    <h3>EventPage</h3>
+    <MudTextField Value="value" ValueChanged="(v) => Pls(v)" InputType="InputType.Number" T="int" Immediate="true"></MudTextField>
+</MudPaper>
+
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    public int value { get; set; }
+
+    public void Pls(int val)
+    {
+        value = val;
+        Snackbar.Add($"Hello there {value}");
+    }
+}

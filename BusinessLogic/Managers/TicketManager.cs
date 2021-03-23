@@ -129,5 +129,10 @@ namespace BL.Managers
             var result = await ticketRepository.DecreaseInStockByOne(ticketId);
             return mapper.Map<TicketDto>(result);
         }
+
+        public async Task UpdateListAsync(TicketDto ticket, int eventid)
+        {
+            await ticketRepository.UpdateTicket(mapper.Map<Ticket>(ticket), eventid);
+        }
     }
 }

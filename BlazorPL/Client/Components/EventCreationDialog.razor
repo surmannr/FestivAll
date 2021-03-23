@@ -1,8 +1,9 @@
 ﻿@inject ISnackbar Snackbar
 @inject HttpClient Http
 @inject IHttpClientFactory HttpClientFactory
+@inject IDialogService DialogService
 
-<MudDialog @ref="@dialog" IsVisible="visible">
+<MudDialog IsVisible="visible" >
 
     <TitleContent>
         <MudText Typo="Typo.h6">
@@ -92,30 +93,33 @@
         </MudGrid>
 
         <MudGrid>
+            @if (ModifyButton == "Módosít")
+            {
+
+                <MudItem xs="6" Style="display:flex; align-items:center; justify-content:center">
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Modify" Class="px-10">@ModifyButton</MudButton>
+                </MudItem>
+            }
+            else
+            {
+                <MudItem xs="6" Style="display:flex; align-items:center; justify-content:center">
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Create" Class="px-10">@ModifyButton</MudButton>
+                </MudItem>
+            }
+
             <MudItem xs="6" Style="display:flex; align-items:center; justify-content:center">
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Create" Class="px-10">Létrehoz</MudButton>
-            </MudItem>
-            <MudItem xs="6" Style="display:flex; align-items:center; justify-content:center">
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CloseDialog" Class="px-10">Mégse</MudButton>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CancelDialog" Class="px-10">Mégse</MudButton>
             </MudItem>
         </MudGrid>
 
     </DialogContent>
 </MudDialog>
 
-@code{
 
-    MudBlazor.DialogOptions options { get; set; } = new MudBlazor.DialogOptions()
-    {
-        MaxWidth = MaxWidth.Medium,
-        FullWidth = true,
-        CloseButton = true
-    };
+@code{ 
+
     [Parameter]
     public List<EventDto> events { get; set; }
-
-    [Parameter]
-    public MudDialog dialog { get; set; } = new MudDialog();
 
     #region Létrehozás
     [Parameter]
@@ -130,42 +134,125 @@
     HttpClient http { get; set; }
 
     [Parameter]
+    public string ModifyButton { get; set; }
+
+    [Parameter]
     public bool visible { get; set; } = false;
 
     [Parameter]
     public EventCallback<EventDto> OnClick { get; set; }
+    [Parameter]
+    public EventCallback<EventDto> OnModifyClick { get; set; }
 
     protected override void OnInitialized()
     {
         http = HttpClientFactory.CreateClient("BlazorPL.PublicServerAPI");
+        ModifyButton = "Létrehozás";
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (newEvent != null) StartDate = newEvent.StartDate;
+        if (ModifyButton == "Létrehozás") newEvent = new EventDto();
+    }
+    private async Task CancelDialog()
+    {
+        bool? dialogresult = await DialogService.ShowMessageBox(
+          "Figyelmeztetés",
+          "Biztosan ki szeretnél lépni?",
+          yesText: "Igen", cancelText: "Mégse");
+        if (dialogresult != null)
+        {
+            CloseDialog();
+            Clear();
+        }
+
     }
 
     private void CloseDialog()
     {
         visible = false;
+        newEvent = new EventDto();
+        newFirstTicket = new TicketDto();
+        moreTickets = new LinkedList<TicketDto>();
+        ModifyButton = "Létrehozás";
+    }
+
+    private async Task Modify()
+    {
+        newEvent.StartDate = (DateTime)StartDate;
+        Console.WriteLine(newEvent.Name + newEvent.Location + newEvent.StartDate + newEvent.Id + newEvent.Description);
+        moreTickets.AddFirst(newFirstTicket);
+        if (CheckAll())
+        {
+            if (ModifyButton == "Módosít")
+            {
+                newEvent.StartDate = (DateTime)StartDate;
+                var res = await http.PutAsJsonAsync<EventDto>($"api/events/{newEvent.Id}", newEvent);
+                if (res.IsSuccessStatusCode)
+                {
+                    var ev = await res.Content.ReadFromJsonAsync<EventDto>();
+                    if (ev != null)
+                    {
+                        ev.CreatorUserId ??= newEvent.CreatorUserId;
+                        ev.Name = newEvent.Name ?? ev.Name;
+                        ev.StartDate = newEvent.StartDate;
+                        ev.Location = newEvent.Location ?? ev.Location;
+                        ev.ImageName = newEvent.ImageName ?? ev.ImageName;
+                        ev.Description = newEvent.Description ?? ev.Description;
+                        foreach(var m in moreTickets)
+                        {
+                            Console.WriteLine($"{m.Id} {m.Category} {m.InStock} {m.Price} {m.EventId}");
+                        }
+                        await UpdateTickets(ev);
+                        Snackbar.Add("Sikerült az esemény módosítása a hozzátartozó jegyekkel!", MudBlazor.Severity.Success);
+                        await OnModifyClick.InvokeAsync(ev);
+                    }
+                    else Snackbar.Add("Hiba történt! Kérlek próbáld újra!", MudBlazor.Severity.Error);
+                }
+                else
+                {
+                    Snackbar.Add("Nem sikerült módosítani az eseményt! Kérlek próbáld újra!", MudBlazor.Severity.Error);
+                }
+                Clear();
+                CloseDialog();
+            }
+        } else Snackbar.Add("Hiba",Severity.Error);
+        Clear();
+        CloseDialog();
     }
 
     private async Task Create()
     {
         moreTickets.AddFirst(newFirstTicket);
-        newEvent.StartDate = StartDate ?? DateTime.Now;
+        newEvent.StartDate = (DateTime)StartDate;
+        Console.WriteLine(newEvent.Name + newEvent.Location + newEvent.StartDate);
         if (CheckAll())
         {
-            var result = await http.PostAsJsonAsync<EventDto>($"api/events", newEvent);
-            if (result.IsSuccessStatusCode)
+            if (ModifyButton == "Létrehozás" || ModifyButton == "Másolat létrehozása")
             {
-                newEvent = await result.Content.ReadFromJsonAsync<EventDto>();
-                events.Add(newEvent);
-                await CreateTickets(newEvent);
-                CloseDialog();
-                Snackbar.Add("Sikerült az esemény létrehozása a hozzátartozó jegyekkel!", MudBlazor.Severity.Success);
-                await OnClick.InvokeAsync();
-                Clear();
-            }
-            else
-            {
-                Snackbar.Add("Nem sikerült létrehozni az eseményt! Kérlek próbáld újra!", MudBlazor.Severity.Error);
-                moreTickets.RemoveFirst();
+                var result = await http.PostAsJsonAsync<EventDto>($"api/events", newEvent);
+                if (result.IsSuccessStatusCode)
+                {
+                    newEvent = await result.Content.ReadFromJsonAsync<EventDto>();
+                    events.Add(newEvent);
+                    foreach(var t in moreTickets)
+                    {
+                        t.Id = 0;
+                    }
+                    await CreateTickets(newEvent);
+
+                    CloseDialog();
+                    Snackbar.Add("Sikerült az esemény létrehozása a hozzátartozó jegyekkel!", MudBlazor.Severity.Success);
+                    await OnClick.InvokeAsync(newEvent);
+                    Clear();
+                }
+
+                else
+                {
+                    Snackbar.Add("Nem sikerült létrehozni az eseményt! Kérlek próbáld újra!", MudBlazor.Severity.Error);
+                    moreTickets.RemoveFirst();
+                }
             }
 
         }
@@ -175,7 +262,7 @@
             return;
         }
 
-
+        CloseDialog();
     }
 
     private void Clear()
@@ -236,13 +323,50 @@
         }
     }
 
+    private async Task UpdateTickets(EventDto dbEvent)
+    {
+        var origintickets = await http.GetFromJsonAsync<List<TicketDto>>($"api/tickets/event?eventId={dbEvent.Id}");
+        foreach(var ticket in moreTickets)
+        {
+            ticket.EventId = dbEvent.Id;
+            var exist = origintickets.Where(s => s.Id == ticket.Id).FirstOrDefault();
+            if(exist != null)
+            {
+                var result = await http.PutAsJsonAsync($"api/tickets/ticketlist?eventid={dbEvent.Id}", ticket);
+                if (!result.IsSuccessStatusCode)
+                {
+                    Snackbar.Add($"Nem sikerült módosítani a {ticket.Category} jegyet! Kérlek próbáld újra!", MudBlazor.Severity.Error);
+                }
+                else origintickets.Remove(exist);
+            }
+            else
+            {
+                var result = await http.PostAsJsonAsync($"api/tickets", ticket);
+                if (!result.IsSuccessStatusCode)
+                {
+                    Snackbar.Add($"Nem sikerült hozzáadni a {ticket.Category} jegyet! Kérlek próbáld újra!", MudBlazor.Severity.Error);
+                }
+                else origintickets.Remove(exist);
+            }
+
+        }
+        foreach(var t in origintickets)
+        {
+            var result = await http.DeleteAsync($"api/tickets/{t.Id}");
+            if (!result.IsSuccessStatusCode)
+            {
+                Snackbar.Add($"Nem sikerült törölni a {t.Category} jegyet! Kérlek próbáld újra!", MudBlazor.Severity.Error);
+            }
+        }
+    }
+
     private void AddMoreTicketForm()
     {
         TicketDto ticket = new TicketDto();
         ticket.Category = "";
         ticket.InStock = 0;
         ticket.Price = 0;
-        moreTickets.AddFirst(ticket);
+        moreTickets.AddLast(ticket);
     }
 
     #region Ellenőrző függvények

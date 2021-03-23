@@ -115,6 +115,24 @@ namespace DAL.Repositories
             await db.SaveChangesAsync();
             return ticket;
         }
+
+        public async Task UpdateTicket(Ticket ticketForUpdate, int eventid)
+        {
+            var tickets = await db.Tickets.Where(t => t.EventId == eventid).ToListAsync();
+            var modticket = tickets.Where(s => s.Id == ticketForUpdate.Id).FirstOrDefault();
+            if(modticket != null)
+            {
+                modticket.EventId = eventid;
+                modticket.EventName = ticketForUpdate.EventName;
+                modticket.Price = ticketForUpdate.Price;
+                modticket.InStock = ticketForUpdate.InStock;
+                modticket.Category = modticket.Category;
+            } else
+            {
+                throw new DbModelNullException(ExceptionMessageConstants.NullObject);
+            }
+            await db.SaveChangesAsync();
+        }
     }
     internal static class TicketRepositoryExtension
     {

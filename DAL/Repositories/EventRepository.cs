@@ -115,6 +115,20 @@ namespace DAL.Repositories
             await db.SaveChangesAsync();
             return mevent;
         }
+
+        public async Task<Event> ModifyEvent(int eventid,Event e)
+        {
+            var mevent = await db.Events.Where(ev => ev.Id == eventid).FirstOrDefaultAsync();
+            if (mevent == null) throw new DbModelNullException(ExceptionMessageConstants.NullObject);
+            mevent.CreatorUserId ??= e.CreatorUserId;
+            mevent.Name = e.Name ?? mevent.Name;
+            mevent.StartDate = e.StartDate;
+            mevent.Location = e.Location ?? mevent.Location;
+            mevent.ImageName = e.ImageName ?? mevent.ImageName;
+            mevent.Description = e.Description ?? mevent.Description;
+            await db.SaveChangesAsync();
+            return mevent;
+        }
     }
 
     internal static class EventRepositoryExtension

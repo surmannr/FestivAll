@@ -123,6 +123,13 @@ namespace BlazorPL.Server.Controllers
             var result = await eventManager.ModifyStartDateAsync(id, _date);
             return Ok(result);
         }
+
+        [HttpPut("{id}")]
+        public async Task<ActionResult<EventDto>> ModifyEvent(int id,[FromBody] EventDto e)
+        {
+            var result = await eventManager.ModifyEventAsync(id,e);
+            return Ok(result);
+        }
         #endregion
     }
 }
