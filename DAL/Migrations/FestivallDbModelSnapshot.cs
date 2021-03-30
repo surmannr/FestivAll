@@ -48,6 +48,12 @@ namespace DAL.Migrations
                     b.Property<int>("Amount")
                         .HasColumnType("int");
 
+                    b.Property<string>("EventLocation")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("EventStartDate")
+                        .HasColumnType("datetime2");
+
                     b.HasKey("TicketId", "UserId");
 
                     b.HasIndex("UserId");
@@ -134,8 +140,14 @@ namespace DAL.Migrations
                     b.Property<int>("Amount")
                         .HasColumnType("int");
 
+                    b.Property<string>("EventLocation")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("EventName")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("EventStartDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("OrderId")
                         .HasColumnType("nvarchar(450)");
@@ -326,17 +338,17 @@ namespace DAL.Migrations
                         {
                             Id = "admin",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "88b97e08-d242-4c76-8fbc-a9f653f89e53",
+                            ConcurrencyStamp = "99668685-a32c-436f-8725-fa9112ff3c57",
                             Email = "admin@admin.hu",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
                             NickName = "Admin",
                             NormalizedEmail = "ADMIN@ADMIN.HU",
                             NormalizedUserName = "ADMIN",
-                            PasswordHash = "AQAAAAEAACcQAAAAEDJrweaOEIK/otdSwBeO4BHb7ngF0F5uGskptuGzbHI+5sAozYYvr9w4XrvAcTpR8g==",
+                            PasswordHash = "AQAAAAEAACcQAAAAEFtcU9r+f9SUfkGCDH8UIxY1q2fwwzVRttcJOD+E3MjXFvJTnektl4gjkESE3wUnag==",
                             PhoneNumberConfirmed = false,
                             Role = "Admin",
-                            SecurityStamp = "244ad76b-9aad-4f69-afb0-d9ed9d38aa10",
+                            SecurityStamp = "b2d3f13e-8194-4558-967c-1df7008eb0fd",
                             TwoFactorEnabled = false,
                             UserName = "admin"
                         });
@@ -490,7 +502,7 @@ namespace DAL.Migrations
                         new
                         {
                             Id = "admin",
-                            ConcurrencyStamp = "820def92-4df9-4d07-b393-a4c3cbc03cb6",
+                            ConcurrencyStamp = "23581a30-16a5-4804-aadc-11f13e197a26",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         });

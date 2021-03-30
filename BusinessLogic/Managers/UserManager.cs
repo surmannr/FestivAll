@@ -53,6 +53,8 @@ namespace BL.Managers
                 z.CartDto.EventName = z.Cart.Ticket.EventName;
                 z.CartDto.TicketPrice = z.Cart.Ticket.Price;
                 z.CartDto.TicketCategory = z.Cart.Ticket.Category;
+                z.CartDto.EventStartDate = z.Cart.EventStartDate;
+                z.CartDto.EventLocation = z.Cart.EventLocation;
             }
             return mappedcarts;
         }

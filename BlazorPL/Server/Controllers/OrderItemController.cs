@@ -1,11 +1,15 @@
 ﻿using BL.InterfacesForManagers;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using SharedLayer.DTOs;
 using SharedLayer.Enums;
+using SharedLayer.PDF;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Mail;
 using System.Threading.Tasks;
+
 
 namespace BlazorPL.Server.Controllers
 {
@@ -14,10 +18,13 @@ namespace BlazorPL.Server.Controllers
     public class OrderItemController : Controller
     {
         private readonly IOrderItemManager orderItemManager;
+        private readonly IEmailSender emailSender;
+        private TicketToPdf ticketToPdf;
 
-        public OrderItemController(IOrderItemManager oi)
+        public OrderItemController(IOrderItemManager oi, IEmailSender se)
         {
             orderItemManager = oi;
+            emailSender = se;
         }
 
         #region Get

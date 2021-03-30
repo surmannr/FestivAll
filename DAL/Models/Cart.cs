@@ -11,5 +11,7 @@ namespace DAL.Models
         public string UserId { get; set; }
         public User User { get; set; }
         public int Amount { get; set; }
+        public string EventLocation { get; set; }
+        public DateTime EventStartDate { get; set; }
     }
 }

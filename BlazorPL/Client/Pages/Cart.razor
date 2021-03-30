@@ -276,8 +276,10 @@
                     Price = c.TicketPrice,
                     TicketCategory = c.TicketCategory,
                     TicketId = c.TicketId,
-                    Status = Status.New
-                });
+                    Status = Status.New,
+                    EventLocation = c.EventLocation,
+                    EventStartDate = c.EventStartDate
+                }) ;
             }
             OrderDto orderDto = new OrderDto()
             {

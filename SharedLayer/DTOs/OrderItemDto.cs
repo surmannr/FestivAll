@@ -8,22 +8,16 @@ namespace SharedLayer.DTOs
 {
     public class OrderItemDto
     {
-        [JsonPropertyName("id")]
         public int Id { get; set; }
-        [JsonPropertyName("amount")]
         public int Amount { get; set; }
-        [JsonPropertyName("price")]
         public int Price { get; set; }
-        [JsonPropertyName("status")]
         public Status Status { get; set; }
-        [JsonPropertyName("ticketid")]
         public int TicketId { get; set; }
-        [JsonPropertyName("orderid")]
         public string OrderId { get; set; }
-        [JsonPropertyName("ticketcategory")]
         public string TicketCategory { get; set; }
-        [JsonPropertyName("eventname")]
         public string EventName { get; set; }
+        public string EventLocation { get; set; }
+        public DateTime EventStartDate { get; set; }
 
         public OrderItemDto() { }
 

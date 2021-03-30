@@ -1,15 +1,176 @@
-﻿<MudExpansionPanel>
+﻿@using SharedLayer.Enums
+@inject IConfiguration Configuration
+@inject AuthenticationStateProvider AuthState
+@inject HttpClient Http
+@inject NavigationManager uriHelper
+
+<MudExpansionPanel HideIcon="true">
     <TitleContent>
-        <div class="d-flex">
-            <MudIcon Icon="@Icons.Material.Filled.Info" class="mr-3"></MudIcon>
-            <MudText>Panel header as <strong>RenderFragment</strong></MudText>
-        </div>
+        <MudGrid>
+            <MudItem xs="1">
+                <div class="d-flex align-items-center h-100 flex-column justify-content-center w-100">
+                    <MudIcon Icon="@Icons.Material.Filled.Info"></MudIcon>
+                </div>
+
+            </MudItem>
+            <MudItem xs="5">
+                <div class="d-flex align-items-start h-100 flex-column justify-content-center w-100">
+                    <MudText>Megrendelés azonosító:<br /> <strong>@order.Id</strong></MudText>
+                </div>
+
+            </MudItem>
+            <MudItem xs="4">
+                <div class="d-flex align-items-center h-100 flex-column justify-content-center w-100 mt-2">
+                    <MudText Align="Align.Left">Megrendelés állapota: <strong>@ReturnStatus(order.Status)</strong></MudText>
+                    <RadzenProgressBar @bind-Value="@ProgressBar" Max="5" ShowValue="false" Style="margin-bottom: 20px; width:100%" />
+                </div>
+
+            </MudItem>
+            <MudItem xs="2">
+                <div class="d-flex align-items-center h-100 flex-column justify-content-center w-100">
+                    <MudText Align="Align.Center">Végösszeg:<br /> <strong>@SumPrice.ToString("N0") Ft</strong></MudText>
+                </div>
+            </MudItem>
+        </MudGrid>
     </TitleContent>
     <ChildContent>
-        Panel Content
+        <MudTable Items="@order.OrderItems" Hover="true" SortLabel="Sort By">
+            <HeaderContent>
+                <MudTh><MudTableSortLabel SortBy="new Func<OrderItemDto, object>(x=>x.EventName)">Program neve</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel SortBy="new Func<OrderItemDto, object>(x=>x.TicketCategory)">Kategória</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel SortBy="new Func<OrderItemDto, object>(x=>x.Amount)">Darabszám</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel SortBy="new Func<OrderItemDto, object>(x=>x.Price)">Egységár</MudTableSortLabel></MudTh>
+                <MudTh></MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Program neve">@context.EventName</MudTd>
+                <MudTd DataLabel="Kategória">@context.TicketCategory</MudTd>
+                <MudTd DataLabel="Darabszám">@context.Amount db</MudTd>
+                <MudTd DataLabel="Egységár">@context.Price.ToString("N0") Ft</MudTd>
+                <MudTd DataLabel="Gombok">
+                    <div class="w-100" @onclick:stopPropagation="true">
+                        <a><MudIcon @onclick="() => PrintTicket(context)" Icon="@Icons.Material.Filled.Print"></MudIcon></a>
+                    </div>
+                </MudTd>
+            </RowTemplate>
+            <PagerContent>
+                <MudTablePager PageSizeOptions="new int[]{5, 10}" />
+            </PagerContent>
+        </MudTable>
+        <MudButton FullWidth="true" Variant="Variant.Filled" EndIcon="@Icons.Material.Filled.ArrowDownward" @onclick="PrintAllTicket" Style="background-color: yellowgreen; color: white;">
+            Összes letöltése
+        </MudButton>
     </ChildContent>
 </MudExpansionPanel>
 
 @code {
+    [Parameter]
+    public OrderDto order { get; set; } = new OrderDto();
 
+    UserDto user = new UserDto();
+
+    public int SumPrice { get; set; } = 0;
+    public double ProgressBar { get; set; } = 1;
+
+    public string FileAddress { get; set; } = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var auth = await AuthState.GetAuthenticationStateAsync();
+        var claimsPrincipal = auth.User;
+        string userId = claimsPrincipal.FindFirst(x => x.Type.Equals("sub")).Value;
+
+        user = await Http.GetFromJsonAsync<UserDto>($"api/users/{userId}");
+
+        FileAddress = Http.BaseAddress.AbsoluteUri;
+    }
+
+    protected override void OnInitialized()
+    {
+        SumPrice = 0;
+        foreach (var o in order.OrderItems)
+        {
+            SumPrice += o.Amount * o.Price;
+        }
+        ProgressBar = ReturnStatusProgress(order.Status);
+    }
+
+    public double ReturnStatusProgress(Status status)
+    {
+        switch (status.ToString())
+        {
+            case ("New"):
+                return 1;
+            case ("Processing"):
+                return 2;
+            case ("Packaged"):
+                return 3;
+            case ("InTransit"):
+                return 4;
+            case ("Delivered"):
+                return 5;
+            default:
+                return 1;
+        }
+    }
+
+    public string ReturnStatus(Status status)
+    {
+        switch (status.ToString())
+        {
+            case ("New"):
+                return "Új";
+            case ("Processing"):
+                return "Beszállítás alatt";
+            case ("Packaged"):
+                return "Összecsomagolt";
+            case ("InTransit"):
+                return "Kiszállítás alatt";
+            case ("Delivered"):
+                return "Kézbesített";
+            default:
+                return "Új";
+        }
+    }
+
+    public Status GetStatus(string status)
+    {
+        switch (status)
+        {
+            case ("Új"):
+                return Status.New;
+            case ("Beszállítás alatt"):
+                return Status.Processing;
+            case ("Összecsomagolt"):
+                return Status.Packaged;
+            case ("Kiszállítás alatt"):
+                return Status.InTransit;
+            case ("Kézbesített"):
+                return Status.Delivered;
+            default:
+                return Status.New;
+        }
+    }
+
+    public async Task PrintAllTicket()
+    {
+        string htmlcontent = $"Kedves {user.UserName}!<br>A megvásárolt jegyeket csatoltuk pdf formátumban az emailhez.<br>" +
+                $"<br>Köszönjük, hogy nálunk vásároltál!<br><b>Üdvözlettel: FestivAll csapat</b>";
+
+        //await Http.PostAsJsonAsync("api/orderitems/email?email=surmannroland@gmail.com", order.OrderItems);
+
+        var response = await Http.PostAsJsonAsync($"api/orders/pdf-create/{order.Id}", order.OrderItems);
+        uriHelper.NavigateTo($"/download-pdf/{order.Id}", forceLoad:true);
+    }
+
+    public async Task PrintTicket(OrderItemDto o)
+    {
+        List<OrderItemDto> list = new List<OrderItemDto>();
+        list.Add(o);
+        var response = await Http.PostAsJsonAsync($"api/orders/pdf-create/{order.Id}", list);
+        uriHelper.NavigateTo($"/download-pdf/{order.Id}", forceLoad: true);
+    }
+
+
+}
 }

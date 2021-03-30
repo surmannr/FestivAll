@@ -14,6 +14,8 @@ namespace SharedLayer.DTOs
         public string TicketCategory { get; set; }
         public string EventName { get; set; }
         public int TicketPrice { get; set; }
+        public string EventLocation { get; set; }
+        public DateTime EventStartDate { get; set; }
         public CartDto()
         {
 

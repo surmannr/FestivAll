@@ -1,21 +1,26 @@
 ﻿@page "/event/{Id:int}"
 @inject ISnackbar Snackbar
 
-<MudPaper>
-    <h3>EventPage</h3>
-    <MudTextField Value="value" ValueChanged="(v) => Pls(v)" InputType="InputType.Number" T="int" Immediate="true"></MudTextField>
-</MudPaper>
+<MudPaper Class="d-flex flex-column align-items-center py-7 p-5" Style="margin-top:20px; height:100%; background-color: rgba(0,0,0,0.5)" Square="false">
 
+    <MudPaper Class="d-flex flex-column align-items-center py-7 p-5" Square="false">
+
+        <MudGrid>
+            <MudItem xs="4">
+
+            </MudItem>
+            <MudItem xs="8">
+
+            </MudItem>
+        </MudGrid>
+
+    </MudPaper>
+
+</MudPaper>
 
 @code {
     [Parameter]
     public int Id { get; set; }
 
-    public int value { get; set; }
 
-    public void Pls(int val)
-    {
-        value = val;
-        Snackbar.Add($"Hello there {value}");
-    }
 }

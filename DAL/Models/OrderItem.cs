@@ -23,6 +23,9 @@ namespace DAL.Models
         public string OrderId { get; set; }
         public Order Order { get; set; }
 
+        public string EventLocation { get; set; }
+        public DateTime EventStartDate { get; set; }
+
         public string EventName { get; set; }
     }
 }

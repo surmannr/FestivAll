@@ -14,6 +14,8 @@ using MudBlazor.Services;
 using MudBlazor;
 using BlazorPL.Client.States;
 using Blazored.LocalStorage;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.AspNetCore.Http;
 
 namespace BlazorPL.Client
 {
@@ -39,6 +41,8 @@ namespace BlazorPL.Client
             builder.Services.AddScoped<NotificationService>();
             builder.Services.AddScoped<TooltipService>();
             builder.Services.AddScoped<ContextMenuService>();
+
+            builder.Services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
             builder.Services.AddMudServices(config =>
             {

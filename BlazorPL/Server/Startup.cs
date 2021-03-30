@@ -25,7 +25,6 @@ using Microsoft.OpenApi.Models;
 using System;
 using System.Linq;
 using SharedLayer.Exceptions;
-
 namespace BlazorPL.Server
 {
     public class Startup
@@ -47,6 +46,14 @@ namespace BlazorPL.Server
             // Adatbázis beállítása
             services.AddDbContext<FestivallDb>(options =>
                 options.UseSqlServer(@"Server=(localdb)\mssqllocaldb;Database=FestivallDB;Trusted_Connection=True;"));
+
+            services.AddCors(policy =>
+            {
+                policy.AddPolicy("CorsPolicy", opt => opt
+                .AllowAnyOrigin()
+                .AllowAnyHeader()
+                .AllowAnyMethod());
+            });
 
             // Userkezelés beállítása
             services.AddDefaultIdentity<User>(options =>
@@ -166,6 +173,8 @@ namespace BlazorPL.Server
             app.UseProblemDetails();
 
             app.UseHttpsRedirection();
+            app.UseCors("CorsPolicy");
+
             app.UseBlazorFrameworkFiles();
             app.UseStaticFiles();
 

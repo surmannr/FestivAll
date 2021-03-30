@@ -15,7 +15,7 @@
                     <MudExpansionPanels>
                         <Virtualize Items="orders" Context="t" OverscanCount="4">
                             <ItemContent>
-                                <OrderComponent></OrderComponent>
+                                <OrderComponent order="t"></OrderComponent>
                             </ItemContent>
                         </Virtualize>
                     </MudExpansionPanels>
@@ -34,7 +34,7 @@
 
 @code {
 
-    public List<Order> orders { get; set; } = new List<Order>();
+    public List<OrderDto> orders { get; set; } = new List<OrderDto>();
 
     public string userId { get; set; }
 
@@ -47,9 +47,7 @@
         userId = claimsPrincipal.FindFirst(x => x.Type.Equals("sub")).Value;
 
         http = HttpClientFactory.CreateClient("BlazorPL.PublicServerAPI");
-        orders = await http.GetFromJsonAsync<List<Order>>($"api/orders/user?userId={userId}");
+        orders = await http.GetFromJsonAsync<List<OrderDto>>($"api/orders/user?userId={userId}");
     }
-
-}
 
 }

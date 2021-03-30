@@ -100,11 +100,11 @@ namespace DAL.Repositories
             var user = await userManager.FindByIdAsync(userId);
             if (user != null)
             {
-                var ticket = await db.Tickets.Where(e => e.Id == ticketId).FirstOrDefaultAsync();
+                var ticket = await db.Tickets.Where(e => e.Id == ticketId).Include(e => e.Event).FirstOrDefaultAsync();
                 if (ticket == null)
                     throw new DbModelNullException(ExceptionMessageConstants.NullObject);
 
-                var existcart = await db.Carts.Where(c => c.TicketId == ticketId && c.UserId == userId).FirstOrDefaultAsync();
+                var existcart = await db.Carts.Where(c => c.TicketId == ticketId && c.UserId == userId).Include(e => e.Ticket).ThenInclude(e => e.Event).FirstOrDefaultAsync();
                 Cart cart = new Cart();
                 if (existcart == null)
                 {
@@ -114,7 +114,9 @@ namespace DAL.Repositories
                         TicketId = ticketId,
                         User = user,
                         UserId = userId,
-                        Amount = 1
+                        Amount = 1,
+                        EventLocation = ticket.Event.Location,
+                        EventStartDate = ticket.Event.StartDate
                     };
                     db.Carts.Add(cart);
                 }

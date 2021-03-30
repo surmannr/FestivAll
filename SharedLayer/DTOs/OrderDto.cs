@@ -8,21 +8,14 @@ namespace SharedLayer.DTOs
 {
     public class OrderDto
     {
-        [JsonPropertyName("id")]
         public string Id { get; set; }
-        [JsonPropertyName("paymentmethod")]
         public PaymentMethod PaymentMethod { get; set; }
-        [JsonPropertyName("shippingmethod")]
         public ShippingMethod ShippingMethod { get; set; }
-        [JsonPropertyName("shippinglocation")]
         public string ShippingLocation { get; set; }
-        [JsonPropertyName("status")]
         public Status Status { get; set; }
-        [JsonPropertyName("userid")]
         public string UserId { get; set; }
-        [JsonPropertyName("orderdate")]
         public DateTime OrderDate { get; set; }
-        [JsonPropertyName("orderitems")]
+
         public ICollection<OrderItemDto> OrderItems { get; set; }
 
         public OrderDto() {
