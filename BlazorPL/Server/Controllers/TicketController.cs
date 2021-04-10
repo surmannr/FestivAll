@@ -34,17 +34,21 @@ namespace BlazorPL.Server.Controllers
             var result = await ticketManager.GetTicketsAsync();
             return Ok(result);
         }
+        [HttpGet("active")]
+        public async Task<ActionResult<IReadOnlyCollection<TicketDto>>> GetAllActive()
+        {
+            var result = await ticketManager.GetTicketsAsync();
+            List<TicketDto> activeTickets = new List<TicketDto>();
+            foreach(TicketDto t in result)
+            {
+                if (t.InStock > 0) activeTickets.Add(t);
+            }
+            return Ok(activeTickets);
+        }
         [HttpGet("cart")]
         public async Task<ActionResult<IReadOnlyCollection<TicketDto>>> GetTicketCartByUserId([FromQuery] string userid)
         {
             var result = await ticketManager.GetTicketsInCartByUserAsync(userid);
-            return Ok(result);
-        }
-
-        [HttpGet("boughttickets/{userid}")]
-        public async Task<ActionResult<IReadOnlyCollection<BoughtTicketDto>>> GetBoughtTicketsByUser(string userid)
-        {
-            var result = await ticketManager.GetBoughtTicketByUser(userid);
             return Ok(result);
         }
 
@@ -103,17 +107,20 @@ namespace BlazorPL.Server.Controllers
             return Ok(result);
         }
 
-        [HttpPatch("decrease-instock/{id}")]
-        public async Task<ActionResult<TicketDto>> ModifyPrice(int id)
+        [HttpPut("decrease-instock")]
+        public async Task<ActionResult> DecreaseInStock([FromBody] List<CartDto> carts)
         {
-            var result = await ticketManager.DecreaseInStockByOneAsync(id);
-            return Ok(result);
+            foreach (var c in carts)
+            {
+                await ticketManager.DecreaseInStockByOneAsync(c.TicketId, c.Amount);
+            }
+            return Ok();
         }
 
-        [HttpPut("ticketlist")]
-        public async Task<ActionResult<IReadOnlyCollection<TicketDto>>> UpdateList([FromBody]TicketDto ticket, [FromQuery] int eventid)
+        [HttpPut]
+        public async Task<ActionResult<IReadOnlyCollection<TicketDto>>> Update([FromBody]TicketDto ticket)
         {
-            await ticketManager.UpdateListAsync(ticket, eventid);
+            await ticketManager.UpdateListAsync(ticket);
             return Ok();
         }
         #endregion

@@ -92,7 +92,7 @@ namespace BlazorPL.Server.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<ActionResult> Create(string id)
+        public async Task<ActionResult> Delete(string id)
         {
             await orderManager.DeleteOrderAsync(id);
             return Ok();
@@ -109,8 +109,8 @@ namespace BlazorPL.Server.Controllers
             return Ok(result);
         }
 
-        [HttpPatch("edit/{id}/status")]
-        public async Task<ActionResult<OrderDto>> AddOrderItemToOrder(string id, [FromQuery] Status status)
+        [HttpPut("edit/{id}/status")]
+        public async Task<ActionResult<OrderDto>> AddOrderItemToOrder(string id, [FromBody] Status status)
         {
             var result = await orderManager.ModifyStatusAsync(id, status);
             return Ok(result);

@@ -16,26 +16,8 @@ namespace DAL.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
-                .HasAnnotation("ProductVersion", "5.0.3")
+                .HasAnnotation("ProductVersion", "5.0.4")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-            modelBuilder.Entity("DAL.Models.BoughtTicket", b =>
-                {
-                    b.Property<int>("TicketId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<int>("Amount")
-                        .HasColumnType("int");
-
-                    b.HasKey("TicketId", "UserId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("BoughtTickets");
-                });
 
             modelBuilder.Entity("DAL.Models.Cart", b =>
                 {
@@ -161,14 +143,12 @@ namespace DAL.Migrations
                     b.Property<string>("TicketCategory")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("TicketId")
+                    b.Property<int?>("TicketId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.HasIndex("OrderId");
-
-                    b.HasIndex("TicketId");
 
                     b.ToTable("OrderItems");
                 });
@@ -338,17 +318,17 @@ namespace DAL.Migrations
                         {
                             Id = "admin",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "99668685-a32c-436f-8725-fa9112ff3c57",
+                            ConcurrencyStamp = "9c8bbb7d-0f70-4af5-a301-f4fe26dd2338",
                             Email = "admin@admin.hu",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
                             NickName = "Admin",
                             NormalizedEmail = "ADMIN@ADMIN.HU",
                             NormalizedUserName = "ADMIN",
-                            PasswordHash = "AQAAAAEAACcQAAAAEFtcU9r+f9SUfkGCDH8UIxY1q2fwwzVRttcJOD+E3MjXFvJTnektl4gjkESE3wUnag==",
+                            PasswordHash = "AQAAAAEAACcQAAAAEDBuOQQrPGNG+oTTARpdJYbnZ4MJzL3kl1BFsIyqz30M6xHvN8AdcfzVmYvcFB/3zw==",
                             PhoneNumberConfirmed = false,
                             Role = "Admin",
-                            SecurityStamp = "b2d3f13e-8194-4558-967c-1df7008eb0fd",
+                            SecurityStamp = "b364a0f1-32c0-4ee4-9447-60c08de4a9ab",
                             TwoFactorEnabled = false,
                             UserName = "admin"
                         });
@@ -502,7 +482,7 @@ namespace DAL.Migrations
                         new
                         {
                             Id = "admin",
-                            ConcurrencyStamp = "23581a30-16a5-4804-aadc-11f13e197a26",
+                            ConcurrencyStamp = "1361c5d6-7bdb-41f1-94d0-7352186ed2df",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         });
@@ -623,25 +603,6 @@ namespace DAL.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
-            modelBuilder.Entity("DAL.Models.BoughtTicket", b =>
-                {
-                    b.HasOne("DAL.Models.Ticket", "Ticket")
-                        .WithMany("BoughtByUsers")
-                        .HasForeignKey("TicketId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("DAL.Models.User", "User")
-                        .WithMany("TicketsBought")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Ticket");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("DAL.Models.Cart", b =>
                 {
                     b.HasOne("DAL.Models.Ticket", "Ticket")
@@ -653,7 +614,7 @@ namespace DAL.Migrations
                     b.HasOne("DAL.Models.User", "User")
                         .WithMany("TicketsInCart")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
 
                     b.Navigation("Ticket");
@@ -665,7 +626,8 @@ namespace DAL.Migrations
                 {
                     b.HasOne("DAL.Models.User", "CreatorUser")
                         .WithMany("CreatedEvents")
-                        .HasForeignKey("CreatorUserId");
+                        .HasForeignKey("CreatorUserId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("CreatorUser");
                 });
@@ -674,7 +636,8 @@ namespace DAL.Migrations
                 {
                     b.HasOne("DAL.Models.User", "User")
                         .WithMany("Orders")
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("User");
                 });
@@ -683,17 +646,10 @@ namespace DAL.Migrations
                 {
                     b.HasOne("DAL.Models.Order", "Order")
                         .WithMany("OrderItems")
-                        .HasForeignKey("OrderId");
-
-                    b.HasOne("DAL.Models.Ticket", "Ticket")
-                        .WithMany()
-                        .HasForeignKey("TicketId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Order");
-
-                    b.Navigation("Ticket");
                 });
 
             modelBuilder.Entity("DAL.Models.Post", b =>
@@ -706,7 +662,8 @@ namespace DAL.Migrations
 
                     b.HasOne("DAL.Models.User", "User")
                         .WithMany("CreatedPosts")
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Event");
 
@@ -723,7 +680,8 @@ namespace DAL.Migrations
 
                     b.HasOne("DAL.Models.User", "User")
                         .WithMany("ReviewsCreated")
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Event");
 
@@ -830,8 +788,6 @@ namespace DAL.Migrations
             modelBuilder.Entity("DAL.Models.Ticket", b =>
                 {
                     b.Navigation("AddToCartByUsers");
-
-                    b.Navigation("BoughtByUsers");
                 });
 
             modelBuilder.Entity("DAL.Models.User", b =>
@@ -845,8 +801,6 @@ namespace DAL.Migrations
                     b.Navigation("Orders");
 
                     b.Navigation("ReviewsCreated");
-
-                    b.Navigation("TicketsBought");
 
                     b.Navigation("TicketsInCart");
                 });

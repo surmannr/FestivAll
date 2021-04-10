@@ -16,6 +16,7 @@ namespace SharedLayer.DTOs
         public string CreatorUserId { get; set; }
 
         public List<ReviewDto> Reviews { get; set; } = new List<ReviewDto>();
+        public List<PostDto> Posts { get; set; } = new List<PostDto>();
 
         public EventDto() { }
         public EventDto(string name, string location, string description, DateTime startDate, string creatorUserId)

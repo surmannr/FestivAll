@@ -23,8 +23,6 @@ namespace DAL.Models
 
         public IReadOnlyCollection<Cart> TicketsInCart { get; set; } = new List<Cart>();
 
-        public IReadOnlyCollection<BoughtTicket> TicketsBought { get; set; } = new List<BoughtTicket>();
-
         public IReadOnlyCollection<Order> Orders { get; set; } = new List<Order>();
 
         public User()
@@ -34,7 +32,6 @@ namespace DAL.Models
             CreatedPosts = new List<Post>();
             ReviewsCreated = new List<Review>();
             TicketsInCart = new List<Cart>();
-            TicketsBought = new List<BoughtTicket>();
             Orders = new List<Order>();
         }
     }

@@ -70,7 +70,7 @@
     protected override async Task OnInitializedAsync()
     {
         var http = HttpClientFactory.CreateClient("BlazorPL.PublicServerAPI");
-        tickets = await http.GetFromJsonAsync<List<TicketDto>>("api/tickets");
+        tickets = await http.GetFromJsonAsync<List<TicketDto>>("api/tickets/active");
         AllTickets = tickets;
     }
 

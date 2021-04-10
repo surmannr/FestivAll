@@ -29,12 +29,12 @@ namespace DAL.Repositories
             return newTicket;
         }
 
-        public async Task<Ticket> DecreaseInStockByOne(int ticketId)
+        public async Task<Ticket> DecreaseInStockByOne(int ticketId, int amount)
         {
             var ticket = await db.Tickets.Where(t => t.Id == ticketId).FirstOrDefaultAsync();
             if(ticket == null)
                 throw new DbModelNullException(ExceptionMessageConstants.NullObject);
-            ticket.InStock -= 1;
+            ticket.InStock -= amount;
             await db.SaveChangesAsync();
             return ticket;
         }
@@ -74,12 +74,6 @@ namespace DAL.Repositories
             return result;
         }
 
-        public async Task<IReadOnlyCollection<BoughtTicket>> GetBoughtTicketsByUser(string userid)
-        {
-            var boughts = await db.BoughtTickets.Where(o => o.UserId == userid).Include(o => o.Ticket).ThenInclude(x => x.Event).ToListAsync();
-            return boughts;
-        }
-
         public async Task<Ticket> ModifyCategory(int ticketId, string newCategory)
         {
             var ticket = await db.Tickets.Where(t => t.Id == ticketId).FirstOrDefaultAsync();
@@ -116,17 +110,16 @@ namespace DAL.Repositories
             return ticket;
         }
 
-        public async Task UpdateTicket(Ticket ticketForUpdate, int eventid)
+        public async Task UpdateTicket(Ticket ticketForUpdate)
         {
-            var tickets = await db.Tickets.Where(t => t.EventId == eventid).ToListAsync();
-            var modticket = tickets.Where(s => s.Id == ticketForUpdate.Id).FirstOrDefault();
-            if(modticket != null)
+            var ticket = await db.Tickets.Where(t => t.Id == ticketForUpdate.Id).FirstOrDefaultAsync();
+            if(ticket != null)
             {
-                modticket.EventId = eventid;
-                modticket.EventName = ticketForUpdate.EventName;
-                modticket.Price = ticketForUpdate.Price;
-                modticket.InStock = ticketForUpdate.InStock;
-                modticket.Category = modticket.Category;
+                ticket.EventId = ticketForUpdate.EventId;
+                ticket.EventName = ticketForUpdate.EventName;
+                ticket.Price = ticketForUpdate.Price;
+                ticket.InStock = ticketForUpdate.InStock;
+                ticket.Category = ticketForUpdate.Category;
             } else
             {
                 throw new DbModelNullException(ExceptionMessageConstants.NullObject);

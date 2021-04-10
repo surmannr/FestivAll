@@ -37,6 +37,11 @@ namespace BL.Managers
             return mapper.Map<List<UserDto>>(users);
         }
 
+        public async Task<IReadOnlyCollection<string>> GetRolesAsync()
+        {
+            return await userRepository.GetRoles();
+        }
+
         public async Task<IReadOnlyCollection<UserDto>> GetUserByNameAsync(string name)
         {
             var user = await userRepository.GetUserByUsername(name);
@@ -87,6 +92,8 @@ namespace BL.Managers
         public async Task<IdentityResult> Create(UserDto newUserDto, string password)
         {
             User user = mapper.Map<User>(newUserDto);
+            user.EmailConfirmed = true;
+            user.LockoutEnabled = false;
             var result = await userRepository.CreateUser(user, password);
             return result;
         }
@@ -100,11 +107,6 @@ namespace BL.Managers
         public async Task AddTicketToCartAsync(string userId, int ticketId)
         {
             await userRepository.AddTicketToCart(userId, ticketId);
-        }
-        public async Task AddTicketsFromCartToBought(OrderDto orderDto)
-        {
-            var order = mapper.Map<Order>(orderDto);
-            await userRepository.AddTicketsFromCartToBoughtItems(order);
         }
 
         // Törlés
@@ -145,6 +147,11 @@ namespace BL.Managers
         {
             var modelcarts = mapper.Map<List<Cart>>(carts);
             await userRepository.ModifyUserCart(modelcarts);
+        }
+
+        public async Task ModifyUserRoleAsync(string id, string role)
+        {
+            await userRepository.ModifyUserRole(id, role);
         }
     }
 }

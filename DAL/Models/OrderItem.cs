@@ -16,8 +16,7 @@ namespace DAL.Models
         public int Price { get; set; }
         public Status Status { get; set; }
 
-        public int TicketId { get; set; }
-        public Ticket Ticket { get; set; }
+        public int? TicketId { get; set; }
         public string TicketCategory { get; set; }
 
         public string OrderId { get; set; }

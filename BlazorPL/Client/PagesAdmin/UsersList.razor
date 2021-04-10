@@ -1,0 +1,200 @@
+﻿@page "/admin/users"
+@layout AdminLayout
+@inject HttpClient Http
+@inject IHttpClientFactory HttpClientFactory
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+@inject NavigationManager uriHelper
+
+<AuthorizeView Roles="Admin">
+
+    <Authorized>
+
+        <MudPaper Class="d-flex justify-center py-7 p-5" Style="margin-top:20px; background-color: rgba(0,0,0,0.5)" Square="false">
+            <MudText Typo="Typo.h2" Align="Align.Center" Style="margin-top: 10px; margin-bottom:20px; color: #ECEFF1"><b>Felhasználók kezelése</b></MudText>
+        </MudPaper>
+
+        <MudPaper Class="d-flex flex-column align-items-left py-7 p-5" Style="margin-top:15px; height:75%; background-color: rgba(0,0,0,0.5)" Square="false">
+
+            <MudTable Items="users" Context="e" Hover="true" Bordered="false" Striped="true" FixedHeader="true" @bind-SelectedItem="UpdateUser" Filter="new Func<UserDto,bool>(FilterFunc)" CommitEditTooltip="Mentés" OnCommitEditClick="Save">
+
+                <ToolBarContent>
+                    <MudText Typo="Typo.h6">Felhasználók listája</MudText>
+                    <MudToolBarSpacer />
+                    <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+                </ToolBarContent>
+
+                <ColGroup>
+                    <col style="width:30%;" />
+                    <col style="width:25%;" />
+                    <col style="width:10%;" />
+                    <col style="width:25%;" />
+                    <col style="width:10%;" />
+                </ColGroup>
+
+                <HeaderContent>
+                    <MudTh><MudTableSortLabel SortBy="new Func<UserDto, object>(x=>x.UserName)">Felhasználónév</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<UserDto, object>(x=>x.NickName)">Becenév</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<UserDto, object>(x=>x.Role)">Szerepkör</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<UserDto, object>(x=>x.Email)">Email</MudTableSortLabel></MudTh>
+                    <MudTh></MudTh>
+                </HeaderContent>
+
+                <RowTemplate>
+                    <MudTd DataLabel="Felhasználónév">@e.UserName</MudTd>
+                    <MudTd DataLabel="Becenév">@e.NickName</MudTd>
+                    <MudTd DataLabel="Szerepkör">@e.Role</MudTd>
+                    <MudTd DataLabel="Email">@e.Email</MudTd>
+                    <MudTd DataLabel="Ikonok">
+                        <MudIcon Icon="@Icons.Material.Filled.Delete" @onclick="() => Remove(e)" />
+                    </MudTd>
+                </RowTemplate>
+
+                <RowEditingTemplate>
+                    <MudTd DataLabel="Felhasználónév">
+                        @e.UserName
+                    </MudTd>
+                    <MudTd DataLabel="Becenév">
+                        @e.NickName
+                    </MudTd>
+                    <MudTd DataLabel="Szerepkör">
+                        <MudSelect T="string" @bind-Value="UpdateRole" Required="true">
+                            @foreach (var a in roles)
+                            {
+                                <MudSelectItem Value="a" />
+                            }
+                        </MudSelect>
+                    </MudTd>
+                    <MudTd DataLabel="Email">
+                        @e.Email
+                    </MudTd>
+                    <MudTd>
+                        <MudIcon Icon="@Icons.Material.Filled.Delete" @onclick="() => Remove(e)" />
+                    </MudTd>
+
+                </RowEditingTemplate>
+
+                <PagerContent>
+                    <MudTablePager />
+                </PagerContent>
+
+            </MudTable>
+            <MudFab Color="Color.Tertiary" Icon="@Icons.Material.Filled.Add" OnClick="() => Visible = true" DisableElevation="true" Label="Új admin létrehozása" Style="margin-top:20px" />
+
+        </MudPaper>
+        <AdminCreationDialog visible="@Visible" NewUser="NewUser" callback="CreateAdmin"></AdminCreationDialog>
+    </Authorized>
+    <NotAuthorized>
+        <AccessDenied></AccessDenied>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+
+    public List<UserDto> users = new List<UserDto>();
+    public List<string> roles = new List<string>();
+
+    private string searchString = "";
+
+    public UserDto UpdateUser { get; set; }
+    public string UpdateRole { get; set; } = "User";
+
+    HttpClient http = new HttpClient();
+
+    public bool Visible { get; set; } = false;
+    public UserDto NewUser { get; set; } = new UserDto();
+
+    protected override async Task OnInitializedAsync()
+    {
+        http = HttpClientFactory.CreateClient("BlazorPL.PublicServerAPI");
+        users = await http.GetFromJsonAsync<List<UserDto>>("api/users");
+        roles = await http.GetFromJsonAsync<List<string>>("api/users/roles");
+    }
+
+    private bool FilterFunc(UserDto element)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (element.UserName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (element.NickName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (element.Role.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (element.Email.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
+    }
+
+    public async Task Save()
+    {
+        bool? dialogresult = await DialogService.ShowMessageBox(
+            "Mentés",
+            $"Biztosan módosítani szeretnéd a(z) {UpdateUser.UserName} nevű felhasználó szerepkörét?",
+            yesText: "Igen", cancelText: "Mégse");
+        if (dialogresult != null)
+        {
+            var result = await http.PatchAsync($"api/users/role-modify/{UpdateUser.Id}?role={UpdateRole}", null);
+            if (result.IsSuccessStatusCode)
+            {
+                Snackbar.Add("Sikeres módosítás", Severity.Success);
+                await Task.Delay(1000);
+                uriHelper.NavigateTo(uriHelper.Uri, true);
+            }
+            else
+            {
+                Snackbar.Add("Nem sikerült a módosítás, kérlek próbáld újra!", Severity.Error);
+                var ev = users.Where(x => x.Id == UpdateUser.Id).FirstOrDefault();
+                if (ev != null) ev = await http.GetFromJsonAsync<UserDto>($"api/users/{UpdateUser.Id}");
+                else
+                {
+                    Snackbar.Add("Hiba! Nincs ilyen esemény a rendszerben!", Severity.Error);
+                }
+                await Task.Delay(1000);
+                uriHelper.NavigateTo(uriHelper.Uri, true);
+            }
+        }
+        else
+        {
+            var ev = users.Where(x => x.Id == UpdateUser.Id).FirstOrDefault();
+            if (ev != null) ev = await http.GetFromJsonAsync<UserDto>($"api/users/{UpdateUser.Id}");
+            else
+            {
+                Snackbar.Add("Hiba! Nincs ilyen esemény a rendszerben!", Severity.Error);
+            }
+            await Task.Delay(1000);
+            uriHelper.NavigateTo(uriHelper.Uri, true);
+        }
+
+    }
+
+    public async Task Remove(UserDto e)
+    {
+        bool? dialogresult = await DialogService.ShowMessageBox(
+            "Törlés",
+            $"Biztosan törölni szeretnéd a(z) {e.UserName} nevű felhasználót?",
+            yesText: "Igen", cancelText: "Mégse");
+        if (dialogresult != null)
+        {
+            var result = await http.DeleteAsync($"api/users/{e.Id}");
+            if (result.IsSuccessStatusCode)
+            {
+                Snackbar.Add("Sikeres törlés", Severity.Success);
+                users.Remove(e);
+                StateHasChanged();
+            }
+            else
+            {
+                Snackbar.Add("Nem sikerült a törlés, kérlek próbáld újra!", Severity.Error);
+            }
+        }
+
+    }
+
+    public async Task CreateAdmin()
+    {
+        users = await http.GetFromJsonAsync<List<UserDto>>("api/users");
+        Visible = false;
+        StateHasChanged();
+    }
+}

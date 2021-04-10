@@ -1,0 +1,359 @@
+﻿@page "/admin/orders"
+@layout AdminLayout
+@inject HttpClient Http
+@inject IHttpClientFactory HttpClientFactory
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+@inject NavigationManager uriHelper
+@using SharedLayer.Enums
+
+<AuthorizeView Roles="Admin">
+
+    <Authorized>
+
+        <MudPaper Class="d-flex justify-center py-7 p-5" Style="margin-top:20px; background-color: rgba(0,0,0,0.5)" Square="false">
+            <MudText Typo="Typo.h2" Align="Align.Center" Style="margin-top: 10px; margin-bottom:20px; color: #ECEFF1"><b>Rendelések kezelése</b></MudText>
+        </MudPaper>
+
+        <MudPaper Class="d-flex flex-column align-items-left py-7 p-5" Style="margin-top:15px; background-color: rgba(0,0,0,0.5); height:100%" Square="false">
+
+            <MudTable Items="orders" Style="height:100%" Context="e" Hover="true" Bordered="false" Striped="true" FixedHeader="true" @bind-SelectedItem="UpdateOrder" Filter="new Func<OrderDto,bool>(FilterFunc)" CommitEditTooltip="Mentés" OnCommitEditClick="Save">
+
+                <ToolBarContent>
+                    <MudText Typo="Typo.h6">Megrendelések listája</MudText>
+                    <MudToolBarSpacer />
+                    <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+                </ToolBarContent>
+
+                <ColGroup>
+                    <col style="width:30%;" />
+                    <col style="width:20%;" />
+                    <col style="width:20%;" />
+                    <col style="width:20%;" />
+                    <col style="width:10%;" />
+                    <col style="width:10%;" />
+                </ColGroup>
+
+                <HeaderContent>
+                    <MudTh><MudTableSortLabel SortBy="new Func<OrderDto, object>(x=>x.Id)">Azonosító</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<OrderDto, object>(x=>x.OrderDate)">Rendelés dátuma</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<OrderDto, object>(x=>ReturnStatus(x.Status))">Státusz</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<OrderDto, object>(x=>GetUserNameByOrder(x))">Vevő felhasználóneve</MudTableSortLabel></MudTh>
+                    <MudTh></MudTh>
+                    <MudTh></MudTh>
+                </HeaderContent>
+
+                <RowTemplate>
+                    <MudTd DataLabel="Azonosító">@e.Id</MudTd>
+                    <MudTd DataLabel="Rendelés dátuma">@e.OrderDate.ToString("yyyy.MM.dd.")</MudTd>
+                    <MudTd DataLabel="Státusz">@ReturnStatus(e.Status)</MudTd>
+                    <MudTd DataLabel="Vevő felhasználóneve">@GetUserNameByOrder(e)</MudTd>
+                    <MudTd>
+                        <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="@(() => shown[e.Id] = !shown[e.Id])">Részletek</MudButton>
+                    </MudTd>
+                    <MudTd DataLabel="Ikonok">
+                        <MudIcon Icon="@Icons.Material.Filled.Delete" @onclick="() => Remove(e)" />
+                    </MudTd>
+                </RowTemplate>
+
+                <ChildRowContent>
+                    @if (shown[e.Id])
+                    {
+                        <MudTr>
+                            <td colspan="6">
+                                <MudCard Elevation="0">
+                                    <MudCardHeader>
+                                        <CardHeaderContent>
+                                            <MudText Typo="Typo.body1"><strong>Szállítási módja:</strong> @ReturnShippingMethod(e.ShippingMethod)</MudText>
+                                            <MudText Typo="Typo.body1"><strong>Fizetés módja:</strong> @ReturnPaymentmethod(e.PaymentMethod)</MudText>
+                                            <MudText Typo="Typo.body1"><strong>Szállítási cím:</strong> @e.ShippingLocation</MudText>
+                                        </CardHeaderContent>
+                                    </MudCardHeader>
+                                    <MudCardContent Class="pa-0">
+                                        <MudTable Items="e.OrderItems" Context="oi" Hover="true" Breakpoint="Breakpoint.Sm" Elevation="0">
+                                            <ColGroup>
+                                                <col style="width:30%" />
+                                                <col style="width:30%" />
+                                                <col style="width:20%" />
+                                                <col style="width:20%" />
+                                            </ColGroup>
+                                            <HeaderContent>
+                                                <MudTh>Esemény neve</MudTh>
+                                                <MudTh>Kategória</MudTh>
+                                                <MudTh>Mennyiség</MudTh>
+                                                <MudTh>Egységár</MudTh>
+                                            </HeaderContent>
+                                            <RowTemplate>
+                                                <MudTd DataLabel="Esemény neve">@oi.EventName</MudTd>
+                                                <MudTd DataLabel="Kategória">@oi.TicketCategory</MudTd>
+                                                <MudTd DataLabel="Mennyiség">@oi.Amount.ToString("N0") db</MudTd>
+                                                <MudTd DataLabel="Egységár">@oi.Price.ToString("N0") Ft</MudTd>
+                                            </RowTemplate>
+                                        </MudTable>
+                                    </MudCardContent>
+                                </MudCard>
+                            </td>
+                        </MudTr>}
+                </ChildRowContent>
+
+                <RowEditingTemplate>
+
+                    <MudTd DataLabel="Azonosító">@e.Id</MudTd>
+                    <MudTd DataLabel="Rendelés dátuma">@e.OrderDate.ToString("yyyy.MM.dd.")</MudTd>
+                    <MudTd DataLabel="Státusz">
+                        <MudSelect T="string" Required="true" @bind-Value="@UpdateStatus">
+                            
+                            @foreach(var a in allstatus)
+                                {
+                                    <MudSelectItem Value="@ReturnStatus((Status)a)" />
+                                }
+                        </MudSelect>
+                    </MudTd>
+                    <MudTd DataLabel="Vevő felhasználóneve">@GetUserNameByOrder(e)</MudTd>
+                    <MudTd>
+                        <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="@(() => shown[e.Id] = !shown[e.Id])">Részletek</MudButton>
+                    </MudTd>
+                    <MudTd DataLabel="Ikonok">
+                        <MudIcon Icon="@Icons.Material.Filled.Delete" @onclick="() => Remove(e)" />
+                    </MudTd>
+
+                </RowEditingTemplate>
+
+                <PagerContent>
+                    <MudTablePager RowsPerPageString="Sorok száma: " />
+                </PagerContent>
+
+            </MudTable>
+
+        </MudPaper>
+
+    </Authorized>
+    <NotAuthorized>
+        <AccessDenied></AccessDenied>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+
+    public List<OrderDto> orders = new List<OrderDto>();
+    public List<UserDto> users = new List<UserDto>();
+
+    private string searchString = "";
+
+    Dictionary<string, bool> shown = new Dictionary<string, bool>();
+    public OrderDto UpdateOrder { get; set; }
+
+    string UpdateStatus = "Új";
+    public Array allstatus { get; set; } = Enum.GetValues(typeof(Status));
+
+    HttpClient http = new HttpClient();
+
+    protected override async Task OnInitializedAsync()
+    {
+        http = HttpClientFactory.CreateClient("BlazorPL.PublicServerAPI");
+        orders = await http.GetFromJsonAsync<List<OrderDto>>("api/orders");
+        users = await http.GetFromJsonAsync<List<UserDto>>("api/users");
+
+        foreach(var o in orders)
+        {
+            shown.Add(o.Id, false);
+        }
+    }
+
+    private string GetUserNameByOrder(OrderDto o)
+    {
+        var user = users.Where(x => x.Id == o.UserId).FirstOrDefault();
+        if (user != null) return user.UserName;
+        return "NA";
+    }
+
+    private bool FilterFunc(OrderDto element)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (element.Id.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (element.OrderDate.ToString("yyyy.MM.dd.").Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (ReturnStatus(element.Status).Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        var user = users.Where(x => x.Id == element.UserId).FirstOrDefault();
+        if (user.UserName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
+    }
+
+    public async void Save()
+    {
+        bool? dialogresult = await DialogService.ShowMessageBox(
+            "Mentés",
+            $"Biztosan módosítani szeretnéd a(z) {UpdateOrder.Id} azonosítójú megrendelést?",
+            yesText: "Igen", cancelText: "Mégse");
+        if (dialogresult != null)
+        {
+            UpdateOrder.Status = GetStatus(UpdateStatus);
+            var result = await http.PutAsJsonAsync($"api/orders/edit/{UpdateOrder.Id}/status", UpdateOrder.Status);
+            if (result.IsSuccessStatusCode)
+            {
+                Snackbar.Add("Sikeres módosítás", Severity.Success);
+                var ord = orders.Where(x => x.Id == UpdateOrder.Id).FirstOrDefault();
+                if(ord != null)
+                {
+                    ord.Status = UpdateOrder.Status;
+                }
+                StateHasChanged();
+            }
+            else
+            {
+                Snackbar.Add("Nem sikerült a módosítás, kérlek próbáld újra!", Severity.Error);
+                var ev = orders.Where(x => x.Id == UpdateOrder.Id).FirstOrDefault();
+                if (ev != null) ev = await http.GetFromJsonAsync<OrderDto>($"api/orders/{UpdateOrder.Id}");
+                else
+                {
+                    Snackbar.Add("Hiba! Nincs ilyen esemény a rendszerben!", Severity.Error);
+                }
+                await Task.Delay(1000);
+                uriHelper.NavigateTo(uriHelper.Uri, true);
+            }
+        }
+        else
+        {
+            var ev = orders.Where(x => x.Id == UpdateOrder.Id).FirstOrDefault();
+            if (ev != null) ev = await http.GetFromJsonAsync<OrderDto>($"api/orders/{UpdateOrder.Id}");
+            else
+            {
+                Snackbar.Add("Hiba! Nincs ilyen esemény a rendszerben!", Severity.Error);
+            }
+            await Task.Delay(1000);
+            uriHelper.NavigateTo(uriHelper.Uri, true);
+        }
+
+    }
+
+    public async void Remove(OrderDto e)
+    {
+        bool? dialogresult = await DialogService.ShowMessageBox(
+            "Törlés",
+            $"Biztosan törölni szeretnéd a(z) {e.Id} azonosítójú megrendelést?",
+            yesText: "Igen", cancelText: "Mégse");
+        if (dialogresult != null)
+        {
+            var result = await http.DeleteAsync($"api/orders/{e.Id}");
+            if (result.IsSuccessStatusCode)
+            {
+                Snackbar.Add("Sikeres törlés", Severity.Success);
+                orders.Remove(e);
+                StateHasChanged();
+            }
+            else
+            {
+                Snackbar.Add("Nem sikerült a törlés, kérlek próbáld újra!", Severity.Error);
+            }
+        }
+
+    }
+
+    #region Enum átalakítás
+
+    public string ReturnStatus(Status status)
+    {
+        switch (status.ToString())
+        {
+            case ("New"):
+                return "Új";
+            case ("Processing"):
+                return "Beszállítás alatt";
+            case ("Packaged"):
+                return "Összecsomagolt";
+            case ("InTransit"):
+                return "Kiszállítás alatt";
+            case ("Delivered"):
+                return "Kézbesített";
+            default:
+                return "Új";
+        }
+    }
+
+    public Status GetStatus(string status)
+    {
+        switch (status)
+        {
+            case ("Új"):
+                return Status.New;
+            case ("Beszállítás alatt"):
+                return Status.Processing;
+            case ("Összecsomagolt"):
+                return Status.Packaged;
+            case ("Kiszállítás alatt"):
+                return Status.InTransit;
+            case ("Kézbesített"):
+                return Status.Delivered;
+            default:
+                return Status.New;
+        }
+    }
+
+    public string ReturnPaymentmethod(PaymentMethod payment)
+    {
+        switch (payment.ToString())
+        {
+            case ("Cash"):
+                return "Utánvétel";
+            case ("CreditCard"):
+                return "Bankkártya";
+            case ("BankTransfer"):
+                return "Banki átutalás";
+            default:
+                return "Utánvétel";
+        }
+    }
+
+    public PaymentMethod GetPayment(string payment)
+    {
+        switch (payment)
+        {
+            case ("Utánvétel"):
+                return PaymentMethod.Cash;
+            case ("Bankkártya"):
+                return PaymentMethod.CreditCard;
+            case ("Banki átutalás"):
+                return PaymentMethod.BankTransfer;
+            default:
+                return PaymentMethod.Cash;
+        }
+    }
+
+    public string ReturnShippingMethod(ShippingMethod shipping)
+    {
+        switch (shipping.ToString())
+        {
+            case ("DeliverByPost"):
+                return "Postai átvétel";
+            case ("DeliverByUps"):
+                return "UPS futár";
+            case ("DeliverByAmazoneDrone"):
+                return "Amazon drón";
+            default:
+                return "Postai átvétel";
+        }
+    }
+
+    public ShippingMethod GetShipping(string shipping)
+    {
+        switch (shipping)
+        {
+            case ("Postai átvétel"):
+                return ShippingMethod.DeliverByPost;
+            case ("UPS futár"):
+                return ShippingMethod.DeliverByUps;
+            case ("Amazon drón"):
+                return ShippingMethod.DeliverByAmazoneDrone;
+            default:
+                return ShippingMethod.DeliverByPost;
+        }
+    }
+
+
+
+    #endregion
+}

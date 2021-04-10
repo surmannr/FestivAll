@@ -19,7 +19,6 @@ namespace DAL
         public DbSet<Post> Posts { get; set; }
         public DbSet<Review> Reviews { get; set; }
         public DbSet<Ticket> Tickets { get; set; }
-        public DbSet<BoughtTicket> BoughtTickets { get; set; }
         public DbSet<Cart> Carts { get; set; }
         public DbSet<UserFollowedEvent> UserFollowedEvents { get; set; }
 
@@ -32,10 +31,19 @@ namespace DAL
         {
             base.OnModelCreating(builder);
 
-            builder.Entity<BoughtTicket>(entity =>
+            builder.Entity<Order>().HasMany<OrderItem>(c => c.OrderItems).WithOne(s => s.Order).OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<User>(entity =>
             {
-                entity.HasKey(c => new { c.TicketId, c.UserId });
+                entity.HasMany<Review>(c => c.ReviewsCreated).WithOne(s => s.User).OnDelete(DeleteBehavior.SetNull);
+                entity.HasMany<UserFollowedEvent>(c => c.FollowedEvents).WithOne(s => s.User).OnDelete(DeleteBehavior.Cascade);
+                entity.HasMany<Event>(c => c.CreatedEvents).WithOne(s => s.CreatorUser).OnDelete(DeleteBehavior.SetNull);
+                entity.HasMany<Post>(c => c.CreatedPosts).WithOne(s => s.User).OnDelete(DeleteBehavior.SetNull);
+                entity.HasMany<Cart>(c => c.TicketsInCart).WithOne(s => s.User).OnDelete(DeleteBehavior.ClientCascade);
+                entity.HasMany<Order>(c => c.Orders).WithOne(s => s.User).OnDelete(DeleteBehavior.Cascade);
             });
+
+            //builder.Entity<OrderItem>().HasOne<Ticket>(x => x.Ticket).WithMany().OnDelete(DeleteBehavior.NoAction);
 
             builder.Entity<Cart>(entity =>
             {

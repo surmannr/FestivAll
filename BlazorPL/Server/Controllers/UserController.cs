@@ -47,6 +47,12 @@ namespace BlazorPL.Server.Controllers
             var result = await userManager.GetUsersAsync();
             return Ok(result);
         }
+        [HttpGet("roles")]
+        public async Task<ActionResult<IReadOnlyCollection<string>>> GetRoles()
+        {
+            var result = await userManager.GetRolesAsync();
+            return Ok(result);
+        }
         #endregion
 
 
@@ -73,13 +79,6 @@ namespace BlazorPL.Server.Controllers
             return Ok();
         }
 
-
-        [HttpPost("cart-to-bought")]
-        public async Task<ActionResult> CreateBoughtItemsFromCart([FromBody] OrderDto order)
-        {
-            await userManager.AddTicketsFromCartToBought(order);
-            return Ok();
-        }
         #endregion
 
         #region Delete
@@ -98,6 +97,15 @@ namespace BlazorPL.Server.Controllers
             return Ok();
         }
 
+        [HttpDelete("delete-cart-list")]
+        public async Task<ActionResult> DeleteTicketFromCart([FromBody] List<CartDto> carts)
+        {
+            foreach(var c in carts)
+            {
+                await userManager.DeleteTicketFromCart(c.UserId, c.TicketId);
+            }
+            return Ok();
+        }
         #endregion
 
         #region Modify
@@ -134,6 +142,13 @@ namespace BlazorPL.Server.Controllers
         public async Task<ActionResult> ModifyUserCart([FromBody] List<CartDto> carts)
         {
             await userManager.ModifyCartByListAsync(carts);
+            return Ok();
+        }
+
+        [HttpPatch("role-modify/{id}")]
+        public async Task<ActionResult> ModifyUserRole(string id, [FromQuery] string role)
+        {
+            await userManager.ModifyUserRoleAsync(id, role);
             return Ok();
         }
         #endregion

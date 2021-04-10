@@ -1,0 +1,37 @@
+﻿@page "/admin"
+@layout AdminLayout
+
+<AuthorizeView Roles="Admin">
+
+    <Authorized>
+
+        <MudPaper Class="d-flex justify-center py-7 p-5" Style="margin-top:20px; background-color: rgba(0,0,0,0.5)" Square="false">
+            <MudText Typo="Typo.h2" Align="Align.Center" Style="margin-top: 10px; margin-bottom:20px; color: #ECEFF1"><b>Üdvözlünk az adminfelületen!</b></MudText>
+        </MudPaper>
+
+        <MudPaper Class="d-flex flex-column align-items-left py-7 p-5" Style="margin-top:15px; height:75%; background-color: rgba(0,0,0,0.5)" Square="false">
+            <ul>
+                <li>
+                    <MudText Typo="Typo.body1" Align="Align.Left" Style="font-size:20px;color: #ECEFF1">A különböző adatbázisok kezeléséhez kérjük válaszd ki a menüben az ahhoz tartozó menüpontot!</MudText>
+                </li>
+                <li>
+                    <MudText Typo="Typo.body1" Align="Align.Left" Style="font-size:20px;color: #ECEFF1">Az adatok kezelésénél a szerződésben foglaltak szerint járjon el!</MudText>
+                </li>
+                <li>
+                    <MudText Typo="Typo.body2" Align="Align.Left" Style="font-size:20px;color: #ECEFF1">Új adminisztrátor regisztráláshoz látogass el a felhasználók menüpontra és ott az új felhasználó létrehozásánál lehetséges!</MudText>
+                </li>
+            </ul>
+           
+        </MudPaper>
+
+    </Authorized>
+    <NotAuthorized>
+        <AccessDenied></AccessDenied>
+    </NotAuthorized>
+
+</AuthorizeView>
+
+
+@code {
+
+}

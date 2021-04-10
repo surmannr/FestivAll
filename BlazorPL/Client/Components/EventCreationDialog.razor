@@ -330,7 +330,7 @@
             var exist = origintickets.Where(s => s.Id == ticket.Id).FirstOrDefault();
             if(exist != null)
             {
-                var result = await http.PutAsJsonAsync($"api/tickets/ticketlist?eventid={dbEvent.Id}", ticket);
+                var result = await http.PutAsJsonAsync($"api/tickets", ticket);
                 if (!result.IsSuccessStatusCode)
                 {
                     Snackbar.Add($"Nem sikerült módosítani a {ticket.Category} jegyet! Kérlek próbáld újra!", MudBlazor.Severity.Error);

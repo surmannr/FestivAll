@@ -148,7 +148,12 @@
             var result = await Http.PostAsJsonAsync("api/reviews", newReview);
             if (result.IsSuccessStatusCode)
             {
-                _event.Reviews.Add(newReview);
+                _event.Reviews.Add(new ReviewDto() { 
+                    Description = newReviewDescription,
+                    Stars = newReviewStars,
+                    EventId = _event.Id,
+                    UserId = userId
+                });
                 CountAverageReview();
                 Snackbar.Add(SnackbarMessage, Severity.Success);
             }

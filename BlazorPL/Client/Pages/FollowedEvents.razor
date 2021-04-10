@@ -34,7 +34,7 @@
                             </MudItem>
                             <MudItem xs="2" sm="2" Class="d-flex align-center justify-around mud-width-full py-8">
                                 <MudButton Variant="Variant.Outlined" OnClick="FilterBy" Style="margin-right:10px">Szűrés</MudButton>
-                                @if (events.Count() != AllEvents.Count())
+                                @if (State.Events.Count() != AllEvents.Count())
                                 {
                                     <MudIcon Color="Color.Error" Icon="@Icons.Material.Filled.RemoveCircle" @onclick="RemoveFilter"></MudIcon>
                                 }
@@ -100,33 +100,33 @@
 
     public async Task FilterBy()
     {
-        if (String.IsNullOrEmpty(Filter)) events = AllEvents;
+        if (String.IsNullOrEmpty(Filter)) State.Events = AllEvents;
         else
         {
             switch (FilterType)
             {
                 case ("Program neve"):
-                    events = AllEvents.Where(f => f.Name.ToUpper().Contains(Filter.ToUpper())).ToList();
+                    State.Events = AllEvents.Where(f => f.Name.ToUpper().Contains(Filter.ToUpper())).ToList();
                     break;
                 case ("Helyszín"):
-                    events = AllEvents.Where(f => f.Location.ToUpper().Contains(Filter.ToUpper())).ToList();
+                    State.Events = AllEvents.Where(f => f.Location.ToUpper().Contains(Filter.ToUpper())).ToList();
                     break;
                 case ("Dátum (yyyy.MM.dd.)"):
                     string[] args = Filter.Split('.');
                     DateTime date = new DateTime(int.Parse(args[0]), int.Parse(args[1]), int.Parse(args[2]));
-                    events = AllEvents.Where(f => f.StartDate == date).ToList();
+                    State.Events = AllEvents.Where(f => f.StartDate == date).ToList();
                     break;
                 case ("Szervező neve"):
                     var http = HttpClientFactory.CreateClient("BlazorPL.PublicServerAPI");
                     var users = await http.GetFromJsonAsync<List<UserDto>>($"api/users/name?name={Filter}");
-                    events = new List<EventDto>();
+                    State.Events = new List<EventDto>();
                     foreach (var u in users)
                     {
-                        events.AddRange(AllEvents.Where(e => e.CreatorUserId == u.Id).ToList());
+                        State.Events.AddRange(AllEvents.Where(e => e.CreatorUserId == u.Id).ToList());
                     }
                     break;
                 default:
-                    events = AllEvents;
+                    State.Events = AllEvents;
                     break;
             }
         }
@@ -135,7 +135,7 @@
     public void RemoveFilter()
     {
         Filter = "";
-        events = AllEvents;
+        State.Events = AllEvents;
     }
     #endregion
 }

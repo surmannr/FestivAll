@@ -1,0 +1,59 @@
+﻿@inject HttpClient Http
+@inject IDialogService DialogService
+@inject IHttpClientFactory HttpClientFactory
+
+<MudContainer Fixed="true" Style="padding:5px">
+    <MudGrid Style="width:100%;">
+        <MudItem xs="3" Style="display:flex; flex-direction:column">
+            <MudText Typo="Typo.h6">@User.NickName</MudText>
+            <MudText Typo="Typo.body1">(@User.UserName)</MudText>
+        </MudItem>
+        <MudItem xs="7" Style="display:flex; align-items:center;">
+            <MudText Typo="Typo.body1">@Post.PostContent</MudText>
+        </MudItem>
+        <MudItem xs="1" Style="display:flex; align-items:center; justify-content:center">
+            <MudText Typo="Typo.body2">@Post.CreationDate.ToString("yyyy.MMMM dd.")</MudText>
+        </MudItem>
+        <MudItem xs="1" Style="display:flex; align-items:center; justify-content:flex-end">
+            <AuthorizeView Roles="Admin">
+                <Authorized>
+                    <MudIcon Color="Color.Error" Icon="@Icons.Material.Filled.Clear" @onclick="DeletePost"></MudIcon>
+                </Authorized>
+            </AuthorizeView>
+        </MudItem>
+    </MudGrid>
+</MudContainer>
+
+@code {
+    [Parameter]
+    public PostDto Post { get; set; }
+
+    [Parameter]
+    public EventCallback<PostDto> DeleteOnClickPost { get; set; }
+
+    public UserDto User { get; set; } = new UserDto();
+
+    protected async override Task OnInitializedAsync()
+    {
+        /*var auth = await AuthState.GetAuthenticationStateAsync();
+        var claimsPrincipal = auth.User;
+        string userId = claimsPrincipal.FindFirst(x => x.Type.Equals("sub")).Value;*/
+        var http = HttpClientFactory.CreateClient("BlazorPL.PublicServerAPI");
+        User = await http.GetFromJsonAsync<UserDto>($"api/users/{Post.UserId}");
+    }
+
+    public async Task DeletePost()
+    {
+        bool? dialogresult = await DialogService.ShowMessageBox(
+          "Figyelmeztetés",
+          "Biztosan ki szeretnéd törölni ezt a posztot?",
+          yesText: "Igen", cancelText: "Mégse");
+        if (dialogresult != null)
+        {
+            await Http.DeleteAsync($"api/posts/{Post.Id}");
+            await DeleteOnClickPost.InvokeAsync(Post);
+        }
+
+    }
+}
+

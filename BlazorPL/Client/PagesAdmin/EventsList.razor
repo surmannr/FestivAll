@@ -1,0 +1,198 @@
+﻿@page "/admin/events"
+@layout AdminLayout
+@inject HttpClient Http
+@inject IHttpClientFactory HttpClientFactory
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+@inject NavigationManager uriHelper
+
+<AuthorizeView Roles="Admin">
+
+    <Authorized>
+
+        <MudPaper Class="d-flex justify-center py-7 p-5" Style="margin-top:20px; background-color: rgba(0,0,0,0.5)" Square="false">
+            <MudText Typo="Typo.h2" Align="Align.Center" Style="margin-top: 10px; margin-bottom:20px; color: #ECEFF1"><b>Programok kezelése</b></MudText>
+        </MudPaper>
+
+        <MudPaper Class="d-flex flex-column align-items-left py-7 p-5" Style="margin-top:15px; height:75%; background-color: rgba(0,0,0,0.5)" Square="false">
+
+            <MudTable Items="events" Context="e" Hover="true" Bordered="false" Striped="true" FixedHeader="true" @bind-SelectedItem="UpdateEvent" Filter="new Func<EventDto,bool>(FilterFunc)" CommitEditTooltip="Mentés" OnCommitEditClick="Save">
+
+                <ToolBarContent>
+                    <MudText Typo="Typo.h6">Programok listája</MudText>
+                    <MudToolBarSpacer />
+                    <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+                </ToolBarContent>
+
+                <ColGroup>
+                    <col style="width:30%;" />
+                    <col style="width:20%;" />
+                    <col style="width:20%;" />
+                    <col style="width:20%;" />
+                    <col style="width:10%;" />
+                </ColGroup>
+
+                <HeaderContent>
+                    <MudTh><MudTableSortLabel SortBy="new Func<EventDto, object>(x=>x.Name)">Program neve</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<EventDto, object>(x=>x.Location)">Helyszín</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<EventDto, object>(x=>x.StartDate.Ticks)">Dátum</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<EventDto, object>(x=>x.ImageName)">Kép neve</MudTableSortLabel></MudTh>
+                    <MudTh></MudTh>
+                </HeaderContent>
+
+                <RowTemplate>
+                    <MudTd DataLabel="Program neve">@e.Name</MudTd>
+                    <MudTd DataLabel="Helyszín">@e.Location</MudTd>
+                    <MudTd DataLabel="Dátum">@e.StartDate.ToString("yyyy.MM.dd.")</MudTd>
+                    <MudTd DataLabel="Kép neve">@e.ImageName</MudTd>
+                    <MudTd DataLabel="Ikonok">
+                        <MudIcon Icon="@Icons.Material.Filled.Delete" @onclick="() => Remove(e)" />
+                    </MudTd>
+                </RowTemplate>
+
+                <RowEditingTemplate>
+                    <MudTd DataLabel="Program neve">
+                        <MudTextField @bind-Value="@UpdateEvent.Name" Required />
+                    </MudTd>
+                    <MudTd DataLabel="Helyszín">
+                        <MudTextField @bind-Value="@UpdateEvent.Location" Required />
+                    </MudTd>
+                    <MudTd DataLabel="Dátum">
+                        <MudDatePicker DateFormat="yyyy.MM.dd." @bind-Date="@date" Required />
+                    </MudTd>
+                    <MudTd DataLabel="Kép neve">
+                        <MudTextField @bind-Value="@UpdateEvent.ImageName" />
+                    </MudTd>
+                    <MudTd>
+                        <MudIcon Icon="@Icons.Material.Filled.Delete" @onclick="() => Remove(e)" />
+                    </MudTd>
+
+                </RowEditingTemplate>
+
+                <PagerContent>
+                    <MudTablePager />
+                </PagerContent>
+
+            </MudTable>
+
+        </MudPaper>
+
+    </Authorized>
+    <NotAuthorized>
+        <AccessDenied></AccessDenied>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+
+    public List<EventDto> events = new List<EventDto>();
+
+    private string searchString = "";
+
+    public EventDto updateevent = new EventDto();
+    public EventDto UpdateEvent
+    {
+        get
+        {
+            return updateevent;
+        }
+        set
+        {
+            updateevent = value;
+        }
+    }
+    public DateTime? date
+    {
+        get
+        {
+            return updateevent.StartDate;
+        }
+        set
+        {
+            updateevent.StartDate = value ?? DateTime.Now;
+        }
+    }
+
+    HttpClient http = new HttpClient();
+
+    protected override async Task OnInitializedAsync()
+    {
+        http = HttpClientFactory.CreateClient("BlazorPL.PublicServerAPI");
+        events = await http.GetFromJsonAsync<List<EventDto>>("api/events");
+    }
+
+    private bool FilterFunc(EventDto element)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (element.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (element.Location.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (element.StartDate.ToString("yyyy.MM.dd.").Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
+    }
+
+    public async void Save()
+    {
+        bool? dialogresult = await DialogService.ShowMessageBox(
+            "Mentés",
+            $"Biztosan módosítani szeretnéd a(z) {UpdateEvent.Name}?",
+            yesText: "Igen", cancelText: "Mégse");
+        if (dialogresult != null)
+        {
+            var result = await http.PutAsJsonAsync($"api/events/{UpdateEvent.Id}", UpdateEvent);
+            if (result.IsSuccessStatusCode)
+            {
+                Snackbar.Add("Sikeres módosítás", Severity.Success);
+            }
+            else
+            {
+                Snackbar.Add("Nem sikerült a módosítás, kérlek próbáld újra!", Severity.Error);
+                var ev = events.Where(x => x.Id == UpdateEvent.Id).FirstOrDefault();
+                if (ev != null) ev = await http.GetFromJsonAsync<EventDto>($"api/events/{UpdateEvent.Id}");
+                else {
+                    Snackbar.Add("Hiba! Nincs ilyen esemény a rendszerben!", Severity.Error);
+                }
+                await Task.Delay(1000);
+                uriHelper.NavigateTo(uriHelper.Uri, true);
+            }
+        }
+        else
+        {
+            var ev = events.Where(x => x.Id == UpdateEvent.Id).FirstOrDefault();
+            if (ev != null) ev = await http.GetFromJsonAsync<EventDto>($"api/events/{UpdateEvent.Id}");
+            else
+            {
+                Snackbar.Add("Hiba! Nincs ilyen esemény a rendszerben!", Severity.Error);
+            }
+            await Task.Delay(1000);
+            uriHelper.NavigateTo(uriHelper.Uri, true);
+        }
+
+    }
+
+    public async void Remove(EventDto e)
+    {
+        bool? dialogresult = await DialogService.ShowMessageBox(
+            "Törlés",
+            $"Biztosan törölni szeretnéd a(z) {e.Name}?",
+            yesText: "Igen", cancelText: "Mégse");
+        if (dialogresult != null)
+        {
+            var result = await http.DeleteAsync($"api/events/{e.Id}");
+            if (result.IsSuccessStatusCode)
+            {
+                Snackbar.Add("Sikeres törlés", Severity.Success);
+                events.Remove(e);
+                StateHasChanged();
+            }
+            else
+            {
+                Snackbar.Add("Nem sikerült a törlés, kérlek próbáld újra!", Severity.Error);
+            }
+        }
+
+    }
+}

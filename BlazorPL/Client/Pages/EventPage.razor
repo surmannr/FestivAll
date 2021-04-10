@@ -1,20 +1,109 @@
 ﻿@page "/event/{Id:int}"
 @inject ISnackbar Snackbar
+@inject HttpClient Http
+@inject IHttpClientFactory HttpClientFactory
+@inject AuthenticationStateProvider AuthState
 
-<MudPaper Class="d-flex flex-column align-items-center py-7 p-5" Style="margin-top:20px; height:100%; background-color: rgba(0,0,0,0.5)" Square="false">
+<MudPaper Class="d-flex flex-column align-items-center py-7 p-5 bastya" Style="margin-top:20px; height:100%; background-color: rgba(0,0,0,0.5); overflow-y:scroll" Square="false">
+    @if (Event != null && Event.Reviews != null)
+    {
+        <MudPaper Class="d-flex flex-column align-items-center py-7 p-5" Square="false" Style="width:100%">
 
-    <MudPaper Class="d-flex flex-column align-items-center py-7 p-5" Square="false">
+            <MudGrid>
+                <MudItem xs="3">
+                    <img src="mainpage3.jpg" height="200" width="200" alt="kép" />
+                </MudItem>
+                <MudItem xs="9" Style="display:flex; flex-direction:column; justify-content:space-between">
+                    <MudText Typo="Typo.h1">@Event.Name</MudText>
+                    <MudText Typo="Typo.h6">@Event.Location</MudText>
+                    <MudText Typo="Typo.h6">@Event.StartDate.ToString("yyyy/MMMM/dd").</MudText>
+                    <MudRating SelectedValue="@AverageReview" ReadOnly="true" Style="margin-top:5px" />
+                </MudItem>
+            </MudGrid>
+            <div style="display:flex; justify-content:start; flex-direction:column; align-items:start; width:100%; margin-top:15px;">
+                <MudText Typo="Typo.h6" Style="margin-bottom:15px"><u>Leírás:</u></MudText>
+                <MudText Typo="Typo.body1">@Event.Description</MudText>
+            </div>
+        </MudPaper>
+    }
 
-        <MudGrid>
-            <MudItem xs="4">
 
-            </MudItem>
-            <MudItem xs="8">
+    @if (Event != null && Event.Posts != null)
+    {
+    <MudPaper Class="d-flex flex-column align-items-center py-7 p-5" Square="false" Style="width:100%">
 
-            </MudItem>
-        </MudGrid>
+    <div style="display:flex; justify-content:start; flex-direction:column; align-items:start; width:100%; margin-top:15px;">
+        <MudText Typo="Typo.h6" Style="margin-bottom:15px"><u>Posztok:</u></MudText>
+        <MudDivider Style="margin-bottom:15px; color:black; background-color:black" DividerType="DividerType.FullWidth" />
+        @if (Event.Posts != null && Event.Posts.Count != 0)
+        {
+            <Virtualize Items="Event.Posts" Context="p" OverscanCount="4">
+                <PostComponent Post="p" DeleteOnClickPost="DeletePostFromList"></PostComponent>
+            </Virtualize>
+        }
+        else
+        {<MudText Typo="Typo.body1">Még nem írt senki posztot. Legyél te az első!</MudText>}
+    </div>
+    <AuthorizeView>
+        <Authorized>
+            <MudGrid Style="display:flex; align-content:center; margin-top:15px">
+                <MudItem xs="2" Style="display:flex; align-items:flex-end">
+                    <MudText Typo="Typo.h6">Posztolás:</MudText>
+                </MudItem>
+                <MudItem xs="10" Style="display:flex; align-items:flex-end">
+                    <MudTextField T="string" Label="Poszt írása..." @bind-Value=@NewPostContent />
+                </MudItem>
+            </MudGrid>
+
+            <MudFab Color="Color.Tertiary" Icon="@Icons.Material.Filled.Add" OnClick="AddPost" DisableElevation="true" Label="Közzététel" Style="margin-top:20px" />
+        </Authorized>
+        <NotAuthorized>
+            <MudText Typo="Typo.h6" Style="margin-top:20px">A poszt írásához kérlek jelentkezz be!</MudText>
+        </NotAuthorized>
+    </AuthorizeView>
 
     </MudPaper>
+    }
+    @if (Event != null && Event.Reviews != null)
+    {
+<MudPaper Class="d-flex flex-column align-items-center py-7 p-5" Square="false" Style="width:100%">
+
+    <div style="display:flex; justify-content:start; flex-direction:column; align-items:start; width:100%; margin-top:15px;">
+        <MudText Typo="Typo.h6" Style="margin-bottom:15px"><u>Vélemények:</u></MudText>
+        <MudDivider Style="margin-bottom:15px; color:black; background-color:black" DividerType="DividerType.FullWidth" />
+        @if (Event.Reviews != null && Event.Reviews.Count != 0)
+        {
+            <Virtualize Items="Event.Reviews" Context="r" OverscanCount="4">
+                <ReviewComponent Review="r" DeleteOnClick="DeleteReviewFromList"></ReviewComponent>
+            </Virtualize>
+        }
+        else
+        {<MudText Typo="Typo.body1">Még nem értékelte senki ezt az eseményt. Legyél te az első!</MudText>}
+    </div>
+        <AuthorizeView>
+            <Authorized>
+                <MudGrid Style="display:flex; align-content:center; margin-top:15px">
+                    <MudItem xs="2" Style="display:flex; align-items:flex-end">
+                        <MudText Typo="Typo.h6">Értékelés:</MudText>
+                    </MudItem>
+                    <MudItem xs="8" Style="display:flex; align-items:flex-end">
+                        <MudTextField T="string" Label="Vélemény írása..." @bind-Value=@NewReviewDescription />
+                    </MudItem>
+                    <MudItem xs="2" Style="display:flex; align-items:flex-end; justify-content:flex-end">
+                        <MudRating @bind-Value=@NewReviewStars @bind-SelectedValue="@NewReviewStars" />
+                    </MudItem>
+                </MudGrid>
+
+                <MudFab Color="Color.Tertiary" Icon="@Icons.Material.Filled.Add" OnClick="AddReview" DisableElevation="true" Label="Értékelem az eseményt" Style="margin-top:20px" />
+            </Authorized>
+            <NotAuthorized>
+                <MudText Typo="Typo.h6" Style="margin-top:20px">Az értékeléshez kérlek jelentkezz be!</MudText>
+            </NotAuthorized>
+        </AuthorizeView>
+
+    </MudPaper>
+    }
+
 
 </MudPaper>
 
@@ -22,5 +111,118 @@
     [Parameter]
     public int Id { get; set; }
 
+    public EventDto Event { get; set; } = new EventDto();
 
+    public string NewReviewDescription = "";
+    public int NewReviewStars = 0;
+
+    public string NewPostContent = "";
+
+    public string UserId { get; set; } = "";
+
+    public int AverageReview { get; set; } = 0;
+
+    protected async override Task OnInitializedAsync()
+    {
+        var http = HttpClientFactory.CreateClient("BlazorPL.PublicServerAPI");
+        Event = await http.GetFromJsonAsync<EventDto>($"api/events/{Id}");
+
+        CountAverageReview();
+    }
+
+    public async Task AddReview()
+    {
+        var auth = await AuthState.GetAuthenticationStateAsync();
+        var claimsPrincipal = auth.User;
+        UserId = claimsPrincipal.FindFirst(x => x.Type.Equals("sub")).Value;
+
+        if (!string.IsNullOrEmpty(NewReviewDescription) && NewReviewStars >= 1 && NewReviewStars <= 5)
+        {
+            ReviewDto NewReview = new ReviewDto();
+            NewReview.EventId = Event.Id;
+            NewReview.UserId = UserId;
+            NewReview.Description = NewReviewDescription;
+            NewReview.Stars = NewReviewStars;
+
+            var result = await Http.PostAsJsonAsync($"api/reviews", NewReview);
+            if (result.IsSuccessStatusCode)
+            {
+                NewReview = await result.Content.ReadFromJsonAsync<ReviewDto>();
+                Event.Reviews.Add(NewReview);
+                CountAverageReview();
+                Snackbar.Add("Sikeresen értékelted az eseményt!", Severity.Success);
+                NewReviewStars = 0;
+                NewReviewDescription = "";
+            }
+            else
+            {
+                Snackbar.Add("Az értékelésnél hiba történt. Kérlek próbáld meg újból.", Severity.Error);
+            }
+        }
+        else
+        {
+            Snackbar.Add("Az értékek nincsenek kitöltve vagy rosszul vannak megadva.", Severity.Error);
+        }
+    }
+
+    public async Task AddPost()
+    {
+        var auth = await AuthState.GetAuthenticationStateAsync();
+        var claimsPrincipal = auth.User;
+        UserId = claimsPrincipal.FindFirst(x => x.Type.Equals("sub")).Value;
+
+        if (!string.IsNullOrEmpty(NewPostContent))
+        {
+            PostDto newPost = new PostDto();
+            newPost.EventId = Event.Id;
+            newPost.UserId = UserId;
+            newPost.PostContent = NewPostContent;
+            newPost.CreationDate = DateTime.Now;
+
+            var result = await Http.PostAsJsonAsync($"api/posts", newPost);
+            if (result.IsSuccessStatusCode)
+            {
+                newPost = await result.Content.ReadFromJsonAsync<PostDto>();
+                Event.Posts.Add(newPost);
+                Snackbar.Add("Sikeresen elküldted a posztod az eseményhez!", Severity.Success);
+                NewPostContent = "";
+            }
+            else
+            {
+                Snackbar.Add("A poszt írásánál hiba történt. Kérlek próbáld meg újból.", Severity.Error);
+            }
+        }
+        else
+        {
+            Snackbar.Add("Az értékek nincsenek kitöltve vagy rosszul vannak megadva.", Severity.Error);
+        }
+    }
+
+    public void CountAverageReview()
+    {
+        if (Event != null)
+        {
+            AverageReview = 0;
+            foreach (ReviewDto r in Event.Reviews)
+            {
+                AverageReview += r.Stars;
+            }
+            if (Event.Reviews.Count() == 0) AverageReview = 0;
+            else AverageReview = AverageReview / Event.Reviews.Count();
+
+        }
+    }
+
+    public void DeleteReviewFromList(ReviewDto r)
+    {
+        var rev = Event.Reviews.Where(a => a.Id == r.Id).FirstOrDefault();
+        Event.Reviews.Remove(rev);
+        CountAverageReview();
+    }
+
+    public void DeletePostFromList(PostDto p)
+    {
+        var rev = Event.Posts.Where(a => a.Id == p.Id).FirstOrDefault();
+        Event.Posts.Remove(rev);
+    }
 }

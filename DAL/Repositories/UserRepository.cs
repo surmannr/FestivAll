@@ -46,47 +46,6 @@ namespace DAL.Repositories
             else throw new DbModelNullException(ExceptionMessageConstants.NullObject);
         }
 
-        public async Task AddTicketsFromCartToBoughtItems(Order order)
-        {
-            var user = await userManager.FindByIdAsync(order.UserId);
-            if (user != null)
-            {
-
-                if (order == null)
-                    throw new DbModelNullException(ExceptionMessageConstants.NullObject);
-                var boughts = await db.BoughtTickets.Where(o => o.UserId == user.Id).ToListAsync();
-                foreach(var o in order.OrderItems)
-                {
-                    bool bennevan = false;
-                    foreach (var b in boughts)
-                    {
-                        if(b.TicketId == o.TicketId)
-                        {
-                            bennevan = true;
-                            b.Amount += o.Amount;
-                        }
-                    }
-                    if (!bennevan)
-                    {
-                        BoughtTicket boughtTicket = new BoughtTicket()
-                        {
-                            Amount = o.Amount,
-                            TicketId = o.TicketId,
-                            UserId = order.UserId
-                        };
-                        db.BoughtTickets.Add(boughtTicket);
-                    }
-                    
-                }
-                var carts = await db.Carts.Where(u => u.UserId == order.UserId).ToListAsync();
-                foreach(var c in carts)
-                {
-                    db.Carts.Remove(c);
-                }
-                await db.SaveChangesAsync();
-            }
-            else throw new DbModelNullException(ExceptionMessageConstants.NullObject);
-        }
         public async Task DeleteFromCart(string userid, int ticketid)
         {
             var cart = await db.Carts.Where(c => c.TicketId == ticketid && c.UserId == userid).FirstOrDefaultAsync();
@@ -130,6 +89,11 @@ namespace DAL.Repositories
         public async Task<IReadOnlyCollection<Cart>> GetCartsByUser(string userid)
         {
             return await db.Carts.Where(c => c.UserId == userid).Include(c => c.Ticket).ToListAsync();
+        }
+
+        public async Task<IReadOnlyCollection<string>> GetRoles()
+        {
+            return await roleManager.Roles.Select(x => x.Name).ToListAsync();
         }
 
         public async Task<IdentityResult> CreateUser(User newUser, string password)
@@ -241,6 +205,18 @@ namespace DAL.Repositories
                 }
             }
             await db.SaveChangesAsync();
+        }
+
+        public async Task ModifyUserRole(string id, string role)
+        {
+            var user = await db.Users.Where(x => x.Id == id).FirstOrDefaultAsync();
+            if(user != null)
+            {
+                await userManager.RemoveFromRoleAsync(user, user.Role);
+                user.Role = role;
+                await userManager.AddToRoleAsync(user, role);
+                await db.SaveChangesAsync();
+            } else throw new DbModelNullException(ExceptionMessageConstants.NullObject);
         }
     }
     internal static class UserRepositoryExtension

@@ -15,6 +15,7 @@ namespace DAL.InterfacesForRepos
         Task<IReadOnlyCollection<User>> GetUserByUsername(string userName);
         Task<IReadOnlyCollection<User>> GetAllUsers();
         Task<IReadOnlyCollection<Cart>> GetCartsByUser(string userid);
+        Task<IReadOnlyCollection<string>> GetRoles();
         // Létrehozás
         Task<IdentityResult> CreateUser(User newUser, string password);
         // Módosítások
@@ -24,8 +25,8 @@ namespace DAL.InterfacesForRepos
         Task<User> ModifyEmail(string userId, string newEmail);
         Task<UserFollowedEvent> AddFollowedEvent(string userId, int eventId);
         Task<Cart> AddTicketToCart(string userId, int ticketId);
-        Task AddTicketsFromCartToBoughtItems(Order order);
         Task ModifyUserCart(IList<Cart> carts);
+        Task ModifyUserRole(string id, string role);
         // Törlés
         Task DeleteUser(string userId);
         Task DeleteFromCart(string userid, int ticketid);

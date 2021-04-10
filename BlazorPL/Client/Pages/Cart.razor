@@ -11,6 +11,8 @@
 @inject IDialogService DialogService
 
 @using SharedLayer.Enums
+@using Newtonsoft.Json
+@using System.Text 
 
 <AuthorizeView>
     <Authorized>
@@ -294,17 +296,39 @@
             if (string.IsNullOrEmpty(ShippingLocation))
             {
                 Snackbar.Add("Az átvétel helye nincsen kitöltve!", Severity.Error);
+                return;
             }
+            var tickets = await http.GetFromJsonAsync<List<TicketDto>>($"api/tickets");
+
+            List<TicketDto> result = new List<TicketDto>();
+            foreach(var c in State.Carts)
+            {
+                var ticket = tickets.Where(x => x.Id == c.TicketId).FirstOrDefault();
+                if(ticket != null)
+                {
+                    int total = ticket.InStock - c.Amount;
+                    if (total < 0)
+                    {
+                        Snackbar.Add($"<ul>" +
+                            $"<li>A {ticket.EventName} esemény {ticket.Category} kategóriájú jegyét nem sikerült megvenni, mert nincs a raktáron!</li>" +
+                            $"<li>A készleten jelen pillanatban {ticket.InStock} db jegy található.</li>" +
+                            $"</ul>", Severity.Error);
+                        return;
+                    }
+                }
+            }
+
             var temp = await http.PostAsJsonAsync<OrderDto>($"api/orders", orderDto);
             if (temp.IsSuccessStatusCode)
             {
-                /*var order = await temp.Content.ReadFromJsonAsync<OrderDto>();
-                foreach (var item in orderitems)
+                var request = new HttpRequestMessage
                 {
-                    item.OrderId = order.Id;
-                    await http.PostAsJsonAsync<OrderItemDto>($"api/orderitems", item);
-                }*/
-                await http.PostAsJsonAsync($"api/users/cart-to-bought", orderDto);
+                    Method = HttpMethod.Delete,
+                    RequestUri = new Uri(uriHelper.BaseUri + $"api/users/delete-cart-list"),
+                    Content = new StringContent(JsonConvert.SerializeObject(carts), Encoding.UTF8, "application/json")
+                };
+                var response = await http.SendAsync(request);
+                await http.PutAsJsonAsync($"api/tickets/decrease-instock",carts);
                 uriHelper.NavigateTo(uriHelper.Uri, forceLoad: true);
             }
             else Snackbar.Add("Nem sikerült a megrendelés, kérlek ellenőrizd az adataidat.", Severity.Error);

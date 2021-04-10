@@ -70,26 +70,6 @@ namespace BL.Managers
             return ticketdtos;
         }
 
-        public async Task<IReadOnlyCollection<BoughtTicketDto>> GetBoughtTicketByUser(string userid)
-        {
-            var boughts = await ticketRepository.GetBoughtTicketsByUser(userid);
-            List<BoughtTicketDto> btlist = new List<BoughtTicketDto>();
-            foreach(var b in boughts)
-            {
-                var ticket = await ticketRepository.GetTicketById(b.TicketId);
-                BoughtTicketDto bt = new BoughtTicketDto()
-                {
-                    TicketId = ticket.Id,
-                    Amount = b.Amount,
-                    Category = ticket.Category,
-                    EventName = b.Ticket.Event.Name,
-                    EventStartDate = ticket.Event.StartDate,
-                    Price = ticket.Price
-                };
-                btlist.Add(bt);
-            }
-            return btlist;
-        }
         // Létrehozás
 
         public async Task<TicketDto> CreateTicketAsync(TicketDto newTicketDto)
@@ -124,15 +104,15 @@ namespace BL.Managers
             return mapper.Map<TicketDto>(result);
         }
 
-        public async Task<TicketDto> DecreaseInStockByOneAsync(int ticketId)
+        public async Task<TicketDto> DecreaseInStockByOneAsync(int ticketId, int amount)
         {
-            var result = await ticketRepository.DecreaseInStockByOne(ticketId);
+            var result = await ticketRepository.DecreaseInStockByOne(ticketId, amount);
             return mapper.Map<TicketDto>(result);
         }
 
-        public async Task UpdateListAsync(TicketDto ticket, int eventid)
+        public async Task UpdateListAsync(TicketDto ticket)
         {
-            await ticketRepository.UpdateTicket(mapper.Map<Ticket>(ticket), eventid);
+            await ticketRepository.UpdateTicket(mapper.Map<Ticket>(ticket));
         }
     }
 }

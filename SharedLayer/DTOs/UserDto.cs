@@ -14,7 +14,7 @@ namespace SharedLayer.DTOs
         public string Role { get; set; }
         public string NickName { get; set; }
 
-        public UserDto() { }
+        public UserDto() { Id = Guid.NewGuid().ToString(); }
 
         public UserDto(string username, string password, string email, string role, string nickname)
         {

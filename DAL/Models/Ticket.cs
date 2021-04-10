@@ -19,7 +19,6 @@ namespace DAL.Models
         public int InStock { get; set; }
 
         public IReadOnlyCollection<Cart> AddToCartByUsers { get; set; } = new List<Cart>();
-        public IReadOnlyCollection<BoughtTicket> BoughtByUsers { get; set; } = new List<BoughtTicket>();
         //public IReadOnlyCollection<OrderItem> OrderedItems { get; set; }
 
         public int EventId { get; set; }
@@ -28,7 +27,6 @@ namespace DAL.Models
         public Ticket()
         {
             AddToCartByUsers = new List<Cart>();
-            BoughtByUsers = new List<BoughtTicket>();
             //OrderedItems = new List<OrderItem>();
         }
     }

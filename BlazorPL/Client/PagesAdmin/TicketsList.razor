@@ -1,0 +1,190 @@
+﻿@page "/admin/tickets"
+@layout AdminLayout
+@inject HttpClient Http
+@inject IHttpClientFactory HttpClientFactory
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+@inject NavigationManager uriHelper
+
+<AuthorizeView Roles="Admin">
+
+    <Authorized>
+
+        <MudPaper Class="d-flex justify-center py-7 p-5" Style="margin-top:20px; background-color: rgba(0,0,0,0.5)" Square="false">
+            <MudText Typo="Typo.h2" Align="Align.Center" Style="margin-top: 10px; margin-bottom:20px; color: #ECEFF1"><b>Jegyek kezelése</b></MudText>
+        </MudPaper>
+
+        <MudPaper Class="d-flex flex-column align-items-left py-7 p-5" Style="margin-top:15px; height:100%; background-color: rgba(0,0,0,0.5)" Square="false">
+
+            <MudTable Items="tickets" Context="e" Hover="true" Bordered="false" Striped="true" FixedHeader="true" @bind-SelectedItem="UpdateTicket" Filter="new Func<TicketDto,bool>(FilterFunc)" CommitEditTooltip="Mentés" OnCommitEditClick="Save">
+
+                <ToolBarContent>
+                    <MudText Typo="Typo.h6">Jegyek listája</MudText>
+                    <MudToolBarSpacer />
+                    <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+                </ToolBarContent>
+
+                <ColGroup>
+                    <col style="width:30%;" />
+                    <col style="width:20%;" />
+                    <col style="width:20%;" />
+                    <col style="width:20%;" />
+                    <col style="width:10%;" />
+                </ColGroup>
+
+                <HeaderContent>
+                    <MudTh><MudTableSortLabel SortBy="new Func<TicketDto, object>(x=>x.EventName)">Program neve</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<TicketDto, object>(x=>x.Category)">Kategória</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<TicketDto, object>(x=>x.Price)">Ár</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<TicketDto, object>(x=>x.InStock)">Készlet</MudTableSortLabel></MudTh>
+                    <MudTh></MudTh>
+                </HeaderContent>
+
+                <RowTemplate>
+                    <MudTd DataLabel="Program neve">@e.EventName</MudTd>
+                    <MudTd DataLabel="Kategória">@e.Category</MudTd>
+                    <MudTd DataLabel="Ár">@e.Price.ToString("N0") Ft</MudTd>
+                    <MudTd DataLabel="Készlet">@e.InStock.ToString("N0") db</MudTd>
+                    <MudTd DataLabel="Ikonok">
+                        <MudIcon Icon="@Icons.Material.Filled.Delete" @onclick="() => Remove(e)" />
+                    </MudTd>
+                </RowTemplate>
+
+                <RowEditingTemplate>
+                    <MudTd DataLabel="Program neve">
+                        <MudTextField @bind-Value="@UpdateTicket.EventName" Required />
+                    </MudTd>
+                    <MudTd DataLabel="Kategória">
+                        <MudTextField @bind-Value="@UpdateTicket.Category" Required />
+                    </MudTd>
+                    <MudTd DataLabel="Ár">
+                        <MudTextField T="int" @bind-Value="@UpdateTicket.Price" />
+                    </MudTd>
+                    <MudTd DataLabel="Készlet">
+                        <MudTextField T="int" @bind-Value="@UpdateTicket.InStock" />
+                    </MudTd>
+                    <MudTd>
+                        <MudIcon Icon="@Icons.Material.Filled.Delete" @onclick="() => Remove(e)" />
+                    </MudTd>
+
+                </RowEditingTemplate>
+
+                <PagerContent>
+                    <MudTablePager />
+                </PagerContent>
+
+            </MudTable>
+
+        </MudPaper>
+
+    </Authorized>
+    <NotAuthorized>
+        <AccessDenied></AccessDenied>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+
+    public List<TicketDto> tickets = new List<TicketDto>();
+
+    private string searchString = "";
+
+    public TicketDto updateticket = new TicketDto();
+    public TicketDto UpdateTicket
+    {
+        get
+        {
+            return updateticket;
+        }
+        set
+        {
+            updateticket = value;
+        }
+    }
+
+    HttpClient http = new HttpClient();
+
+    protected override async Task OnInitializedAsync()
+    {
+        http = HttpClientFactory.CreateClient("BlazorPL.PublicServerAPI");
+        tickets = await http.GetFromJsonAsync<List<TicketDto>>("api/tickets");
+    }
+
+    private bool FilterFunc(TicketDto element)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (element.Category.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (element.EventName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (element.Price.ToString("N0").Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (element.InStock.ToString("N0").Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
+    }
+
+    public async void Save()
+    {
+        bool? dialogresult = await DialogService.ShowMessageBox(
+            "Mentés",
+            $"Biztosan módosítani szeretnéd a(z) {UpdateTicket.EventName} esemény {UpdateTicket.Category} jegyét?",
+            yesText: "Igen", cancelText: "Mégse");
+        if (dialogresult != null)
+        {
+            var result = await http.PutAsJsonAsync($"api/tickets", UpdateTicket);
+            if (result.IsSuccessStatusCode)
+            {
+                Snackbar.Add("Sikeres módosítás", Severity.Success);
+            }
+            else
+            {
+                Snackbar.Add("Nem sikerült a módosítás, kérlek próbáld újra!", Severity.Error);
+                var ev = tickets.Where(x => x.Id == UpdateTicket.Id).FirstOrDefault();
+                if (ev != null) ev = await http.GetFromJsonAsync<TicketDto>($"api/tickets/{UpdateTicket.Id}");
+                else
+                {
+                    Snackbar.Add("Hiba! Nincs ilyen esemény a rendszerben!", Severity.Error);
+                }
+                await Task.Delay(1000);
+                uriHelper.NavigateTo(uriHelper.Uri, true);
+            }
+        }
+        else
+        {
+            var ev = tickets.Where(x => x.Id == UpdateTicket.Id).FirstOrDefault();
+            if (ev != null) ev = await http.GetFromJsonAsync<TicketDto>($"api/tickets/{UpdateTicket.Id}");
+            else
+            {
+                Snackbar.Add("Hiba! Nincs ilyen esemény a rendszerben!", Severity.Error);
+            }
+            await Task.Delay(1000);
+            uriHelper.NavigateTo(uriHelper.Uri, true);
+        }
+
+    }
+
+    public async void Remove(TicketDto e)
+    {
+        bool? dialogresult = await DialogService.ShowMessageBox(
+            "Törlés",
+            $"Biztosan törölni szeretnéd a(z) {UpdateTicket.EventName} esemény {UpdateTicket.Category} jegyét?",
+            yesText: "Igen", cancelText: "Mégse");
+        if (dialogresult != null)
+        {
+            var result = await http.DeleteAsync($"api/tickets/{e.Id}");
+            if (result.IsSuccessStatusCode)
+            {
+                Snackbar.Add("Sikeres törlés", Severity.Success);
+                tickets.Remove(e);
+                StateHasChanged();
+            }
+            else
+            {
+                Snackbar.Add("Nem sikerült a törlés, kérlek próbáld újra!", Severity.Error);
+            }
+        }
+
+    }
+}

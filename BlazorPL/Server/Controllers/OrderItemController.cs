@@ -19,7 +19,6 @@ namespace BlazorPL.Server.Controllers
     {
         private readonly IOrderItemManager orderItemManager;
         private readonly IEmailSender emailSender;
-        private TicketToPdf ticketToPdf;
 
         public OrderItemController(IOrderItemManager oi, IEmailSender se)
         {
