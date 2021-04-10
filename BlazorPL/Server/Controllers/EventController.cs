@@ -1,5 +1,8 @@
-﻿using BL.InterfacesForManagers;
+﻿using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
+using BL.InterfacesForManagers;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using SharedLayer.DTOs;
 using System;
 using System.Collections.Generic;
@@ -13,10 +16,12 @@ namespace BlazorPL.Server.Controllers
     public class EventController : Controller
     {
         private readonly IEventManager eventManager;
+        private readonly string _azureConnectionString;
 
-        public EventController(IEventManager e)
+        public EventController(IEventManager e, IConfiguration configuration)
         {
             eventManager = e;
+            _azureConnectionString = configuration["AzureBlobStorageConnectionString"];
         }
 
         #region Get
@@ -95,6 +100,35 @@ namespace BlazorPL.Server.Controllers
         {
             var newEvent = await eventManager.CreateEventAsync(newEventDto);
             return Ok(newEvent);
+        }
+
+        [HttpPost("upload")]
+        public async Task<IActionResult> Upload()
+        {
+            try
+            {
+                var formCollection = await Request.ReadFormAsync();
+                var file = formCollection.Files.First();
+                if (file.Length > 0)
+                {
+                    var container = new BlobContainerClient(_azureConnectionString, "event-images");
+                    var createResponse = await container.CreateIfNotExistsAsync();
+                    if (createResponse != null && createResponse.GetRawResponse().Status == 201)
+                        await container.SetAccessPolicyAsync(Azure.Storage.Blobs.Models.PublicAccessType.Blob);
+                    var blob = container.GetBlobClient(file.FileName);
+                    await blob.DeleteIfExistsAsync(DeleteSnapshotsOption.IncludeSnapshots);
+                    using (var fileStream = file.OpenReadStream())
+                    {
+                        await blob.UploadAsync(fileStream, new BlobHttpHeaders { ContentType = file.ContentType });
+                    }
+                    return Ok(blob.Uri.ToString());
+                }
+                return BadRequest();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex}");
+            }
         }
         #endregion
 

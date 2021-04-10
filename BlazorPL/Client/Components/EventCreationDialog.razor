@@ -90,6 +90,25 @@
                 <MudTextField T="string" @bind-Value="newEvent.Description" HelperText="Itt adhatod meg az eseményed leírását." Required="false" Lines="5" />
             </MudItem>
 
+            <MudItem xs="6">
+
+                <MudText Typo="@Typo.h6">Feltöltött fájl:</MudText>
+                @if (browserFile != null)
+                {
+                    <MudIcon Icon="@Icons.Filled.AttachFile"></MudIcon> @browserFile.Name <code>@browserFile.Size bytes</code>
+                }
+
+            </MudItem>
+            <MudItem xs="6" Style="justify-content:flex-end; display:flex">
+
+                <InputFile id="fileInput" OnChange="UploadFile" hidden multiple accept=".jpg, .jpeg, .png" />
+
+                <MudIconButton HtmlTag="label"
+                               Color="Color.Info"
+                               Icon="@Icons.Filled.PhotoCamera"
+                               for="fileInput">
+                </MudIconButton>
+            </MudItem>
         </MudGrid>
 
         <MudGrid>
@@ -144,6 +163,8 @@
     [Parameter]
     public EventCallback<EventDto> OnModifyClick { get; set; }
 
+    IBrowserFile browserFile { get; set; }
+
     protected override void OnInitialized()
     {
         http = HttpClientFactory.CreateClient("BlazorPL.PublicServerAPI");
@@ -168,12 +189,21 @@
 
     }
 
+    private void UploadFile(InputFileChangeEventArgs e)
+    {
+        foreach(var a in e.GetMultipleFiles())
+        {
+            browserFile = a;
+        }
+    }
+
     private void CloseDialog()
     {
         visible = false;
         newEvent = new EventDto();
         newFirstTicket = new TicketDto();
         moreTickets = new LinkedList<TicketDto>();
+        browserFile = null;
         ModifyButton = "Létrehozás";
     }
 
@@ -186,9 +216,24 @@
             if (ModifyButton == "Módosít")
             {
                 newEvent.StartDate = (DateTime)StartDate;
+                if(String.IsNullOrEmpty(newEvent.ImageName)) newEvent.ImageName = newEvent.Name + "_" + Guid.NewGuid().ToString() + ".png";
                 var res = await http.PutAsJsonAsync<EventDto>($"api/events/{newEvent.Id}", newEvent);
                 if (res.IsSuccessStatusCode)
                 {
+
+                    if(browserFile != null)
+                    {
+                        var resizedFile = await browserFile.RequestImageFileAsync("image/png", 500, 500);
+                        using (var ms = resizedFile.OpenReadStream(resizedFile.Size))
+                        {
+                            var content = new MultipartFormDataContent();
+                            content.Headers.ContentDisposition = new System.Net.Http.Headers.ContentDispositionHeaderValue("form-data");
+                            content.Add(new StreamContent(ms, Convert.ToInt32(resizedFile.Size)), "image", newEvent.ImageName);
+                            var response = await http.PostAsync("api/events/upload", content);
+                        }
+                    }
+
+
                     var ev = await res.Content.ReadFromJsonAsync<EventDto>();
                     if (ev != null)
                     {
@@ -225,40 +270,50 @@
         moreTickets.AddFirst(newFirstTicket);
         newEvent.StartDate = (DateTime)StartDate;
         if(newEvent!=null)
-        if (CheckAll())
-        {
-            if (ModifyButton == "Létrehozás" || ModifyButton == "Másolat létrehozása")
+            if (CheckAll())
             {
-                var result = await http.PostAsJsonAsync<EventDto>($"api/events", newEvent);
-                if (result.IsSuccessStatusCode)
+                if (ModifyButton == "Létrehozás" || ModifyButton == "Másolat létrehozása")
                 {
-                    newEvent = await result.Content.ReadFromJsonAsync<EventDto>();
-                    events.Add(newEvent);
-                    foreach(var t in moreTickets)
+                    newEvent.ImageName = newEvent.Name + "_" +  Guid.NewGuid().ToString() + ".png";
+                    var result = await http.PostAsJsonAsync<EventDto>($"api/events", newEvent);
+                    if (result.IsSuccessStatusCode)
                     {
-                        t.Id = 0;
+                        var resizedFile = await browserFile.RequestImageFileAsync("image/png", 500, 500);
+                        using (var ms = resizedFile.OpenReadStream(resizedFile.Size))
+                        {
+                            var content = new MultipartFormDataContent();
+                            content.Headers.ContentDisposition = new System.Net.Http.Headers.ContentDispositionHeaderValue("form-data");
+                            content.Add(new StreamContent(ms, Convert.ToInt32(resizedFile.Size)), "image", newEvent.ImageName);
+                            var response = await http.PostAsync("api/events/upload", content);
+                        }
+
+                        newEvent = await result.Content.ReadFromJsonAsync<EventDto>();
+                        events.Add(newEvent);
+                        foreach(var t in moreTickets)
+                        {
+                            t.Id = 0;
+                        }
+                        await CreateTickets(newEvent);
+
+                        CloseDialog();
+                        Snackbar.Add("Sikerült az esemény létrehozása a hozzátartozó jegyekkel!", MudBlazor.Severity.Success);
+                        await OnClick.InvokeAsync(newEvent);
+                        Clear();
                     }
-                    await CreateTickets(newEvent);
 
-                    CloseDialog();
-                    Snackbar.Add("Sikerült az esemény létrehozása a hozzátartozó jegyekkel!", MudBlazor.Severity.Success);
-                    await OnClick.InvokeAsync(newEvent);
-                    Clear();
+                    else
+                    {
+                        Snackbar.Add("Nem sikerült létrehozni az eseményt! Kérlek próbáld újra!", MudBlazor.Severity.Error);
+                        moreTickets.RemoveFirst();
+                    }
                 }
 
-                else
-                {
-                    Snackbar.Add("Nem sikerült létrehozni az eseményt! Kérlek próbáld újra!", MudBlazor.Severity.Error);
-                    moreTickets.RemoveFirst();
-                }
             }
-
-        }
-        else
-        {
-            moreTickets.RemoveFirst();
-            return;
-        }
+            else
+            {
+                moreTickets.RemoveFirst();
+                return;
+            }
 
         CloseDialog();
     }

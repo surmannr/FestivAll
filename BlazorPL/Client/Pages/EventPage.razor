@@ -11,7 +11,7 @@
 
             <MudGrid>
                 <MudItem xs="3">
-                    <img src="mainpage3.jpg" height="200" width="200" alt="kép" />
+                    <img src="@ImageURL" height="200" width="200" alt="kép" />
                 </MudItem>
                 <MudItem xs="9" Style="display:flex; flex-direction:column; justify-content:space-between">
                     <MudText Typo="Typo.h1">@Event.Name</MudText>
@@ -122,10 +122,14 @@
 
     public int AverageReview { get; set; } = 0;
 
+    public string ImageURL = @"https://festivall.blob.core.windows.net/event-images/";
+
     protected async override Task OnInitializedAsync()
     {
         var http = HttpClientFactory.CreateClient("BlazorPL.PublicServerAPI");
         Event = await http.GetFromJsonAsync<EventDto>($"api/events/{Id}");
+
+        ImageURL = ImageURL + Event.ImageName;
 
         CountAverageReview();
     }
