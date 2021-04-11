@@ -318,17 +318,17 @@ namespace DAL.Migrations
                         {
                             Id = "admin",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "9c8bbb7d-0f70-4af5-a301-f4fe26dd2338",
+                            ConcurrencyStamp = "4ead2ff7-20f4-4ae5-bb7c-9a896eefacdf",
                             Email = "admin@admin.hu",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
                             NickName = "Admin",
                             NormalizedEmail = "ADMIN@ADMIN.HU",
                             NormalizedUserName = "ADMIN",
-                            PasswordHash = "AQAAAAEAACcQAAAAEDBuOQQrPGNG+oTTARpdJYbnZ4MJzL3kl1BFsIyqz30M6xHvN8AdcfzVmYvcFB/3zw==",
+                            PasswordHash = "AQAAAAEAACcQAAAAEPJr9QG6SCd/b89E8/x+oZs1ofdx6U6Ab2ZGeW6oquke8qKsvdWVTSk1KOEkA32LoQ==",
                             PhoneNumberConfirmed = false,
                             Role = "Admin",
-                            SecurityStamp = "b364a0f1-32c0-4ee4-9447-60c08de4a9ab",
+                            SecurityStamp = "1c16ba0d-feee-4b04-833f-506cecf4894c",
                             TwoFactorEnabled = false,
                             UserName = "admin"
                         });
@@ -482,7 +482,7 @@ namespace DAL.Migrations
                         new
                         {
                             Id = "admin",
-                            ConcurrencyStamp = "1361c5d6-7bdb-41f1-94d0-7352186ed2df",
+                            ConcurrencyStamp = "c624fa9e-6451-4ed6-bda5-4c47214d331f",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         });

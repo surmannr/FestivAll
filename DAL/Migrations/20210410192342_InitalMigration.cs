@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace DAL.Migrations
 {
-    public partial class InitialMigration2 : Migration
+    public partial class InitalMigration : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -400,12 +400,12 @@ namespace DAL.Migrations
             migrationBuilder.InsertData(
                 table: "AspNetRoles",
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
-                values: new object[] { "admin", "1361c5d6-7bdb-41f1-94d0-7352186ed2df", "Admin", "ADMIN" });
+                values: new object[] { "admin", "c624fa9e-6451-4ed6-bda5-4c47214d331f", "Admin", "ADMIN" });
 
             migrationBuilder.InsertData(
                 table: "AspNetUsers",
                 columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "Email", "EmailConfirmed", "LockoutEnabled", "LockoutEnd", "NickName", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "Role", "SecurityStamp", "TwoFactorEnabled", "UserName" },
-                values: new object[] { "admin", 0, "9c8bbb7d-0f70-4af5-a301-f4fe26dd2338", "admin@admin.hu", true, false, null, "Admin", "ADMIN@ADMIN.HU", "ADMIN", "AQAAAAEAACcQAAAAEDBuOQQrPGNG+oTTARpdJYbnZ4MJzL3kl1BFsIyqz30M6xHvN8AdcfzVmYvcFB/3zw==", null, false, "Admin", "b364a0f1-32c0-4ee4-9447-60c08de4a9ab", false, "admin" });
+                values: new object[] { "admin", 0, "4ead2ff7-20f4-4ae5-bb7c-9a896eefacdf", "admin@admin.hu", true, false, null, "Admin", "ADMIN@ADMIN.HU", "ADMIN", "AQAAAAEAACcQAAAAEPJr9QG6SCd/b89E8/x+oZs1ofdx6U6Ab2ZGeW6oquke8qKsvdWVTSk1KOEkA32LoQ==", null, false, "Admin", "1c16ba0d-feee-4b04-833f-506cecf4894c", false, "admin" });
 
             migrationBuilder.InsertData(
                 table: "AspNetUserRoles",

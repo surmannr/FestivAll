@@ -35,17 +35,17 @@ namespace BlazorPL.Server
         }
 
         public IConfiguration Configuration { get; }
-        //private string dbConnectionString = null;
+        private string dbConnectionString = null;
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
             // Connection string lekérdezése a user secrets-bõl (secret.json)
-            //dbConnectionString = Configuration["ConnectionStrings:festivalldb"];
+            dbConnectionString = Configuration["ConnectionStrings:festivalldb"];
 
             // Adatbázis beállítása
             services.AddDbContext<FestivallDb>(options =>
-                options.UseSqlServer(@"Server=(localdb)\mssqllocaldb;Database=FestivallDB;Trusted_Connection=True;"));
+                options.UseSqlServer(dbConnectionString));
 
             services.AddCors(policy =>
             {
