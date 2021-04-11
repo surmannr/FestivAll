@@ -1,4 +1,5 @@
-﻿using Azure.Storage.Blobs;
+﻿using Azure.Identity;
+using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using BL.InterfacesForManagers;
 using Microsoft.AspNetCore.Mvc;
@@ -18,9 +19,13 @@ namespace BlazorPL.Server.Controllers
         private readonly IEventManager eventManager;
         private readonly string _azureConnectionString;
 
-        public EventController(IEventManager e, IConfiguration configuration)
+        public EventController(IEventManager e)
         {
             eventManager = e;
+            ConfigurationBuilder builder = new ConfigurationBuilder();
+            builder.AddAzureKeyVault(new Uri(@"https://festivall-keyvault.vault.azure.net/"), new DefaultAzureCredential());
+
+            IConfiguration configuration = builder.Build();
             _azureConnectionString = configuration["AzureBlobStorageConnectionString"];
         }
 

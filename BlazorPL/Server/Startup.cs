@@ -25,6 +25,8 @@ using Microsoft.OpenApi.Models;
 using System;
 using System.Linq;
 using SharedLayer.Exceptions;
+using Azure.Identity;
+
 namespace BlazorPL.Server
 {
     public class Startup
@@ -40,8 +42,14 @@ namespace BlazorPL.Server
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            ConfigurationBuilder builder = new ConfigurationBuilder();
+            builder.AddAzureKeyVault(new Uri(@"https://festivall-keyvault.vault.azure.net/"), new DefaultAzureCredential());
+
+            IConfiguration configuration = builder.Build();
+            //Console.WriteLine(configuration["MySecret"]);
+
             // Connection string lekérdezése a user secrets-bõl (secret.json)
-            dbConnectionString = Configuration["ConnectionStrings:festivalldb"];
+            dbConnectionString = configuration["ConnectionStrings-festivalldb"];
 
             // Adatbázis beállítása
             services.AddDbContext<FestivallDb>(options =>
@@ -115,7 +123,7 @@ namespace BlazorPL.Server
             #endregion
 
             services.AddTransient<IEmailSender, EmailSender>();
-            services.Configure<AuthMessageSenderOptions>(Configuration);
+            services.Configure<AuthMessageSenderOptions>(configuration);
             #region Swagger
             // Register the Swagger generator, defining 1 or more Swagger documents
             services.AddSwaggerGen(c =>
