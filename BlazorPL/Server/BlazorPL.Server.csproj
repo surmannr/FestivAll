@@ -15,7 +15,6 @@
     <PackageReference Include="Azure.Extensions.AspNetCore.Configuration.Secrets" Version="1.0.2" />
     <PackageReference Include="Azure.Identity" Version="1.3.0" />
     <PackageReference Include="Azure.Storage.Blobs" Version="12.8.1" />
-    <PackageReference Include="ceTe.DynamicPDF.CoreSuite.NET" Version="11.8.0" />
     <PackageReference Include="Hellang.Middleware.ProblemDetails" Version="5.1.1" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="5.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="5.0.4" />

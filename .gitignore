@@ -338,3 +338,4 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
+/BlazorPL/Server/Properties/ServiceDependencies/festivall - Web Deploy/profile.arm.json
