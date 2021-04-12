@@ -16,10 +16,11 @@ steps:
 - script: dotnet build --configuration $(buildConfiguration)
   displayName: 'Building $(buildConfiguration)...'
 
-- task: DotNetCoreInstaller@0
+- task: UseDotNet@2
   displayName: 'Installing .NET Core SDK...'
   inputs:
     version: '5.x'
+    includePreviewVersions: true
 
 - task: DotNetCoreCLI@2
   displayName: 'Publishing App...'
