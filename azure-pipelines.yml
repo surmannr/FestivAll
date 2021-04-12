@@ -13,14 +13,12 @@ variables:
   buildConfiguration: 'Release'
 
 steps:
-- script: dotnet build --configuration $(buildConfiguration)
-  displayName: 'Building $(buildConfiguration)...'
-
-- task: UseDotNet@2
+- task: DotNetCoreInstaller@0
   displayName: 'Installing .NET Core SDK...'
   inputs:
-    version: '5.x'
-    includePreviewVersions: true
+    version: 3.0.100-preview6-012264
+- script: dotnet build --configuration $(buildConfiguration)
+  displayName: 'Building $(buildConfiguration)...'
 
 - task: DotNetCoreCLI@2
   displayName: 'Publishing App...'
