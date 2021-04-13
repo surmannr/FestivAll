@@ -43,7 +43,8 @@ namespace BlazorPL.Server
         public void ConfigureServices(IServiceCollection services)
         {
             ConfigurationBuilder builder = new ConfigurationBuilder();
-            builder.AddAzureKeyVault(new Uri(@"https://festivall-keyvault.vault.azure.net/"), new DefaultAzureCredential());
+            var credential = new DefaultAzureCredential(new DefaultAzureCredentialOptions { ExcludeSharedTokenCacheCredential = true });
+            builder.AddAzureKeyVault(new Uri(@"https://festivall-keyvault.vault.azure.net/"), credential);
 
             IConfiguration configuration = builder.Build();
             //Console.WriteLine(configuration["MySecret"]);
