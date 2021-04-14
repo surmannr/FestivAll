@@ -21,6 +21,7 @@ namespace BlazorPL.Server
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
+                    webBuilder.ConfigureKestrel(o => o.AddServerHeader = false);
                 });
     }
 }
