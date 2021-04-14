@@ -56,7 +56,4 @@
 	<PropertyGroup>
 		<BlazorEnableCompression>false</BlazorEnableCompression>
 	</PropertyGroup>
-	<PropertyGroup>
-		<AspNetCoreHostingModel>OutOfProcess</AspNetCoreHostingModel>
-	</PropertyGroup>
 </Project>
