@@ -87,8 +87,7 @@ namespace BlazorPL.Server
             // services.AddDefaultIdentity<User>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<FestivallDb>();
             //services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
             //services.AddIdentityServer().AddApiAuthorization<User, FestivallDb>();
-            var key = Configuration["blazorfestivallcert"];
-            Console.Error.WriteLine(key);
+            var key = Configuration["blazorweb"];
             var pfxBytes = Convert.FromBase64String(key);
             var cert = new X509Certificate2(pfxBytes, (string)null, X509KeyStorageFlags.MachineKeySet);
             services.AddIdentityServer().AddApiAuthorization<User, FestivallDb>(options => 
