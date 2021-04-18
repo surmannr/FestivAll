@@ -89,7 +89,7 @@ namespace BlazorPL.Server
             //services.AddIdentityServer().AddApiAuthorization<User, FestivallDb>();
             var key = Configuration["blazorweb"];
             var pfxBytes = Convert.FromBase64String(key);
-            var cert = new X509Certificate2(pfxBytes, Configuration["cert-passw"], X509KeyStorageFlags.MachineKeySet);
+            var cert = new X509Certificate2(pfxBytes, (string)null, X509KeyStorageFlags.MachineKeySet);
             services.AddIdentityServer().AddApiAuthorization<User, FestivallDb>(options => 
             { 
                 options.IdentityResources["openid"].UserClaims.Add("role");
