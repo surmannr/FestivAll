@@ -26,6 +26,7 @@ using System;
 using System.Linq;
 using SharedLayer.Exceptions;
 using Azure.Identity;
+using System.Security.Cryptography.X509Certificates;
 
 namespace BlazorPL.Server
 {
@@ -33,24 +34,23 @@ namespace BlazorPL.Server
     {
         public Startup(IConfiguration configuration)
         {
+            ConfigurationBuilder builder = new ConfigurationBuilder();
+            var credential = new DefaultAzureCredential(new DefaultAzureCredentialOptions { ExcludeSharedTokenCacheCredential = true });
+            builder.AddAzureKeyVault(new Uri(@"https://festivall-keyvault.vault.azure.net/"), credential);
+            configuration = builder.Build();
             Configuration = configuration;
-        }
 
+        }
         public IConfiguration Configuration { get; }
         private string dbConnectionString = null;
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            ConfigurationBuilder builder = new ConfigurationBuilder();
-            var credential = new DefaultAzureCredential(new DefaultAzureCredentialOptions { ExcludeSharedTokenCacheCredential = true });
-            builder.AddAzureKeyVault(new Uri(@"https://festivall-keyvault.vault.azure.net/"), credential);
-
-            IConfiguration configuration = builder.Build();
             //Console.WriteLine(configuration["MySecret"]);
 
             // Connection string lekérdezése a user secrets-bõl (secret.json)
-            dbConnectionString = configuration["ConnectionStrings-festivalldb"];
+            dbConnectionString = Configuration["ConnectionStrings-festivalldb"];
 
             // Adatbázis beállítása
             services.AddDbContext<FestivallDb>(options =>
@@ -87,10 +87,15 @@ namespace BlazorPL.Server
             // services.AddDefaultIdentity<User>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<FestivallDb>();
             //services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
             //services.AddIdentityServer().AddApiAuthorization<User, FestivallDb>();
+            var key = Configuration["blazorfestivallcert"];
+            Console.Error.WriteLine(key);
+            var pfxBytes = Convert.FromBase64String(key);
+            var cert = new X509Certificate2(pfxBytes, (string)null, X509KeyStorageFlags.MachineKeySet);
             services.AddIdentityServer().AddApiAuthorization<User, FestivallDb>(options => 
             { 
                 options.IdentityResources["openid"].UserClaims.Add("role");
-            });
+            }).AddSigningCredential(cert);
+
             services.AddAuthentication().AddIdentityServerJwt();
             services.AddHttpContextAccessor();
             #region Dependency Injection - Repository-khoz
@@ -124,7 +129,7 @@ namespace BlazorPL.Server
             #endregion
 
             services.AddTransient<IEmailSender, EmailSender>();
-            services.Configure<AuthMessageSenderOptions>(configuration);
+            services.Configure<AuthMessageSenderOptions>(Configuration);
             #region Swagger
             // Register the Swagger generator, defining 1 or more Swagger documents
             services.AddSwaggerGen(c =>
