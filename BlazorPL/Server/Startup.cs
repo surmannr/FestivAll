@@ -27,6 +27,9 @@ using System.Linq;
 using SharedLayer.Exceptions;
 using Azure.Identity;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.Azure.KeyVault;
+using Microsoft.Azure.Services.AppAuthentication;
+using System.Threading.Tasks;
 
 namespace BlazorPL.Server
 {
@@ -87,9 +90,21 @@ namespace BlazorPL.Server
             // services.AddDefaultIdentity<User>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<FestivallDb>();
             //services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
             //services.AddIdentityServer().AddApiAuthorization<User, FestivallDb>();
-            var key = Configuration["festivallcert"];
+
+            var azureServiceTokenProvider = new AzureServiceTokenProvider();
+
+            // using managed identities
+            var kv = new KeyVaultClient(new KeyVaultClient.AuthenticationCallback(azureServiceTokenProvider.KeyVaultTokenCallback));
+
+            var certificateSecret = kv.GetSecretAsync($"https://festivall-keyvault.vault.azure.net/", "festivallcert").GetAwaiter().GetResult();
+            var privateKeyBytes = Convert.FromBase64String(certificateSecret.Value);
+
+            var cert = new X509Certificate2(privateKeyBytes, (string)null);
+
+            /*var key = Configuration["festivallcert"];
             var pfxBytes = Convert.FromBase64String(key);
-            var cert = new X509Certificate2(pfxBytes, (string)null, X509KeyStorageFlags.MachineKeySet | X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable);
+            var cert = new X509Certificate2(pfxBytes, (string)null, X509KeyStorageFlags.MachineKeySet | X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable);*/
+
             services.AddIdentityServer().AddApiAuthorization<User, FestivallDb>(options => 
             { 
                 options.IdentityResources["openid"].UserClaims.Add("role");
