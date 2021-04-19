@@ -87,9 +87,9 @@ namespace BlazorPL.Server
             // services.AddDefaultIdentity<User>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<FestivallDb>();
             //services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
             //services.AddIdentityServer().AddApiAuthorization<User, FestivallDb>();
-            var key = Configuration["blazorweb"];
+            var key = Configuration["festivallcert"];
             var pfxBytes = Convert.FromBase64String(key);
-            var cert = new X509Certificate2(pfxBytes, (string)null, X509KeyStorageFlags.MachineKeySet);
+            var cert = new X509Certificate2(pfxBytes, (string)null, X509KeyStorageFlags.MachineKeySet | X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable);
             services.AddIdentityServer().AddApiAuthorization<User, FestivallDb>(options => 
             { 
                 options.IdentityResources["openid"].UserClaims.Add("role");
@@ -183,9 +183,9 @@ namespace BlazorPL.Server
                 app.UseHsts();
             }
 
+            app.UseHttpsRedirection();
             app.UseProblemDetails();
 
-            app.UseHttpsRedirection();
             app.UseCors("CorsPolicy");
 
             app.UseBlazorFrameworkFiles();
