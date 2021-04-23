@@ -31,6 +31,7 @@ using Microsoft.Azure.KeyVault;
 using Microsoft.Azure.Services.AppAuthentication;
 using System.Threading.Tasks;
 using Azure.Security.KeyVault.Secrets;
+using Azure.Security.KeyVault.Certificates;
 
 namespace BlazorPL.Server
 {
@@ -46,6 +47,7 @@ namespace BlazorPL.Server
 
         }
         public IConfiguration Configuration { get; }
+        public IIdentityServerBuilder builder { get; set; }
         private string dbConnectionString = null;
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
@@ -92,24 +94,34 @@ namespace BlazorPL.Server
             //services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
             //services.AddIdentityServer().AddApiAuthorization<User, FestivallDb>();
 
-            var azureServiceTokenProvider = new AzureServiceTokenProvider();
+            /*var azureServiceTokenProvider = new AzureServiceTokenProvider();
             // using managed identities
             var kv = new KeyVaultClient(new KeyVaultClient.AuthenticationCallback(azureServiceTokenProvider.KeyVaultTokenCallback));
             var certificateSecret = kv.GetSecretAsync($"https://festivall-keyvault.vault.azure.net/", "festivallcert").GetAwaiter().GetResult();
             var privateKeyBytes = Convert.FromBase64String(certificateSecret.Value);
-            var cert = new X509Certificate2(privateKeyBytes);
+            var cert = new X509Certificate2(privateKeyBytes);*/
 
             /*var key = Configuration["festivallcert"];
             var pfxBytes = Convert.FromBase64String(key);
             var cert = new X509Certificate2(pfxBytes, (string)null, X509KeyStorageFlags.MachineKeySet | X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable);
             */
+            /*
+            var client = new CertificateClient(vaultUri: new Uri($"https://festivall-keyvault.vault.azure.net/"), credential: new DefaultAzureCredential());
+            KeyVaultCertificateWithPolicy certificateWithPolicy = client.GetCertificate("festivall");
+            KeyVaultCertificate certificate = client.GetCertificateVersion(certificateWithPolicy.Name, certificateWithPolicy.Properties.Version);
+            var cert = new X509Certificate2(certificate.Cer, (string)null, X509KeyStorageFlags.MachineKeySet);
+            */
 
 
+            /*var azureServiceTokenProvider = new AzureServiceTokenProvider();
+            var kv = new KeyVaultClient(new KeyVaultClient.AuthenticationCallback(azureServiceTokenProvider.KeyVaultTokenCallback));
+            var certificateSecret = kv.GetSecretAsync($"https://festivall-keyvault.vault.azure.net/", "festivallcert").GetAwaiter().GetResult();
+            var cert = new X509Certificate2(Convert.FromBase64String(certificateSecret.Value));*/
 
-            services.AddIdentityServer().AddApiAuthorization<User, FestivallDb>(options => 
-            { 
+            builder = services.AddIdentityServer().AddApiAuthorization<User, FestivallDb>(options =>
+            {
                 options.IdentityResources["openid"].UserClaims.Add("role");
-            }).AddSigningCredential(cert);
+            });
 
             services.AddAuthentication().AddIdentityServerJwt();
             services.AddHttpContextAccessor();
@@ -191,9 +203,14 @@ namespace BlazorPL.Server
                 app.UseDeveloperExceptionPage();
                 app.UseMigrationsEndPoint();
                 app.UseWebAssemblyDebugging();
+                builder.AddDeveloperSigningCredential();
             }
             else
             {
+                var key = Configuration["festivall"];
+                var pfxBytes = Convert.FromBase64String(key);
+                var cert = new X509Certificate2(pfxBytes, (string)null, X509KeyStorageFlags.MachineKeySet);
+                builder.AddSigningCredential(cert);
                 app.UseExceptionHandler("/Error");
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
