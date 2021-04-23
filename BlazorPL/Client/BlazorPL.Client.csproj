@@ -3,8 +3,6 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <UserSecretsId>cf73c8f8-f5fb-4b8e-acf4-d1cf671dfcd9</UserSecretsId>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <OutputType>Exe</OutputType>
   </PropertyGroup>
 
   <ItemGroup>
