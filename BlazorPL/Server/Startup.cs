@@ -47,7 +47,6 @@ namespace BlazorPL.Server
 
         }
         public IConfiguration Configuration { get; }
-        public IIdentityServerBuilder builder { get; set; }
         private string dbConnectionString = null;
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
@@ -118,7 +117,7 @@ namespace BlazorPL.Server
             var certificateSecret = kv.GetSecretAsync($"https://festivall-keyvault.vault.azure.net/", "festivallcert").GetAwaiter().GetResult();
             var cert = new X509Certificate2(Convert.FromBase64String(certificateSecret.Value));*/
 
-            builder = services.AddIdentityServer().AddApiAuthorization<User, FestivallDb>(options =>
+            services.AddIdentityServer().AddApiAuthorization<User, FestivallDb>(options =>
             {
                 options.IdentityResources["openid"].UserClaims.Add("role");
             });
@@ -203,14 +202,9 @@ namespace BlazorPL.Server
                 app.UseDeveloperExceptionPage();
                 app.UseMigrationsEndPoint();
                 app.UseWebAssemblyDebugging();
-                builder.AddDeveloperSigningCredential();
             }
             else
             {
-                var key = Configuration["festivall"];
-                var pfxBytes = Convert.FromBase64String(key);
-                var cert = new X509Certificate2(pfxBytes, (string)null, X509KeyStorageFlags.MachineKeySet);
-                builder.AddSigningCredential(cert);
                 app.UseExceptionHandler("/Error");
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
