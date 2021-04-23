@@ -111,16 +111,15 @@ namespace BlazorPL.Server
             var cert = new X509Certificate2(certificate.Cer, (string)null, X509KeyStorageFlags.MachineKeySet);
             */
 
-
-            /*var azureServiceTokenProvider = new AzureServiceTokenProvider();
+            var azureServiceTokenProvider = new AzureServiceTokenProvider();
             var kv = new KeyVaultClient(new KeyVaultClient.AuthenticationCallback(azureServiceTokenProvider.KeyVaultTokenCallback));
             var certificateSecret = kv.GetSecretAsync($"https://festivall-keyvault.vault.azure.net/", "festivallcert").GetAwaiter().GetResult();
-            var cert = new X509Certificate2(Convert.FromBase64String(certificateSecret.Value));*/
+            var cert = new X509Certificate2(Convert.FromBase64String(certificateSecret.Value));
 
             services.AddIdentityServer().AddApiAuthorization<User, FestivallDb>(options =>
             {
                 options.IdentityResources["openid"].UserClaims.Add("role");
-            });
+            }).AddSigningCredential(cert);
 
             services.AddAuthentication().AddIdentityServerJwt();
             services.AddHttpContextAccessor();
