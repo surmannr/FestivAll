@@ -119,7 +119,7 @@ namespace BlazorPL.Server
             services.AddIdentityServer().AddApiAuthorization<User, FestivallDb>(options =>
             {
                 options.IdentityResources["openid"].UserClaims.Add("role");
-            }).AddSigningCredential(cert);
+            });//.AddSigningCredential(cert);
 
             services.AddAuthentication().AddIdentityServerJwt();
             services.AddHttpContextAccessor();
