@@ -122,6 +122,7 @@ namespace BlazorPL.Server
             });//.AddSigningCredential(cert);
 
             services.AddAuthentication().AddIdentityServerJwt();
+
             services.AddHttpContextAccessor();
             #region Dependency Injection - Repository-khoz
             services.AddScoped<IEventRepository, EventRepository>();
@@ -210,6 +211,7 @@ namespace BlazorPL.Server
             }
 
             app.UseHttpsRedirection();
+            app.UseIdentityServer();
             app.UseProblemDetails();
 
             app.UseCors("CorsPolicy");
@@ -219,7 +221,6 @@ namespace BlazorPL.Server
 
             app.UseRouting();
 
-            app.UseIdentityServer();
             app.UseAuthentication();
             app.UseAuthorization();
 
