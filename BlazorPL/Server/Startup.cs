@@ -32,6 +32,8 @@ using Microsoft.Azure.Services.AppAuthentication;
 using System.Threading.Tasks;
 using Azure.Security.KeyVault.Secrets;
 using Azure.Security.KeyVault.Certificates;
+using Microsoft.AspNetCore.ApiAuthorization.IdentityServer;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace BlazorPL.Server
 {
@@ -121,6 +123,10 @@ namespace BlazorPL.Server
                 options.IdentityResources["openid"].UserClaims.Add("role");
             });//.AddSigningCredential(cert);
 
+            services.Configure<JwtBearerOptions>(IdentityServerJwtConstants.IdentityServerJwtBearerScheme, options =>
+            {
+                options.Authority = "https://festivall.azurewebsites.net";
+            });
             services.AddAuthentication().AddIdentityServerJwt();
 
             services.AddHttpContextAccessor();
