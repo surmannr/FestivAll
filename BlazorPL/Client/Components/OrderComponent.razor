@@ -3,6 +3,8 @@
 @inject AuthenticationStateProvider AuthState
 @inject HttpClient Http
 @inject NavigationManager uriHelper
+@using SharedLayer.PDF
+@inject IJSRuntime js
 
 <MudExpansionPanel HideIcon="true">
     <TitleContent>
@@ -159,16 +161,22 @@
 
         //await Http.PostAsJsonAsync("api/orderitems/email?email=surmannroland@gmail.com", order.OrderItems);
 
-        var response = await Http.PostAsJsonAsync($"api/orders/pdf-create/{order.Id}", order.OrderItems);
-        uriHelper.NavigateTo($"/download-pdf/{order.Id}", forceLoad:true);
+        var ticketToPdf = new TicketToPdf((List<OrderItemDto>)order.OrderItems);
+        ticketToPdf.CreatePdf(js);
+
+        //var response = await Http.PostAsJsonAsync($"api/orders/pdf-create/{order.Id}", order.OrderItems);
+        //uriHelper.NavigateTo($"/download-pdf/{order.Id}", forceLoad:true);
     }
 
     public async Task PrintTicket(OrderItemDto o)
     {
         List<OrderItemDto> list = new List<OrderItemDto>();
         list.Add(o);
-        var response = await Http.PostAsJsonAsync($"api/orders/pdf-create/{order.Id}", list);
-        uriHelper.NavigateTo($"/download-pdf/{order.Id}", forceLoad: true);
+
+        var ticketToPdf = new TicketToPdf(list);
+        ticketToPdf.CreatePdf(js);
+        //var response = await Http.PostAsJsonAsync($"api/orders/pdf-create/{order.Id}", list);
+        //uriHelper.NavigateTo($"/download-pdf/{order.Id}", forceLoad: true);
     }
 
 

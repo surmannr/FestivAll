@@ -1,17 +1,9 @@
 ﻿using BL.InterfacesForManagers;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.StaticFiles;
 using SharedLayer.DTOs;
 using SharedLayer.Enums;
 using SharedLayer.PDF;
-using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
 namespace BlazorPL.Server.Controllers
@@ -68,16 +60,17 @@ namespace BlazorPL.Server.Controllers
             return Ok(result);
         }
 
-        [HttpPost,DisableRequestSizeLimit]
+        [HttpGet,DisableRequestSizeLimit]
         [Route("pdf-create/{orderid}")]
-        public IActionResult DownloadPdf(string orderid, [FromBody] List<OrderItemDto> orderItems)
+        public byte[] DownloadPdf(string orderid, [FromBody] List<OrderItemDto> orderItems)
         {
+
             ticketToPdf = new TicketToPdf(orderItems);
-
+            return null;
             // A fájl létrehozása és bájtjainak lekérése
-            var bytearray = ticketToPdf.CreatePdf();
+            //var bytearray = ticketToPdf.CreatePdf();
 
-            return Ok();
+            //return bytearray;
         }
         #endregion
 
