@@ -91,42 +91,11 @@ namespace BlazorPL.Server
                 opts.SignIn.RequireConfirmedEmail = true;
             });
 
-            // services.AddDefaultIdentity<User>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<FestivallDb>();
-            //services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
-            //services.AddIdentityServer().AddApiAuthorization<User, FestivallDb>();
-
-            /*var azureServiceTokenProvider = new AzureServiceTokenProvider();
-            // using managed identities
-            var kv = new KeyVaultClient(new KeyVaultClient.AuthenticationCallback(azureServiceTokenProvider.KeyVaultTokenCallback));
-            var certificateSecret = kv.GetSecretAsync($"https://festivall-keyvault.vault.azure.net/", "festivallcert").GetAwaiter().GetResult();
-            var privateKeyBytes = Convert.FromBase64String(certificateSecret.Value);
-            var cert = new X509Certificate2(privateKeyBytes);*/
-
-            /*var key = Configuration["festivallcert"];
-            var pfxBytes = Convert.FromBase64String(key);
-            var cert = new X509Certificate2(pfxBytes, (string)null, X509KeyStorageFlags.MachineKeySet | X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable);
-            */
-            /*
-            var client = new CertificateClient(vaultUri: new Uri($"https://festivall-keyvault.vault.azure.net/"), credential: new DefaultAzureCredential());
-            KeyVaultCertificateWithPolicy certificateWithPolicy = client.GetCertificate("festivall");
-            KeyVaultCertificate certificate = client.GetCertificateVersion(certificateWithPolicy.Name, certificateWithPolicy.Properties.Version);
-            var cert = new X509Certificate2(certificate.Cer, (string)null, X509KeyStorageFlags.MachineKeySet);
-            */
-            /*
-            var azureServiceTokenProvider = new AzureServiceTokenProvider();
-            var kv = new KeyVaultClient(new KeyVaultClient.AuthenticationCallback(azureServiceTokenProvider.KeyVaultTokenCallback));
-            var certificateSecret = kv.GetSecretAsync($"https://festivall-keyvault.vault.azure.net/", "festivall").GetAwaiter().GetResult();
-            var cert = new X509Certificate2(Convert.FromBase64String(certificateSecret.Value),string.Empty, X509KeyStorageFlags.MachineKeySet | X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable);
-            */
             services.AddIdentityServer().AddApiAuthorization<User, FestivallDb>(options =>
             {
                 options.IdentityResources["openid"].UserClaims.Add("role");
-            });//.AddSigningCredential(cert);
-
-            services.Configure<JwtBearerOptions>(IdentityServerJwtConstants.IdentityServerJwtBearerScheme, options =>
-            {
-                options.Authority = "https://festivall.azurewebsites.net";
             });
+
             services.AddAuthentication().AddIdentityServerJwt();
 
             services.AddHttpContextAccessor();
@@ -149,7 +118,6 @@ namespace BlazorPL.Server
             services.AddScoped<ITicketManager, TicketManager>();
             services.AddScoped<IUserManager, UserManager>();
             #endregion
-            //services.AddIdentityServer().AddApiAuthorization<User, FestivallDb>();
 
             #region Dependency Injection - AutoMapperekhez
             services.AddAutoMapper(typeof(EventProfile));
@@ -259,6 +227,7 @@ namespace BlazorPL.Server
             options.MapToStatusCode<DbUserCreationFailedException>(StatusCodes.Status500InternalServerError);
             // DbModelParamFormatException -> PreconditionFailed : Az adott validáció nem sikerül, a felhasználó által beírt adat nem megfelelõ.
             options.MapToStatusCode<DbModelParamFormatException>(StatusCodes.Status412PreconditionFailed);
+            options.MapToStatusCode<DbRequirementsException>(StatusCodes.Status412PreconditionFailed);
         }
     }
 }

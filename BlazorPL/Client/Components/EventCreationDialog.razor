@@ -278,14 +278,18 @@
                     var result = await http.PostAsJsonAsync<EventDto>($"api/events", newEvent);
                     if (result.IsSuccessStatusCode)
                     {
-                        var resizedFile = await browserFile.RequestImageFileAsync("image/png", 500, 500);
-                        using (var ms = resizedFile.OpenReadStream(resizedFile.Size))
+                        if (browserFile != null)
                         {
-                            var content = new MultipartFormDataContent();
-                            content.Headers.ContentDisposition = new System.Net.Http.Headers.ContentDispositionHeaderValue("form-data");
-                            content.Add(new StreamContent(ms, Convert.ToInt32(resizedFile.Size)), "image", newEvent.ImageName);
-                            var response = await http.PostAsync("api/events/upload", content);
+                            var resizedFile = await browserFile.RequestImageFileAsync("image/png", 500, 500);
+                            using (var ms = resizedFile.OpenReadStream(resizedFile.Size))
+                            {
+                                var content = new MultipartFormDataContent();
+                                content.Headers.ContentDisposition = new System.Net.Http.Headers.ContentDispositionHeaderValue("form-data");
+                                content.Add(new StreamContent(ms, Convert.ToInt32(resizedFile.Size)), "image", newEvent.ImageName);
+                                var response = await http.PostAsync("api/events/upload", content);
+                            }
                         }
+
 
                         newEvent = await result.Content.ReadFromJsonAsync<EventDto>();
                         events.Add(newEvent);

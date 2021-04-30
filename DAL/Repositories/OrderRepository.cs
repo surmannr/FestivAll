@@ -15,9 +15,11 @@ namespace DAL.Repositories
     public class OrderRepository : IOrderRepository
     {
         private readonly FestivallDb db;
-        public OrderRepository(FestivallDb _db)
+        private readonly ITicketRepository ticketRepository;
+        public OrderRepository(FestivallDb _db, ITicketRepository _ticketRepository)
         {
             db = _db;
+            ticketRepository = _ticketRepository;
         }
         public async Task<Order> AddItemToOrder(string orderId, int orderItemId)
         {
@@ -42,6 +44,24 @@ namespace DAL.Repositories
                 throw new DbModelNullException(ExceptionMessageConstants.NullObject);
             if(OrderRepositoryExtension.IsOrderParamsNull(newOrder))
                 throw new DbModelParamsNullException(ExceptionMessageConstants.RequiredParams);
+            
+            foreach(var o in newOrder.OrderItems)
+            {
+                if(o.TicketId != null)
+                {
+                    var ticket = await ticketRepository.GetTicketById((int)o.TicketId);
+                    if(ticket != null)
+                    {
+                        int total = ticket.InStock - o.Amount;
+                        if (total < 0)
+                        {
+                            throw new DbRequirementsException("Nincs elegendő jegy a raktáron.");
+                        }
+                    }
+                }
+                
+            }
+            
             db.Orders.Add(newOrder);
             await db.SaveChangesAsync();
             return newOrder;
