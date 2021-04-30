@@ -68,6 +68,7 @@ namespace BlazorPL.Server
                 policy.AddPolicy("CorsPolicy", opt => opt
                 .AllowAnyOrigin()
                 .AllowAnyHeader()
+                .AllowCredentials()
                 .AllowAnyMethod());
             });
 
@@ -183,12 +184,11 @@ namespace BlazorPL.Server
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+            app.UseCors("CorsPolicy");
 
             app.UseHttpsRedirection();
             app.UseIdentityServer();
             app.UseProblemDetails();
-
-            app.UseCors("CorsPolicy");
 
             app.UseBlazorFrameworkFiles();
             app.UseStaticFiles();
@@ -228,6 +228,8 @@ namespace BlazorPL.Server
             // DbModelParamFormatException -> PreconditionFailed : Az adott validáció nem sikerül, a felhasználó által beírt adat nem megfelelõ.
             options.MapToStatusCode<DbModelParamFormatException>(StatusCodes.Status412PreconditionFailed);
             options.MapToStatusCode<DbRequirementsException>(StatusCodes.Status412PreconditionFailed);
+
+            options.MapToStatusCode<Exception>(StatusCodes.Status500InternalServerError);
         }
     }
 }

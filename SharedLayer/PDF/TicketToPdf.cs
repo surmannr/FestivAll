@@ -34,13 +34,10 @@ namespace SharedLayer.PDF
             Filename = OutputPath;
             using (MemoryStream ms = new MemoryStream())
             {
-                // stuff 
             
                 Document pdfDoc = new Document();
                 PdfWriter pdfWriter = PdfWriter.GetInstance(pdfDoc, ms);
                 pdfDoc.Open();
-
-                string ordertemplate = "";
 
                 float minheight = 40f;
 
@@ -90,106 +87,13 @@ namespace SharedLayer.PDF
                         cellpriceandid.Border = PdfPCell.BOTTOM_BORDER;
                         cellpriceandid.MinimumHeight = minheight;
                         table.AddCell(cellpriceandid);
-                        /*
-                        table.AddCell("");
-                        table.AddCell(o.EventLocation);
-                        table.AddCell("");
-                        var cell = new PdfPCell(new Phrase(o.TicketCategory));
-                        cell.Rotation = -90;
-                        table.AddCell(cell);
-
-                        table.AddCell("");
-                        table.AddCell($"{o.Price.ToString("N0")} Ft");
-                        table.AddCell(o.OrderId);
-                        table.AddCell("");
-                        */
+                       
                         pdfDoc.Add(table);
-                        /*
-                        if (counter != 0 && counter % 6 == 0)
-                        {
-                            ordertemplate += @"<div style = 'page-break-after: always;' > </div>";
-                        }
-                        ordertemplate += $@"<table class='table m-4 table-borderless myborder' style='page-break-inside: avoid'>
-                            <colgroup>
-                                <col class='blck' style='width: 20%;'/>
-                                <col class='wht' span='2' />
-                                <col class='blck' style='width: 20%;' />
-                            </colgroup>
-                            <tbody>
-
-                                <tr>
-                                    <td class='blck'>Jegy</td>
-                                    <td><h1 class='padleft'>{o.EventName}</h1></td>
-                                    <td class='wht'>Jegy</td>
-                                    <td class='blck'></td>
-                                </tr>
-                                <tr>
-                                    <td class='myflex' style='color:white;text-align:center'>
-                                        <h1>{o.EventStartDate.Day}</h1>
-                                        <h6>{CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(o.EventStartDate.Month)}</h6>
-                                    </td>
-                                    <td><h6 class='padleft'>{o.EventLocation}</h6></td>
-                                    <td class='wht'>Jegy</td>
-                                    <td class='myflex rotate' style='color:white;text-align:center'><h4>{o.TicketCategory}</h4></td>
-                                </tr>
-                                <tr>
-                                    <td class='blck'>Jegy</td>
-                                    <td><p class='padleft'>{o.Price.ToString("N0")} Ft</p></td>
-                                    <td>{o.OrderId}</td>
-                                    <td class='blck'></td>
-                                </tr>
-
-                            </tbody>
-                        </table>";*/
+                      
                         counter++;
                     }
                 }
             
-                //var htmlbuilder = new StringBuilder();
-                /*htmlbuilder.Append(@" <html lang='en' dir='ltr' style='height: 100% '>
-                          <head>
-                            <meta charset = 'utf-8'>
-                            <meta name='viewport' content='width=device-width, initial-scale=1'>
-                            <title> Ticket </title>
-                            <link href = 'https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css' rel = 'stylesheet' integrity = 'sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl' crossorigin = 'anonymous' >
-                            <style>
-                                .blck{
-                                    background-color: black;
-                                    color: black;
-                                    }
-                                .wht{
-                                    background-color: white;
-                                    color: white;
-                                    }
-                                .myborder{
-                                    border: 1px solid black;
-                                    }
-                                .myborder td{
-                                    border: none;
-                                }
-                                .myborder tr{
-                                    border: none;
-                                }
-                                .myflex{
-                                    display: flex;
-                                        flex-direction: column;
-                                        justify-content: center;
-                                        align-items: center;
-                                    }
-                                .rotate{
-                                        -webkit-transform: rotate(-90deg);
-                                    }
-                                .padleft{
-                                        padding-left: 15px;
-                                    }
-                            </style>
-                          </head >
-                          <body>");
-                *///htmlbuilder.Append(ordertemplate);
-                //htmlbuilder.Append(@"</body> </html>");
-                
-                //HTMLWorker htmlWorker = new HTMLWorker(pdfDoc);
-                //htmlWorker.Parse(new StringReader(htmlbuilder.ToString()));
                 
                 pdfWriter.CloseStream = false;
                 pdfDoc.Close();
